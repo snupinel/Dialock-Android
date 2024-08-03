@@ -1,6 +1,8 @@
 package com.example.dailysummary.dto
 
-data class AnimaionTarget(
+import androidx.compose.ui.unit.Dp
+
+data class AnimationTarget(
     val alpha:Float,
-    val offsetY:Int,
+    val offsetY: Dp,
 )
