@@ -62,9 +62,9 @@ fun StartPage(){
     var boxSize by remember { mutableStateOf(IntSize.Zero) }
     //var startPageAnimationState by remember { mutableIntStateOf(0) }
     val startPageAnimationState by viewModel.startPageAnimationState.collectAsState()
-    var adviceOrForcing by remember{ mutableStateOf(Pair(false,false)) }
+    //var adviceOrForcing by remember{ mutableStateOf(Pair(false,false)) }
 
-    // Start the animation after a slight delay
+    // 시작하자마자
     LaunchedEffect(Unit) {
         delay(300)
 
@@ -84,12 +84,16 @@ fun StartPage(){
         viewModel.setStartPageAnimationState(4)
     }
 
+    /*
+    //버튼누른 이후
     LaunchedEffect(startPageAnimationState) {
+        //설정1 등장시작
         if(startPageAnimationState==5){
             delay(1000)
+            //설정1 등장완료
             viewModel.setStartPageAnimationState(6)
         }
-    }
+    }*/
     val animatedValueList = (0..objectMaxIndex).map { obId ->
         val alpha by animateFloatAsState(
             targetValue = getTargetValue(obId, startPageAnimationState, boxSize).alpha,
@@ -117,67 +121,7 @@ fun StartPage(){
 
         SettingStartButton(animatedValueList)
 
-        /*
-        * 해야하는 설정이 뭐가있지
-        * 1. 권유로받을지 강요로 받을지
-        * 2. 몇시에 받을지 (매일 or 요일별 다름)
-        * 3. 앱위에 표시 권한 받기
-        * 일단 이정도?
-        */
-        Text(
-            text = "권유 or 강요",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Light,
-            color = Color.DarkGray,
-            modifier = Modifier
-                .fillMaxWidth()
-                .offset(y = animatedValueList[4].offsetY)
-                .alpha(animatedValueList[4].alpha),
-            textAlign = TextAlign.Left
-        )
-        Row (modifier = Modifier
-            .fillMaxWidth()
-            .height(150.dp)
-            .offset(y = animatedValueList[5].offsetY)
-            .alpha(animatedValueList[5].alpha)
-        ){
-            Box(modifier = Modifier
-                .fillMaxHeight()
-                .weight(1f)
-                .clip(shape = RoundedCornerShape(4.dp))
-                .border(
-                    width = 2.dp,
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = RoundedCornerShape(4.dp),
-                )
-                .then(
-                    if (startPageAnimationState == 5) {
-                        Modifier.clickable {
-                            viewModel.setStartPageAnimationState(6)
-                        }
-                    } else Modifier
-                ),
-            ){
-                Text(text = "권유")
-            }
-            Spacer(modifier = Modifier
-                .fillMaxHeight()
-                .width(16.dp))
-            Box(modifier = Modifier
-                .fillMaxHeight()
-                .weight(1f)
-                .clip(shape = RoundedCornerShape(4.dp))
-                .border(
-                    width = 2.dp,
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = RoundedCornerShape(4.dp),
-                )
-                .background(MaterialTheme.colorScheme.inversePrimary)
-            ){
-                Text(text = "강요")
-            }
-
-        }
+        Setting1(animatedValueList)
     }
 
 }
@@ -251,13 +195,96 @@ fun SettingStartButton(animatedValueList: List<AnimationTarget>){
 }
 
 @Composable
+fun Setting1(animatedValueList:List<AnimationTarget>){
+    val viewModel= hiltViewModel<InitialSettingViewModel>()
+
+    val startPageAnimationState by viewModel.startPageAnimationState.collectAsState()
+
+    val adviceOrForcing by viewModel.adviceOrForcing.collectAsState()
+
+    /*
+        * 해야하는 설정이 뭐가있지
+        * 1. 권유로받을지 강요로 받을지
+        * 2. 몇시에 받을지 (매일 or 요일별 다름)
+        * 3. 앱위에 표시 권한 받기
+        * 일단 이정도?
+        */
+    Text(
+        text = "권유 or 강요",
+        fontSize = 20.sp,
+        fontWeight = FontWeight.Light,
+        color = Color.DarkGray,
+        modifier = Modifier
+            .fillMaxWidth()
+            .offset(y = animatedValueList[4].offsetY)
+            .alpha(animatedValueList[4].alpha),
+        textAlign = TextAlign.Left
+    )
+    Row (modifier = Modifier
+        .fillMaxWidth()
+        .height(80.dp)
+        .offset(y = animatedValueList[5].offsetY)
+        .alpha(animatedValueList[5].alpha)
+    ){
+        Box(modifier = Modifier
+            .fillMaxHeight()
+            .weight(1f)
+            .clip(shape = RoundedCornerShape(4.dp))
+            .border(
+                width = 2.dp,
+                color = if(adviceOrForcing.first) MaterialTheme.colorScheme.inversePrimary else MaterialTheme.colorScheme.background,
+                shape = RoundedCornerShape(4.dp),
+            )
+            .background(color = if(adviceOrForcing.first) MaterialTheme.colorScheme.primary else Color.White)
+            .then(
+                if (startPageAnimationState >= 5) {
+                    Modifier.clickable {
+                        viewModel.clickAdviceOrForcing(clickedIsLeft = true)
+                        if(startPageAnimationState==5) viewModel.setStartPageAnimationState(6)
+                    }
+                } else Modifier
+            ),
+            contentAlignment = Alignment.Center,
+        ){
+            Text(text = "권유")
+        }
+        Spacer(modifier = Modifier
+            .fillMaxHeight()
+            .width(16.dp))
+        Box(modifier = Modifier
+            .fillMaxHeight()
+            .weight(1f)
+            .clip(shape = RoundedCornerShape(4.dp))
+            .border(
+                width = 2.dp,
+                color = if(adviceOrForcing.second) MaterialTheme.colorScheme.inversePrimary else MaterialTheme.colorScheme.background,
+                shape = RoundedCornerShape(4.dp),
+            )
+            .background(color = if(adviceOrForcing.second) MaterialTheme.colorScheme.primary else Color.White)
+            .then(
+                if (startPageAnimationState >= 5) {
+                    Modifier.clickable {
+                        viewModel.clickAdviceOrForcing(clickedIsLeft = false)
+                        if(startPageAnimationState==5) viewModel.setStartPageAnimationState(6)
+                    }
+                } else Modifier
+            ),
+            contentAlignment = Alignment.Center,
+        ){
+            Text(text = "강요")
+        }
+
+    }
+}
+
+@Composable
 fun getTargetValue(obId:Int,startPageAnimationState:Int,boxSize:IntSize):AnimationTarget{
     if(obId<0||startPageAnimationState<0) return AnimationTarget(0f,0.dp)
 
     val durationMillisList= listOf(0,1000,1000,500,0,1000,1000)
 
     val targetLists= listOf(
-        //이름
+        //제목
         listOf(
             AnimationTarget(0f,PxToDp(boxSize.height/2)-50.dp),
             AnimationTarget(1f,PxToDp(boxSize.height/2)-100.dp),
@@ -305,16 +332,18 @@ fun getTargetValue(obId:Int,startPageAnimationState:Int,boxSize:IntSize):Animati
             AnimationTarget(0f,PxToDp(boxSize.height/2)-50.dp),
             AnimationTarget(0f,PxToDp(boxSize.height/2)-50.dp),
             AnimationTarget(1f,PxToDp(boxSize.height/2)-150.dp),
+            AnimationTarget(1f,0.dp),
         ),
 
         //설정 1번 선택
         listOf(
-            AnimationTarget(0f,PxToDp(boxSize.height/2)),
-            AnimationTarget(0f,PxToDp(boxSize.height/2)),
-            AnimationTarget(0f,PxToDp(boxSize.height/2)),
-            AnimationTarget(0f,PxToDp(boxSize.height/2)),
-            AnimationTarget(0f,PxToDp(boxSize.height/2)),
-            AnimationTarget(1f,PxToDp(boxSize.height/2)),
+            AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
+            AnimationTarget(1f,PxToDp(boxSize.height/2)-100.dp),
+            AnimationTarget(1f,50.dp)
         ),
     )
 

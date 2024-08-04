@@ -1,5 +1,9 @@
 package com.example.dailysummary.viewModel
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.dailysummary.data.PrefRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,5 +22,12 @@ class InitialSettingViewModel @Inject constructor(
 
     fun setStartPageAnimationState(num:Int){
         _startPageAnimationState.value=num
+    }
+
+    private val _adviceOrForcing = MutableStateFlow(Pair(false,false))
+    val adviceOrForcing:StateFlow<Pair<Boolean,Boolean>> = _adviceOrForcing.asStateFlow()
+
+    fun clickAdviceOrForcing(clickedIsLeft:Boolean){
+        _adviceOrForcing.value=Pair(clickedIsLeft,!clickedIsLeft)
     }
 }
