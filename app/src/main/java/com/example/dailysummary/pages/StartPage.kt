@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -53,7 +54,7 @@ import kotlinx.coroutines.delay
 import kotlin.math.min
 
 
-const val objectMaxIndex=5
+const val objectMaxIndex=6
 public var durationMillis=0
 @Composable
 fun StartPage(){
@@ -117,11 +118,15 @@ fun StartPage(){
             },
         contentAlignment = Alignment.TopCenter,)
     {
-        Greeting(animatedValueList)
+        if (startPageAnimationState in 0..5) Greeting(animatedValueList)
 
-        SettingStartButton(animatedValueList)
+        if (startPageAnimationState in 3..5) SettingStartButton(animatedValueList)
 
         Setting1(animatedValueList)
+
+        Setting2(animatedValueList)
+
+        //GradientTransparencyExample()
     }
 
 }
@@ -232,15 +237,15 @@ fun Setting1(animatedValueList:List<AnimationTarget>){
             .clip(shape = RoundedCornerShape(4.dp))
             .border(
                 width = 2.dp,
-                color = if(adviceOrForcing.first) MaterialTheme.colorScheme.inversePrimary else MaterialTheme.colorScheme.background,
+                color = if (adviceOrForcing.first) MaterialTheme.colorScheme.inversePrimary else MaterialTheme.colorScheme.background,
                 shape = RoundedCornerShape(4.dp),
             )
-            .background(color = if(adviceOrForcing.first) MaterialTheme.colorScheme.primary else Color.White)
+            .background(color = if (adviceOrForcing.first) MaterialTheme.colorScheme.primary else Color.White)
             .then(
                 if (startPageAnimationState >= 5) {
                     Modifier.clickable {
                         viewModel.clickAdviceOrForcing(clickedIsLeft = true)
-                        if(startPageAnimationState==5) viewModel.setStartPageAnimationState(6)
+                        if (startPageAnimationState == 5) viewModel.setStartPageAnimationState(6)
                     }
                 } else Modifier
             ),
@@ -257,15 +262,15 @@ fun Setting1(animatedValueList:List<AnimationTarget>){
             .clip(shape = RoundedCornerShape(4.dp))
             .border(
                 width = 2.dp,
-                color = if(adviceOrForcing.second) MaterialTheme.colorScheme.inversePrimary else MaterialTheme.colorScheme.background,
+                color = if (adviceOrForcing.second) MaterialTheme.colorScheme.inversePrimary else MaterialTheme.colorScheme.background,
                 shape = RoundedCornerShape(4.dp),
             )
-            .background(color = if(adviceOrForcing.second) MaterialTheme.colorScheme.primary else Color.White)
+            .background(color = if (adviceOrForcing.second) MaterialTheme.colorScheme.primary else Color.White)
             .then(
                 if (startPageAnimationState >= 5) {
                     Modifier.clickable {
                         viewModel.clickAdviceOrForcing(clickedIsLeft = false)
-                        if(startPageAnimationState==5) viewModel.setStartPageAnimationState(6)
+                        if (startPageAnimationState == 5) viewModel.setStartPageAnimationState(6)
                     }
                 } else Modifier
             ),
@@ -274,6 +279,50 @@ fun Setting1(animatedValueList:List<AnimationTarget>){
             Text(text = "강요")
         }
 
+    }
+}
+
+@Composable
+fun Setting2(animatedValueList: List<AnimationTarget>){
+    Text(
+        text = "알림을 받을 시간을 설정해 주세요.\n" +
+                "잠자기 30분 정도가 좋아요.",
+        fontSize = 20.sp,
+        fontWeight = FontWeight.Light,
+        color = Color.DarkGray,
+        modifier = Modifier
+            .fillMaxWidth()
+            .offset(y = animatedValueList[6].offsetY)
+            .alpha(animatedValueList[6].alpha),
+        textAlign = TextAlign.Center
+    )
+
+}
+
+@Composable
+fun GradientTransparencyExample() {
+    val gradientBrush = remember {
+        Brush.verticalGradient(
+            colors = listOf(
+                Color(0xFF6200EE).copy(alpha = 0.1f), // Starting color with low transparency
+                Color(0xFF6200EE).copy(alpha = 1f) // Ending color with full opacity
+            ),
+            startY = 0f,
+            endY = Float.POSITIVE_INFINITY
+        )
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(brush = gradientBrush)
+    ) {
+        // Content inside the box
+        Text(
+            text = "Hello, World!",
+            modifier = Modifier.padding(16.dp),
+            color = Color.White
+        )
     }
 }
 
@@ -332,7 +381,7 @@ fun getTargetValue(obId:Int,startPageAnimationState:Int,boxSize:IntSize):Animati
             AnimationTarget(0f,PxToDp(boxSize.height/2)-50.dp),
             AnimationTarget(0f,PxToDp(boxSize.height/2)-50.dp),
             AnimationTarget(1f,PxToDp(boxSize.height/2)-150.dp),
-            AnimationTarget(1f,0.dp),
+            AnimationTarget(0.3f,0.dp),
         ),
 
         //설정 1번 선택
@@ -343,7 +392,18 @@ fun getTargetValue(obId:Int,startPageAnimationState:Int,boxSize:IntSize):Animati
             AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
             AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
             AnimationTarget(1f,PxToDp(boxSize.height/2)-100.dp),
-            AnimationTarget(1f,50.dp)
+            AnimationTarget(0.3f,50.dp)
+        ),
+
+        //설정 2번 설명
+        listOf(
+            AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
+            AnimationTarget(1f,150.dp)
         ),
     )
 
