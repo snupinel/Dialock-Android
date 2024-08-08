@@ -1,5 +1,6 @@
 package com.example.dailysummary.viewModel
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,5 +30,23 @@ class InitialSettingViewModel @Inject constructor(
 
     fun clickAdviceOrForcing(clickedIsLeft:Boolean){
         _adviceOrForcing.value=Pair(clickedIsLeft,!clickedIsLeft)
+    }
+
+    private val _myTime = MutableStateFlow(Pair(23,0))
+    val myTime:StateFlow<Pair<Int,Int>> = _myTime.asStateFlow()
+
+    fun setMyTime(hour:Int?=null,minute:Int?=null){
+        _myTime.value=Pair(
+            hour ?: _myTime.value.first,
+            minute ?: _myTime.value.second
+        )
+        Log.d("setMyTime",_myTime.value.toString())
+    }
+
+    private val _sameEveryDay = MutableStateFlow(true)
+    val sameEveryDay:StateFlow<Boolean> = _sameEveryDay.asStateFlow()
+
+    fun toggleSameEveryDay(){
+        _sameEveryDay.value=!_sameEveryDay.value
     }
 }

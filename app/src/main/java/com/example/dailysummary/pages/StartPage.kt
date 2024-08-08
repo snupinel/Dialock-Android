@@ -2,15 +2,34 @@ package com.example.dailysummary.pages
 
 import android.util.Log
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.with
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.gestures.rememberScrollableState
+import androidx.compose.foundation.gestures.scrollBy
+import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -19,8 +38,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,6 +56,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,6 +65,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -51,10 +79,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.dailysummary.dto.AnimationTarget
 import com.example.dailysummary.viewModel.InitialSettingViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.math.absoluteValue
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 
-const val objectMaxIndex=6
+const val objectMaxIndex=8
 public var durationMillis=0
 @Composable
 fun StartPage(){
@@ -127,6 +158,14 @@ fun StartPage(){
         Setting2(animatedValueList)
 
         //GradientTransparencyExample()
+
+        //SlideToSetNumber()
+
+        //TimeSettingScreen()
+
+        //SlideToSetTime()
+
+
     }
 
 }
@@ -284,6 +323,12 @@ fun Setting1(animatedValueList:List<AnimationTarget>){
 
 @Composable
 fun Setting2(animatedValueList: List<AnimationTarget>){
+    val viewModel= hiltViewModel<InitialSettingViewModel>()
+
+    val myTime by viewModel.myTime.collectAsState()
+    val sameEveryDay by viewModel.sameEveryDay.collectAsState()
+
+    //Log.d("myTime",myTime.toString())
     Text(
         text = "알림을 받을 시간을 설정해 주세요.\n" +
                 "잠자기 30분 정도가 좋아요.",
@@ -297,35 +342,163 @@ fun Setting2(animatedValueList: List<AnimationTarget>){
         textAlign = TextAlign.Center
     )
 
+
+    TimePicker(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp)
+            .offset(y = animatedValueList[7].offsetY)
+            .alpha(animatedValueList[7].alpha)
+            .border(width = 1.dp, color = Color.Cyan),
+        selectedHour = myTime.first,
+        selectedMinute = myTime.second,
+        onHourChange = { viewModel.setMyTime(hour = it) },
+        onMinuteChange = { viewModel.setMyTime(minute = it) }
+    )
+    val interactionSource = remember { MutableInteractionSource() }
+    Row(verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .height(40.dp)
+            .offset(y = animatedValueList[8].offsetY)
+            .alpha(animatedValueList[8].alpha)
+            .clickable (
+                indication = null, // 파문 애니메이션을 제거
+                interactionSource = interactionSource // 필요 시 상태를 관리
+            ){
+                viewModel.toggleSameEveryDay()
+            }
+    ) {
+        Box(modifier = Modifier
+            .size(20.dp)
+            .border(width = 2.dp, color = Color.DarkGray)
+            .then(
+                if (sameEveryDay) Modifier.background(color = MaterialTheme.colorScheme.primary)
+                else Modifier
+            )
+            , contentAlignment = Alignment.Center){
+            if (sameEveryDay) Text(text = "V")
+        }
+        Spacer(modifier = Modifier
+            .fillMaxHeight()
+            .width(5.dp))
+        Text(
+            text = "매일 동일",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Normal,
+            color = if(sameEveryDay) Color.DarkGray else Color.LightGray,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.height(IntrinsicSize.Min)
+        )
+    }
 }
+
+
 
 @Composable
-fun GradientTransparencyExample() {
-    val gradientBrush = remember {
-        Brush.verticalGradient(
-            colors = listOf(
-                Color(0xFF6200EE).copy(alpha = 0.1f), // Starting color with low transparency
-                Color(0xFF6200EE).copy(alpha = 1f) // Ending color with full opacity
-            ),
-            startY = 0f,
-            endY = Float.POSITIVE_INFINITY
-        )
-    }
+fun TimePicker(
+    modifier: Modifier= Modifier,
+    selectedHour: Int,
+    selectedMinute: Int,
+    onHourChange: (Int) -> Unit,
+    onMinuteChange: (Int) -> Unit
+) {
+    val hours = (0..23).toList()
+    val minutes = (0..59).toList()
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(brush = gradientBrush)
-    ) {
-        // Content inside the box
-        Text(
-            text = "Hello, World!",
-            modifier = Modifier.padding(16.dp),
-            color = Color.White
-        )
+    Box(modifier = modifier){
+        Row(modifier = Modifier.fillMaxSize(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically) {
+            NumberScroller(
+                numbers = hours,
+                selectedNumber = selectedHour,
+                onNumberChange = onHourChange,
+                modifier = Modifier.weight(1f)
+            )
+            Text(text = ":", fontSize = 32.sp, modifier = Modifier.padding(horizontal = 8.dp))
+            NumberScroller(
+                numbers = minutes,
+                selectedNumber = selectedMinute,
+                onNumberChange = onMinuteChange,
+                modifier = Modifier.weight(1f)
+            )
+        }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun NumberScroller(
+    numbers: List<Int>,
+    selectedNumber: Int,
+    onNumberChange: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val lazyListState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+    val itemHeight = 50.dp
+    val visibleItemsCount = 3
+    /*
+    LaunchedEffect(selectedNumber) {
+        coroutineScope.launch {
+            val initialIndex = numbers.size * 50 + selectedNumber
+            lazyListState.scrollToItem(initialIndex)
+        }
+    }*/
+    LaunchedEffect(Unit){
+        val initialIndex = numbers.size * 50 + selectedNumber -1
+        lazyListState.scrollToItem(initialIndex)
+    }
+
+    LazyColumn(
+        state = lazyListState,
+        modifier = modifier
+            .height(itemHeight * visibleItemsCount)
+            .pointerInput(Unit) {
+                detectVerticalDragGestures { change, dragAmount ->
+                    coroutineScope.launch {
+                        lazyListState.scrollBy(-dragAmount)
+                    }
+                    change.consume()
+                }
+            },
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        itemsIndexed(List(numbers.size * 100) { it % numbers.size }) { index, number ->
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(itemHeight)
+                    /*
+                    .combinedClickable(
+                        onClick = {
+                            coroutineScope.launch {
+                                onNumberChange(number)
+                                lazyListState.animateScrollToItem(index)
+                            }
+                        }
+                    ),*/,
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = String.format("%02d", number), fontSize = 24.sp)
+            }
+        }
+    }
+    val density = LocalDensity.current
+    LaunchedEffect(lazyListState.isScrollInProgress) {
+        if (!lazyListState.isScrollInProgress) {
+            val centerIndex = (lazyListState.firstVisibleItemIndex + lazyListState.firstVisibleItemScrollOffset / with( density) { itemHeight.toPx() }).roundToInt()
+            val actualIndex = centerIndex % numbers.size
+            onNumberChange(numbers[((actualIndex+1)% numbers.size)])
+            coroutineScope.launch {
+                lazyListState.animateScrollToItem(centerIndex)
+            }
+            //Log.d("actualIndex",.toString())
+        }
+
+    }
+}
 @Composable
 fun getTargetValue(obId:Int,startPageAnimationState:Int,boxSize:IntSize):AnimationTarget{
     if(obId<0||startPageAnimationState<0) return AnimationTarget(0f,0.dp)
@@ -404,6 +577,26 @@ fun getTargetValue(obId:Int,startPageAnimationState:Int,boxSize:IntSize):Animati
             AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
             AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
             AnimationTarget(1f,150.dp)
+        ),
+        //설정 2번 시?계
+        listOf(
+            AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height/2)+300.dp),
+            AnimationTarget(1f,240.dp)
+        ),
+        //설정 2번 매일동일체크박스
+        listOf(
+            AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height/2)+510.dp),
+            AnimationTarget(1f,450.dp)
         ),
     )
 
