@@ -1,7 +1,16 @@
 package com.example.dailysummary.pages
 
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
+import android.provider.Settings
 import android.util.Log
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.Animatable
@@ -9,8 +18,10 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.with
@@ -44,9 +55,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.magnifier
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -58,6 +71,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -67,6 +81,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -75,30 +90,32 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.dailysummary.dto.AnimationTarget
 import com.example.dailysummary.viewModel.InitialSettingViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
 import kotlin.math.min
 import kotlin.math.roundToInt
 
 
-const val objectMaxIndex=8
+const val objectMaxIndex=11
 public var durationMillis=0
 @Composable
 fun StartPage(){
     val viewModel = hiltViewModel<InitialSettingViewModel>()
 
     var boxSize by remember { mutableStateOf(IntSize.Zero) }
-    //var startPageAnimationState by remember { mutableIntStateOf(0) }
     val startPageAnimationState by viewModel.startPageAnimationState.collectAsState()
-    //var adviceOrForcing by remember{ mutableStateOf(Pair(false,false)) }
 
     // 시작하자마자
     LaunchedEffect(Unit) {
-        delay(300)
+        delay(500)
 
         //올라오면서 인사 등장
         viewModel.setStartPageAnimationState(1)
@@ -116,16 +133,13 @@ fun StartPage(){
         viewModel.setStartPageAnimationState(4)
     }
 
-    /*
-    //버튼누른 이후
+
     LaunchedEffect(startPageAnimationState) {
-        //설정1 등장시작
-        if(startPageAnimationState==5){
-            delay(1000)
-            //설정1 등장완료
-            viewModel.setStartPageAnimationState(6)
+        if(startPageAnimationState==7){
+            delay(500)
+            viewModel.setStartPageAnimationState(8)
         }
-    }*/
+    }
     val animatedValueList = (0..objectMaxIndex).map { obId ->
         val alpha by animateFloatAsState(
             targetValue = getTargetValue(obId, startPageAnimationState, boxSize).alpha,
@@ -157,15 +171,11 @@ fun StartPage(){
 
         Setting2(animatedValueList)
 
-        //GradientTransparencyExample()
+        SettingEndButton(animatedValueList)
 
-        //SlideToSetNumber()
+        PermissionGuide(animatedValueList)
 
-        //TimeSettingScreen()
-
-        //SlideToSetTime()
-
-
+        PermissionButton(animatedValueList)
     }
 
 }
@@ -327,7 +337,7 @@ fun Setting2(animatedValueList: List<AnimationTarget>){
 
     val myTime by viewModel.myTime.collectAsState()
     val sameEveryDay by viewModel.sameEveryDay.collectAsState()
-
+    val currentMyTimeTab by viewModel.currentMyTimeTab.collectAsState()
     //Log.d("myTime",myTime.toString())
     Text(
         text = "알림을 받을 시간을 설정해 주세요.\n" +
@@ -350,50 +360,117 @@ fun Setting2(animatedValueList: List<AnimationTarget>){
             .offset(y = animatedValueList[7].offsetY)
             .alpha(animatedValueList[7].alpha)
             .border(width = 1.dp, color = Color.Cyan),
-        selectedHour = myTime.first,
-        selectedMinute = myTime.second,
+        selectedHour = myTime[currentMyTimeTab].first,
+        selectedMinute = myTime[currentMyTimeTab].second,
         onHourChange = { viewModel.setMyTime(hour = it) },
         onMinuteChange = { viewModel.setMyTime(minute = it) }
     )
     val interactionSource = remember { MutableInteractionSource() }
-    Row(verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
-        modifier = Modifier
-            .height(40.dp)
-            .offset(y = animatedValueList[8].offsetY)
-            .alpha(animatedValueList[8].alpha)
-            .clickable (
-                indication = null, // 파문 애니메이션을 제거
-                interactionSource = interactionSource // 필요 시 상태를 관리
-            ){
-                viewModel.toggleSameEveryDay()
+    Column(modifier = Modifier
+        .offset(y = animatedValueList[8].offsetY)
+        .alpha(animatedValueList[8].alpha),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ){
+        AnimatedVisibility(
+            visible = !sameEveryDay,
+            enter = fadeIn(animationSpec = tween(500)) + expandVertically(animationSpec = tween(500)),
+            exit = fadeOut(animationSpec = tween(500)) + shrinkVertically(animationSpec = tween(500))
+        ) {
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp)) {
+                DayTab(0, modifier = Modifier.weight(1f))
+                DayTab(1, modifier = Modifier.weight(1f))
+                DayTab(2, modifier = Modifier.weight(1f))
+                DayTab(3, modifier = Modifier.weight(1f))
+                DayTab(4, modifier = Modifier.weight(1f))
+                DayTab(5, modifier = Modifier.weight(1f))
+                DayTab(6, modifier = Modifier.weight(1f))
             }
-    ) {
-        Box(modifier = Modifier
-            .size(20.dp)
-            .border(width = 2.dp, color = Color.DarkGray)
-            .then(
-                if (sameEveryDay) Modifier.background(color = MaterialTheme.colorScheme.primary)
-                else Modifier
-            )
-            , contentAlignment = Alignment.Center){
-            if (sameEveryDay) Text(text = "V")
         }
-        Spacer(modifier = Modifier
-            .fillMaxHeight()
-            .width(5.dp))
-        Text(
-            text = "매일 동일",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Normal,
-            color = if(sameEveryDay) Color.DarkGray else Color.LightGray,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.height(IntrinsicSize.Min)
-        )
+        Row(verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .height(40.dp)
+                .clickable(
+                    indication = null, // 파문 애니메이션을 제거
+                    interactionSource = interactionSource // 필요 시 상태를 관리
+                ) {
+                    viewModel.toggleSameEveryDay()
+                }
+        ) {
+            Box(modifier = Modifier
+                .size(20.dp)
+                .border(width = 2.dp, color = Color.DarkGray)
+                .then(
+                    if (sameEveryDay) Modifier.background(color = MaterialTheme.colorScheme.primary)
+                    else Modifier
+                )
+               , contentAlignment = Alignment.TopCenter){
+               if (sameEveryDay) Text(text = "V")
+            }
+            Spacer(modifier = Modifier
+                .fillMaxHeight()
+                .width(5.dp))
+            Text(
+               text = "매일 동일",
+               fontSize = 20.sp,
+               fontWeight = FontWeight.Normal,
+               color = if(sameEveryDay) Color.DarkGray else Color.LightGray,
+               textAlign = TextAlign.Center,
+               modifier = Modifier
+                   .height(IntrinsicSize.Min)
+                   .align(Alignment.CenterVertically)
+            )
+        }
     }
 }
 
+@Composable
+fun SettingEndButton(animatedValueList: List<AnimationTarget>){
+    val viewModel = hiltViewModel<InitialSettingViewModel>()
 
+    val startPageAnimationState by viewModel.startPageAnimationState.collectAsState()
+
+    Box(modifier = Modifier
+        .offset(y = animatedValueList[9].offsetY)
+        .alpha(animatedValueList[9].alpha)
+        .height(60.dp)
+        .fillMaxWidth()
+        .clip(shape = RoundedCornerShape(4.dp))
+        .background(color = MaterialTheme.colorScheme.background)
+        .then(
+            if (startPageAnimationState == 6) {
+                Modifier.clickable {
+                    viewModel.setStartPageAnimationState(7)
+                }
+            } else Modifier
+        ), contentAlignment = Alignment.Center
+    ) {
+        Text("설정 완료", color = Color.White)
+    }
+}
+
+@Composable
+fun DayTab(day:Int,modifier: Modifier=Modifier){
+    val week= listOf("월","화","수","목","금","토","일")
+    val viewModel= hiltViewModel<InitialSettingViewModel>()
+    val currentMyTimeTab by viewModel.currentMyTimeTab.collectAsState()
+    Box(modifier = modifier
+        .fillMaxHeight()
+        .clickable {
+            viewModel.setCurrentMyTimeTab(day)
+        }, contentAlignment = Alignment.Center){
+        Text(text = week[day])
+        if(day==currentMyTimeTab)Divider(
+            Modifier
+                .align(Alignment.TopCenter)
+                .fillMaxWidth()
+                .height(3.dp), color = MaterialTheme.colorScheme.primary)
+
+    }
+}
 
 @Composable
 fun TimePicker(
@@ -435,6 +512,8 @@ fun NumberScroller(
     onNumberChange: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val viewModel= hiltViewModel<InitialSettingViewModel>()
+    val currentMyTimeTab by viewModel.currentMyTimeTab.collectAsState()
     val lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     val itemHeight = 50.dp
@@ -446,7 +525,7 @@ fun NumberScroller(
             lazyListState.scrollToItem(initialIndex)
         }
     }*/
-    LaunchedEffect(Unit){
+    LaunchedEffect(currentMyTimeTab){
         val initialIndex = numbers.size * 50 + selectedNumber -1
         lazyListState.scrollToItem(initialIndex)
     }
@@ -486,24 +565,131 @@ fun NumberScroller(
         }
     }
     val density = LocalDensity.current
+    LaunchedEffect(Unit) {
+        snapshotFlow { lazyListState.isScrollInProgress }
+            .distinctUntilChanged()
+            .filter { isScrolling -> !isScrolling }
+            .collect {
+                // 스크롤이 멈춘 순간에 실행할 작업
+                println("Scrolling stopped")
+            }
+    }
+    var wasScrolling by remember { mutableStateOf(false) }
+
     LaunchedEffect(lazyListState.isScrollInProgress) {
-        if (!lazyListState.isScrollInProgress) {
-            val centerIndex = (lazyListState.firstVisibleItemIndex + lazyListState.firstVisibleItemScrollOffset / with( density) { itemHeight.toPx() }).roundToInt()
+        if (wasScrolling && !lazyListState.isScrollInProgress) {
+            val centerIndex = (lazyListState.firstVisibleItemIndex + lazyListState.firstVisibleItemScrollOffset / with(density) { itemHeight.toPx() }).roundToInt()
             val actualIndex = centerIndex % numbers.size
-            onNumberChange(numbers[((actualIndex+1)% numbers.size)])
+            onNumberChange(numbers[(actualIndex + 1) % numbers.size])
             coroutineScope.launch {
                 lazyListState.animateScrollToItem(centerIndex)
             }
-            //Log.d("actualIndex",.toString())
+            Log.d("aaaa", "!lazyListState.isScrollInProgress called")
         }
-
+        wasScrolling = lazyListState.isScrollInProgress
     }
+}
+@Composable
+fun PermissionGuide(animatedValueList: List<AnimationTarget>){
+    Text(
+        text = "권한을 설정해라 애송이",
+        fontSize = 20.sp,
+        fontWeight = FontWeight.Light,
+        color = Color.DarkGray,
+        modifier = Modifier
+            .fillMaxWidth()
+            .offset(y = animatedValueList[10].offsetY)
+            .alpha(animatedValueList[10].alpha),
+        textAlign = TextAlign.Center
+    )
+}
+
+@Composable
+fun PermissionButton(animatedValueList: List<AnimationTarget>){
+    val viewModel = hiltViewModel<InitialSettingViewModel>()
+
+    val context=LocalContext.current
+
+    val startPageAnimationState by viewModel.startPageAnimationState.collectAsState()
+
+    val (permissionRequested, setPermissionRequested) = remember { mutableStateOf(false) }
+    /*
+    val allPermissionsGranted = viewModel.neededPermissions().all {
+        ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+    }
+
+     */
+
+    val multiplePermissionsLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+    ) { permissions ->
+        // 권한 요청 결과 처리. permissions는 Map<String, Boolean> 형태입니다.
+        if(permissions.entries.all { it.value }){
+            //
+        }
+    }
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (Settings.canDrawOverlays(context)) {
+            Toast.makeText(context, "Overlay permission granted", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(context, "Overlay permission denied", Toast.LENGTH_SHORT).show()
+        }
+    }
+    /*
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // 마시멜로우(API 23)부터 적용
+        if (!Settings.canDrawOverlays(context)) {
+
+        }
+    }*/
+    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+        data = Uri.parse("package:${context.packageName}")
+    }
+    //launcher.launch(intent)
+    LaunchedEffect(permissionRequested) {
+        if (permissionRequested) {
+            if (false) {
+                // 모든 권한이 이미 부여되었을 경우의 처리
+                Log.d("aaaa","already_granted")
+            } else {
+                // 하나 이상의 권한이 부여되지 않았을 경우 권한 요청 로직
+                launcher.launch(intent)
+            }
+
+            setPermissionRequested(false) // 상태를 다시 초기화
+        }
+    }
+
+
+
+
+    Box(modifier = Modifier
+        .offset(y = animatedValueList[11].offsetY)
+        .alpha(animatedValueList[11].alpha)
+        .height(60.dp)
+        .fillMaxWidth()
+        .clip(shape = RoundedCornerShape(4.dp))
+        .background(color = MaterialTheme.colorScheme.background)
+        .then(
+            if (startPageAnimationState == 8) {
+                Modifier.clickable {
+                    setPermissionRequested(true)
+                }
+            } else Modifier
+        ), contentAlignment = Alignment.Center
+    ) {
+        Text("권한 설정하기", color = Color.White)
+    }
+}
+
+@Composable
+fun RequestOverlayPermission() {
+
 }
 @Composable
 fun getTargetValue(obId:Int,startPageAnimationState:Int,boxSize:IntSize):AnimationTarget{
     if(obId<0||startPageAnimationState<0) return AnimationTarget(0f,0.dp)
 
-    val durationMillisList= listOf(0,1000,1000,500,0,1000,1000)
+    val durationMillisList= listOf(0,1000,1000,500,0,1000,1000,500,1000)
 
     val targetLists= listOf(
         //제목
@@ -555,6 +741,7 @@ fun getTargetValue(obId:Int,startPageAnimationState:Int,boxSize:IntSize):Animati
             AnimationTarget(0f,PxToDp(boxSize.height/2)-50.dp),
             AnimationTarget(1f,PxToDp(boxSize.height/2)-150.dp),
             AnimationTarget(0.3f,0.dp),
+            AnimationTarget(0f,0.dp),
         ),
 
         //설정 1번 선택
@@ -565,7 +752,8 @@ fun getTargetValue(obId:Int,startPageAnimationState:Int,boxSize:IntSize):Animati
             AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
             AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
             AnimationTarget(1f,PxToDp(boxSize.height/2)-100.dp),
-            AnimationTarget(0.3f,50.dp)
+            AnimationTarget(0.3f,50.dp),
+            AnimationTarget(0.0f,0.dp),
         ),
 
         //설정 2번 설명
@@ -576,8 +764,10 @@ fun getTargetValue(obId:Int,startPageAnimationState:Int,boxSize:IntSize):Animati
             AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
             AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
             AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
-            AnimationTarget(1f,150.dp)
+            AnimationTarget(1f,150.dp),
+            AnimationTarget(0f,0.dp),
         ),
+
         //설정 2번 시?계
         listOf(
             AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
@@ -586,8 +776,10 @@ fun getTargetValue(obId:Int,startPageAnimationState:Int,boxSize:IntSize):Animati
             AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
             AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
             AnimationTarget(0f,PxToDp(boxSize.height/2)+300.dp),
-            AnimationTarget(1f,240.dp)
+            AnimationTarget(1f,240.dp),
+            AnimationTarget(0f,0.dp),
         ),
+
         //설정 2번 매일동일체크박스
         listOf(
             AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
@@ -596,7 +788,46 @@ fun getTargetValue(obId:Int,startPageAnimationState:Int,boxSize:IntSize):Animati
             AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
             AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
             AnimationTarget(0f,PxToDp(boxSize.height/2)+510.dp),
-            AnimationTarget(1f,450.dp)
+            AnimationTarget(1f,450.dp),
+            AnimationTarget(0f,0.dp),
+        ),
+
+        //설정 완료 버튼
+        listOf(
+            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
+            AnimationTarget(1f,PxToDp(boxSize.height)-60.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
+        ),
+
+        //권한 필요하다고 설명
+        listOf(
+            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height/2)),
+            AnimationTarget(1f,PxToDp(boxSize.height/2)-60.dp),
+        ),
+
+        //권한 설정 시작 버튼
+        listOf(
+            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
+            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
+            AnimationTarget(1f,PxToDp(boxSize.height)-60.dp),
         ),
     )
 

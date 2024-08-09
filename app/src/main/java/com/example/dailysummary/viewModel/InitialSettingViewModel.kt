@@ -31,16 +31,26 @@ class InitialSettingViewModel @Inject constructor(
     fun clickAdviceOrForcing(clickedIsLeft:Boolean){
         _adviceOrForcing.value=Pair(clickedIsLeft,!clickedIsLeft)
     }
+    private val _currentMyTimeTab = MutableStateFlow(0)
+    val currentMyTimeTab:StateFlow<Int> = _currentMyTimeTab.asStateFlow()
 
-    private val _myTime = MutableStateFlow(Pair(23,0))
-    val myTime:StateFlow<Pair<Int,Int>> = _myTime.asStateFlow()
+    fun setCurrentMyTimeTab(tab:Int){
+        _currentMyTimeTab.value=tab
+    }
 
-    fun setMyTime(hour:Int?=null,minute:Int?=null){
-        _myTime.value=Pair(
-            hour ?: _myTime.value.first,
-            minute ?: _myTime.value.second
-        )
-        Log.d("setMyTime",_myTime.value.toString())
+    private val _myTime = MutableStateFlow(List(7){ Pair(23,0)})
+    val myTime:StateFlow<List<Pair<Int,Int>>> = _myTime.asStateFlow()
+
+    fun setMyTime(hour:Int?=null,minute:Int?=null,tab:Int?=null){
+        val index=tab?:currentMyTimeTab.value
+
+        _myTime.value=_myTime.value.toMutableList().apply {
+            this[index]=Pair(
+                hour ?: this[index].first,
+                minute ?: this[index].second
+            )
+        }
+        Log.d("setMyTime",myTime.value.joinToString(separator = ",") { "(${it.first},${it.second})" })
     }
 
     private val _sameEveryDay = MutableStateFlow(true)
@@ -48,5 +58,8 @@ class InitialSettingViewModel @Inject constructor(
 
     fun toggleSameEveryDay(){
         _sameEveryDay.value=!_sameEveryDay.value
+        if(_sameEveryDay.value) _currentMyTimeTab.value=0
     }
+
+
 }
