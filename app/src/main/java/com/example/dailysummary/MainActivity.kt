@@ -19,19 +19,25 @@ import androidx.navigation.compose.rememberNavController
 import com.example.dailysummary.pages.StartPage
 import com.example.dailysummary.ui.theme.DailySummaryTheme
 import com.example.dailysummary.viewModel.InitialSettingViewModel
+import com.example.dailysummary.viewModel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    //private val viewModel: InitialSettingViewModel by viewModels()
+    private val viewModel: MainViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             DailySummaryTheme {
                 // A surface container using the 'background' color from the theme
-                MyApp()
+                if(viewModel.isSettingCompleted()){
+                    
+                }else{
+                    MyApp()
+                }
+
             }
         }
     }
