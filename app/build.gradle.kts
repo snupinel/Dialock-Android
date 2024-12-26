@@ -55,6 +55,9 @@ android {
 
 dependencies {
 
+    implementation ("com.jakewharton.threetenabp:threetenabp:1.4.4")
+
+
     //Dagger-Hilt
     implementation("com.google.dagger:hilt-android:2.48")
     kapt("com.google.dagger:hilt-android-compiler:2.47")

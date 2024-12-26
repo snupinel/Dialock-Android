@@ -72,19 +72,17 @@ class InitialSettingViewModel @Inject constructor(
             builder.append("${it.first} ${it.second} ")
         }
         prefRepository.setPref("Setting",builder.toString())
+        Log.d("ref",builder.toString())
     }
-    fun getRefSetting():Setting?{
-        val refList=prefRepository.getPref("Setting")?.trimEnd()?.split(" ")?: emptyList()
 
-        if(refList.isEmpty()) return null
-
-        val adviceOrForcing=AdviceOrForcing.valueOf(refList[0])
-        val sameEveryDay=refList[1].toBoolean()
-        val alarmTimes=refList.drop(2).chunked(2).map{
-                (first, second) -> Pair(first.toInt(), second.toInt())
-        }
-
-        return Setting(adviceOrForcing, sameEveryDay, alarmTimes)
+    fun saveSetting(){
+        setRefSetting(
+            Setting(
+                adviceOrForcing = if(_adviceOrForcing.value.first)AdviceOrForcing.Advice else AdviceOrForcing.Forcing,
+                sameEveryDay = _sameEveryDay.value,
+                alarmTimes = _myTime.value,
+            )
+        )
     }
 
 

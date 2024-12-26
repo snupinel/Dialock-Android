@@ -92,6 +92,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.example.dailysummary.dto.AnimationTarget
 import com.example.dailysummary.viewModel.InitialSettingViewModel
 import kotlinx.coroutines.delay
@@ -107,7 +108,7 @@ import kotlin.math.roundToInt
 const val objectMaxIndex=11
 public var durationMillis=0
 @Composable
-fun StartPage(){
+fun StartPage(navController: NavController){
     val viewModel = hiltViewModel<InitialSettingViewModel>()
 
     var boxSize by remember { mutableStateOf(IntSize.Zero) }
@@ -175,7 +176,7 @@ fun StartPage(){
 
         PermissionGuide(animatedValueList)
 
-        PermissionButton(animatedValueList)
+        PermissionButton(animatedValueList,navController)
     }
 
 }
@@ -605,7 +606,7 @@ fun PermissionGuide(animatedValueList: List<AnimationTarget>){
 }
 
 @Composable
-fun PermissionButton(animatedValueList: List<AnimationTarget>){
+fun PermissionButton(animatedValueList: List<AnimationTarget>,navController: NavController){
     val viewModel = hiltViewModel<InitialSettingViewModel>()
 
     val context=LocalContext.current
@@ -631,6 +632,8 @@ fun PermissionButton(animatedValueList: List<AnimationTarget>){
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (Settings.canDrawOverlays(context)) {
             Toast.makeText(context, "Overlay permission granted", Toast.LENGTH_SHORT).show()
+            viewModel.saveSetting()
+            navController.navigate("MainPage")
         } else {
             Toast.makeText(context, "Overlay permission denied", Toast.LENGTH_SHORT).show()
         }

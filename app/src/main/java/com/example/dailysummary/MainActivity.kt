@@ -16,6 +16,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.dailysummary.pages.MainPage
 import com.example.dailysummary.pages.StartPage
 import com.example.dailysummary.ui.theme.DailySummaryTheme
 import com.example.dailysummary.viewModel.InitialSettingViewModel
@@ -33,7 +34,7 @@ class MainActivity : ComponentActivity() {
             DailySummaryTheme {
                 // A surface container using the 'background' color from the theme
                 if(viewModel.isSettingCompleted()){
-                    
+                    MyApp(startDestination = "MainPage")
                 }else{
                     MyApp()
                 }
@@ -56,7 +57,10 @@ private fun MyApp(
     ) {
         NavHost(navController = navController, startDestination = startDestination) {
             composable("StartPage") {
-                StartPage()
+                StartPage(navController)
+            }
+            composable("MainPage") {
+                MainPage(navController)
             }
         }
     }
