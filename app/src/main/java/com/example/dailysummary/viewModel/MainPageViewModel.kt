@@ -7,6 +7,7 @@ import com.example.dailysummary.dto.Summary
 import com.example.dailysummary.model.CalenderEntry
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.time.LocalDate
 import javax.inject.Inject
@@ -95,6 +96,13 @@ class MainPageViewModel @Inject constructor(
         }
 
         _calenderEntries.value=list
+    }
+
+    private val _adviceOrForcing = MutableStateFlow(Pair(false,false))
+    val adviceOrForcing: StateFlow<Pair<Boolean, Boolean>> = _adviceOrForcing.asStateFlow()
+
+    fun clickAdviceOrForcing(clickedIsLeft:Boolean){
+        _adviceOrForcing.value=Pair(clickedIsLeft,!clickedIsLeft)
     }
 
 }

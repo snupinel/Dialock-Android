@@ -93,6 +93,7 @@ import androidx.compose.ui.unit.toSize
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.dailysummary.components.SettingOption
 import com.example.dailysummary.dto.AnimationTarget
 import com.example.dailysummary.viewModel.InitialSettingViewModel
 import kotlinx.coroutines.delay
@@ -250,87 +251,28 @@ fun SettingStartButton(animatedValueList: List<AnimationTarget>){
 }
 
 @Composable
-fun Setting1(animatedValueList:List<AnimationTarget>){
-    val viewModel= hiltViewModel<InitialSettingViewModel>()
-
+fun Setting1(animatedValueList: List<AnimationTarget>) {
+    val viewModel = hiltViewModel<InitialSettingViewModel>()
     val startPageAnimationState by viewModel.startPageAnimationState.collectAsState()
-
     val adviceOrForcing by viewModel.adviceOrForcing.collectAsState()
 
-    /*
-        * 해야하는 설정이 뭐가있지
-        * 1. 권유로받을지 강요로 받을지
-        * 2. 몇시에 받을지 (매일 or 요일별 다름)
-        * 3. 앱위에 표시 권한 받기
-        * 일단 이정도?
-        */
-    Text(
-        text = "권유 or 강요",
-        fontSize = 20.sp,
-        fontWeight = FontWeight.Light,
-        color = Color.DarkGray,
-        modifier = Modifier
-            .fillMaxWidth()
-            .offset(y = animatedValueList[4].offsetY)
-            .alpha(animatedValueList[4].alpha),
-        textAlign = TextAlign.Left
+    SettingOption(
+        animatedValue = animatedValueList[4],
+        title = "권유 or 강요",
+        adviceOrForcing = adviceOrForcing,
+        onOptionSelected = { clickedIsLeft ->
+            viewModel.clickAdviceOrForcing(clickedIsLeft)
+        },
+        isEnabled = startPageAnimationState >= 5,
+        startPageAnimationState = startPageAnimationState,
+        onNextState = { viewModel.setStartPageAnimationState(6) }
     )
-    Row (modifier = Modifier
-        .fillMaxWidth()
-        .height(80.dp)
-        .offset(y = animatedValueList[5].offsetY)
-        .alpha(animatedValueList[5].alpha)
-    ){
-        Box(modifier = Modifier
-            .fillMaxHeight()
-            .weight(1f)
-            .clip(shape = RoundedCornerShape(4.dp))
-            .border(
-                width = 2.dp,
-                color = if (adviceOrForcing.first) MaterialTheme.colorScheme.inversePrimary else MaterialTheme.colorScheme.background,
-                shape = RoundedCornerShape(4.dp),
-            )
-            .background(color = if (adviceOrForcing.first) MaterialTheme.colorScheme.primary else Color.White)
-            .then(
-                if (startPageAnimationState >= 5) {
-                    Modifier.clickable {
-                        viewModel.clickAdviceOrForcing(clickedIsLeft = true)
-                        if (startPageAnimationState == 5) viewModel.setStartPageAnimationState(6)
-                    }
-                } else Modifier
-            ),
-            contentAlignment = Alignment.Center,
-        ){
-            Text(text = "권유")
-        }
-        Spacer(modifier = Modifier
-            .fillMaxHeight()
-            .width(16.dp))
-        Box(modifier = Modifier
-            .fillMaxHeight()
-            .weight(1f)
-            .clip(shape = RoundedCornerShape(4.dp))
-            .border(
-                width = 2.dp,
-                color = if (adviceOrForcing.second) MaterialTheme.colorScheme.inversePrimary else MaterialTheme.colorScheme.background,
-                shape = RoundedCornerShape(4.dp),
-            )
-            .background(color = if (adviceOrForcing.second) MaterialTheme.colorScheme.primary else Color.White)
-            .then(
-                if (startPageAnimationState >= 5) {
-                    Modifier.clickable {
-                        viewModel.clickAdviceOrForcing(clickedIsLeft = false)
-                        if (startPageAnimationState == 5) viewModel.setStartPageAnimationState(6)
-                    }
-                } else Modifier
-            ),
-            contentAlignment = Alignment.Center,
-        ){
-            Text(text = "강요")
-        }
-
-    }
 }
+
+
+
+
+
 
 @Composable
 fun Setting2(animatedValueList: List<AnimationTarget>){

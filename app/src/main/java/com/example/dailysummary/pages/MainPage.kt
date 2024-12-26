@@ -1,5 +1,6 @@
 package com.example.dailysummary.pages
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -33,6 +34,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.dailysummary.components.SettingOption
+import com.example.dailysummary.dto.AnimationTarget
 import com.example.dailysummary.model.BottomNavItem
 import com.example.dailysummary.viewModel.InitialSettingViewModel
 import com.example.dailysummary.viewModel.MainPageViewModel
@@ -63,12 +66,31 @@ fun MainPage(navController: NavController){
                     DSCalender()
                 }
                 Tab.Setting -> {
+                    //
+                    Column {
+                        SettingAdviceOrForcing()
 
+                        //Setting2(animatedValueList)
+                    }
                 }
             }
 
         }
     }
+}
+
+@Composable
+fun SettingAdviceOrForcing() {
+    //Log.d("aaaa","aaaa")
+    val viewModel = hiltViewModel<MainPageViewModel>()
+    val adviceOrForcing by viewModel.adviceOrForcing.collectAsState()
+
+    SettingOption(
+        title = "권유 or 강요",
+        adviceOrForcing = adviceOrForcing,
+        onOptionSelected = { clickedIsLeft ->
+            viewModel.clickAdviceOrForcing(clickedIsLeft)
+        },)
 }
 
 @Composable
@@ -94,8 +116,8 @@ fun DSCalender(){
                     .padding(1.dp)
                     .border(width = 1.dp, color = Color.Gray)
                     .then(
-                        if(it.isBlank) Modifier.background(color = Color.Gray)
-                        else if(it.isWritten) Modifier.background(color = Color.Green)
+                        if (it.isBlank) Modifier.background(color = Color.Gray)
+                        else if (it.isWritten) Modifier.background(color = Color.Green)
                         else Modifier
                     )){
                     if(!it.isBlank)Text(text = it.day.toString())

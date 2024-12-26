@@ -34,6 +34,7 @@ class InitialSettingViewModel @Inject constructor(
     fun clickAdviceOrForcing(clickedIsLeft:Boolean){
         _adviceOrForcing.value=Pair(clickedIsLeft,!clickedIsLeft)
     }
+
     private val _currentMyTimeTab = MutableStateFlow(0)
     val currentMyTimeTab:StateFlow<Int> = _currentMyTimeTab.asStateFlow()
 
