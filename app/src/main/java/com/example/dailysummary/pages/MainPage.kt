@@ -87,6 +87,8 @@ fun MainPage(navController: NavController){
 
                         SettingSaveButton()
 
+                        SettingPreviewButton()
+
                         //Setting2(animatedValueList)
                     }
                 }
@@ -176,6 +178,21 @@ fun SettingSaveButton() {
         onClick = {
             viewModel.setRefSetting(viewModel.extractCurrentSetting())
             Toast.makeText(context, "설정 완료", Toast.LENGTH_SHORT).show()
+
+        },
+        backgroundColor = MaterialTheme.colorScheme.primary,
+        textColor = Color.White,
+    )
+}
+
+@Composable
+fun SettingPreviewButton() {
+    val viewModel = hiltViewModel<MainPageViewModel>()
+
+    AnimatedActionButton(
+        text = "미리보기",
+        onClick = {
+            //viewModel.setRefSetting(viewModel.extractCurrentSetting())
 
         },
         backgroundColor = MaterialTheme.colorScheme.primary,
