@@ -1,6 +1,7 @@
 package com.example.dailysummary.pages
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -20,6 +21,7 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -31,9 +33,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.dailysummary.components.AnimatedActionButton
 import com.example.dailysummary.components.SameEveryDayToggle
 import com.example.dailysummary.components.SettingOption
 import com.example.dailysummary.components.TabNavigationBar
@@ -80,6 +84,8 @@ fun MainPage(navController: NavController){
                         SettingAdviceOrForcing()
 
                         SettingTime()
+
+                        SettingSaveButton()
 
                         //Setting2(animatedValueList)
                     }
@@ -158,6 +164,23 @@ fun DSCalender(){
             }
         }
     }
+}
+
+@Composable
+fun SettingSaveButton() {
+    val viewModel = hiltViewModel<MainPageViewModel>()
+
+    val context = LocalContext.current
+    AnimatedActionButton(
+        text = "설정 완료",
+        onClick = {
+            viewModel.setRefSetting(viewModel.extractCurrentSetting())
+            Toast.makeText(context, "설정 완료", Toast.LENGTH_SHORT).show()
+
+        },
+        backgroundColor = MaterialTheme.colorScheme.primary,
+        textColor = Color.White,
+    )
 }
 
 

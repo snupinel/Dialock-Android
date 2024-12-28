@@ -187,4 +187,13 @@ class MainPageViewModel @Inject constructor(
         setSameEveryDay(value=setting.sameEveryDay)
     }
 
+    fun extractCurrentSetting():Setting{
+
+
+        val adviceOrForcing= if(_adviceOrForcing.value.first)AdviceOrForcing.Advice else AdviceOrForcing.Forcing
+        val sameEveryDay=_sameEveryDay.value
+        val alarmTimes=myTime.value
+
+        return Setting(adviceOrForcing, sameEveryDay, alarmTimes)
+    }
 }

@@ -93,6 +93,7 @@ import androidx.compose.ui.unit.toSize
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.dailysummary.components.AnimatedActionButton
 import com.example.dailysummary.components.DayTabs
 import com.example.dailysummary.components.SettingOption
 import com.example.dailysummary.components.TimePicker
@@ -301,29 +302,22 @@ fun Setting2(animatedValueList: List<AnimationTarget>) {
 
 
 @Composable
-fun SettingEndButton(animatedValueList: List<AnimationTarget>){
+fun SettingEndButton(animatedValueList: List<AnimationTarget>) {
     val viewModel = hiltViewModel<InitialSettingViewModel>()
 
     val startPageAnimationState by viewModel.startPageAnimationState.collectAsState()
 
-    Box(modifier = Modifier
-        .offset(y = animatedValueList[9].offsetY)
-        .alpha(animatedValueList[9].alpha)
-        .height(60.dp)
-        .fillMaxWidth()
-        .clip(shape = RoundedCornerShape(4.dp))
-        .background(color = MaterialTheme.colorScheme.background)
-        .then(
-            if (startPageAnimationState == 6) {
-                Modifier.clickable {
-                    viewModel.setStartPageAnimationState(7)
-                }
-            } else Modifier
-        ), contentAlignment = Alignment.Center
-    ) {
-        Text("설정 완료", color = Color.White)
-    }
+    AnimatedActionButton(
+        text = "설정 완료",
+        animatedValue = animatedValueList[9],
+        isEnabled = startPageAnimationState == 6,
+        onClick = {
+            viewModel.setStartPageAnimationState(7)
+        },
+        textColor = Color.White
+    )
 }
+
 
 
 
