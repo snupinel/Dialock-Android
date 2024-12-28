@@ -93,7 +93,10 @@ import androidx.compose.ui.unit.toSize
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.dailysummary.components.DayTabs
 import com.example.dailysummary.components.SettingOption
+import com.example.dailysummary.components.TimePicker
+import com.example.dailysummary.components.TimeSetting
 import com.example.dailysummary.dto.AnimationTarget
 import com.example.dailysummary.viewModel.InitialSettingViewModel
 import kotlinx.coroutines.delay
@@ -154,7 +157,7 @@ fun StartPage(navController: NavController){
         AnimationTarget(alpha, offsetY)
     }
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
@@ -163,21 +166,21 @@ fun StartPage(navController: NavController){
                 boxSize = layoutCoordinates.size
                 //Log.d("offset", boxSize.toString())
             },
-        contentAlignment = Alignment.TopCenter,)
+        horizontalAlignment = Alignment.CenterHorizontally,)
     {
         if (startPageAnimationState in 0..5) Greeting(animatedValueList)
 
         if (startPageAnimationState in 3..5) SettingStartButton(animatedValueList)
 
-        Setting1(animatedValueList)
+        if (startPageAnimationState in 3..8) Setting1(animatedValueList)
 
-        Setting2(animatedValueList)
+        if (startPageAnimationState in 3..8) Setting2(animatedValueList)
 
-        SettingEndButton(animatedValueList)
+        if (startPageAnimationState in 3..8) SettingEndButton(animatedValueList)
 
-        PermissionGuide(animatedValueList)
+        if (startPageAnimationState in 6..12) PermissionGuide(animatedValueList)
 
-        PermissionButton(animatedValueList,navController)
+        if (startPageAnimationState in 6..12) PermissionButton(animatedValueList,navController)
     }
 
 }
@@ -275,100 +278,27 @@ fun Setting1(animatedValueList: List<AnimationTarget>) {
 
 
 @Composable
-fun Setting2(animatedValueList: List<AnimationTarget>){
-    val viewModel= hiltViewModel<InitialSettingViewModel>()
+fun Setting2(animatedValueList: List<AnimationTarget>) {
+    val viewModel = hiltViewModel<InitialSettingViewModel>()
 
     val myTime by viewModel.myTime.collectAsState()
     val sameEveryDay by viewModel.sameEveryDay.collectAsState()
     val currentMyTimeTab by viewModel.currentMyTimeTab.collectAsState()
-    //Log.d("myTime",myTime.toString())
-    Text(
-        text = "알림을 받을 시간을 설정해 주세요.\n" +
-                "잠자기 30분 정도가 좋아요.",
-        fontSize = 20.sp,
-        fontWeight = FontWeight.Light,
-        color = Color.DarkGray,
-        modifier = Modifier
-            .fillMaxWidth()
-            .offset(y = animatedValueList[6].offsetY)
-            .alpha(animatedValueList[6].alpha),
-        textAlign = TextAlign.Center
-    )
 
-
-    TimePicker(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(200.dp)
-            .offset(y = animatedValueList[7].offsetY)
-            .alpha(animatedValueList[7].alpha)
-            .border(width = 1.dp, color = Color.Cyan),
+    TimeSetting(
+        animatedValues = animatedValueList.subList(6, 9),
+        title = "알림을 받을 시간을 설정해 주세요.\n잠자기 30분 정도가 좋아요.",
         selectedHour = myTime[currentMyTimeTab].first,
         selectedMinute = myTime[currentMyTimeTab].second,
         onHourChange = { viewModel.setMyTime(hour = it) },
-        onMinuteChange = { viewModel.setMyTime(minute = it) }
+        onMinuteChange = { viewModel.setMyTime(minute = it) },
+        sameEveryDay = sameEveryDay,
+        onToggleSameEveryDay = { viewModel.toggleSameEveryDay() },
+        currentMyTimeTab = currentMyTimeTab,
+        onDayTabClick = { viewModel.setCurrentMyTimeTab(it) }
     )
-    val interactionSource = remember { MutableInteractionSource() }
-    Column(modifier = Modifier
-        .offset(y = animatedValueList[8].offsetY)
-        .alpha(animatedValueList[8].alpha),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ){
-        AnimatedVisibility(
-            visible = !sameEveryDay,
-            enter = fadeIn(animationSpec = tween(500)) + expandVertically(animationSpec = tween(500)),
-            exit = fadeOut(animationSpec = tween(500)) + shrinkVertically(animationSpec = tween(500))
-        ) {
-            Row(modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)) {
-                DayTab(0, modifier = Modifier.weight(1f))
-                DayTab(1, modifier = Modifier.weight(1f))
-                DayTab(2, modifier = Modifier.weight(1f))
-                DayTab(3, modifier = Modifier.weight(1f))
-                DayTab(4, modifier = Modifier.weight(1f))
-                DayTab(5, modifier = Modifier.weight(1f))
-                DayTab(6, modifier = Modifier.weight(1f))
-            }
-        }
-        Row(verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier
-                .height(40.dp)
-                .clickable(
-                    indication = null, // 파문 애니메이션을 제거
-                    interactionSource = interactionSource // 필요 시 상태를 관리
-                ) {
-                    viewModel.toggleSameEveryDay()
-                }
-        ) {
-            Box(modifier = Modifier
-                .size(20.dp)
-                .border(width = 2.dp, color = Color.DarkGray)
-                .then(
-                    if (sameEveryDay) Modifier.background(color = MaterialTheme.colorScheme.primary)
-                    else Modifier
-                )
-               , contentAlignment = Alignment.TopCenter){
-               if (sameEveryDay) Text(text = "V")
-            }
-            Spacer(modifier = Modifier
-                .fillMaxHeight()
-                .width(5.dp))
-            Text(
-               text = "매일 동일",
-               fontSize = 20.sp,
-               fontWeight = FontWeight.Normal,
-               color = if(sameEveryDay) Color.DarkGray else Color.LightGray,
-               textAlign = TextAlign.Center,
-               modifier = Modifier
-                   .height(IntrinsicSize.Min)
-                   .align(Alignment.CenterVertically)
-            )
-        }
-    }
 }
+
 
 @Composable
 fun SettingEndButton(animatedValueList: List<AnimationTarget>){
@@ -395,143 +325,11 @@ fun SettingEndButton(animatedValueList: List<AnimationTarget>){
     }
 }
 
-@Composable
-fun DayTab(day:Int,modifier: Modifier=Modifier){
-    val week= listOf("월","화","수","목","금","토","일")
-    val viewModel= hiltViewModel<InitialSettingViewModel>()
-    val currentMyTimeTab by viewModel.currentMyTimeTab.collectAsState()
-    Box(modifier = modifier
-        .fillMaxHeight()
-        .clickable {
-            viewModel.setCurrentMyTimeTab(day)
-        }, contentAlignment = Alignment.Center){
-        Text(text = week[day])
-        if(day==currentMyTimeTab)Divider(
-            Modifier
-                .align(Alignment.TopCenter)
-                .fillMaxWidth()
-                .height(3.dp), color = MaterialTheme.colorScheme.primary)
 
-    }
-}
 
-@Composable
-fun TimePicker(
-    modifier: Modifier= Modifier,
-    selectedHour: Int,
-    selectedMinute: Int,
-    onHourChange: (Int) -> Unit,
-    onMinuteChange: (Int) -> Unit
-) {
-    val hours = (0..23).toList()
-    val minutes = (0..59).toList()
 
-    Box(modifier = modifier){
-        Row(modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically) {
-            NumberScroller(
-                numbers = hours,
-                selectedNumber = selectedHour,
-                onNumberChange = onHourChange,
-                modifier = Modifier.weight(1f)
-            )
-            Text(text = ":", fontSize = 32.sp, modifier = Modifier.padding(horizontal = 8.dp))
-            NumberScroller(
-                numbers = minutes,
-                selectedNumber = selectedMinute,
-                onNumberChange = onMinuteChange,
-                modifier = Modifier.weight(1f)
-            )
-        }
-    }
-}
 
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun NumberScroller(
-    numbers: List<Int>,
-    selectedNumber: Int,
-    onNumberChange: (Int) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val viewModel= hiltViewModel<InitialSettingViewModel>()
-    val currentMyTimeTab by viewModel.currentMyTimeTab.collectAsState()
-    val lazyListState = rememberLazyListState()
-    val coroutineScope = rememberCoroutineScope()
-    val itemHeight = 50.dp
-    val visibleItemsCount = 3
-    /*
-    LaunchedEffect(selectedNumber) {
-        coroutineScope.launch {
-            val initialIndex = numbers.size * 50 + selectedNumber
-            lazyListState.scrollToItem(initialIndex)
-        }
-    }*/
-    LaunchedEffect(currentMyTimeTab){
-        val initialIndex = numbers.size * 50 + selectedNumber -1
-        lazyListState.scrollToItem(initialIndex)
-    }
 
-    LazyColumn(
-        state = lazyListState,
-        modifier = modifier
-            .height(itemHeight * visibleItemsCount)
-            .pointerInput(Unit) {
-                detectVerticalDragGestures { change, dragAmount ->
-                    coroutineScope.launch {
-                        lazyListState.scrollBy(-dragAmount)
-                    }
-                    change.consume()
-                }
-            },
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        itemsIndexed(List(numbers.size * 100) { it % numbers.size }) { index, number ->
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(itemHeight)
-                    /*
-                    .combinedClickable(
-                        onClick = {
-                            coroutineScope.launch {
-                                onNumberChange(number)
-                                lazyListState.animateScrollToItem(index)
-                            }
-                        }
-                    ),*/,
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = String.format("%02d", number), fontSize = 24.sp)
-            }
-        }
-    }
-    val density = LocalDensity.current
-    LaunchedEffect(Unit) {
-        snapshotFlow { lazyListState.isScrollInProgress }
-            .distinctUntilChanged()
-            .filter { isScrolling -> !isScrolling }
-            .collect {
-                // 스크롤이 멈춘 순간에 실행할 작업
-                println("Scrolling stopped")
-            }
-    }
-    var wasScrolling by remember { mutableStateOf(false) }
-
-    LaunchedEffect(lazyListState.isScrollInProgress) {
-        if (wasScrolling && !lazyListState.isScrollInProgress) {
-            val centerIndex = (lazyListState.firstVisibleItemIndex + lazyListState.firstVisibleItemScrollOffset / with(density) { itemHeight.toPx() }).roundToInt()
-            val actualIndex = centerIndex % numbers.size
-            onNumberChange(numbers[(actualIndex + 1) % numbers.size])
-            coroutineScope.launch {
-                lazyListState.animateScrollToItem(centerIndex)
-            }
-            Log.d("aaaa", "!lazyListState.isScrollInProgress called")
-        }
-        wasScrolling = lazyListState.isScrollInProgress
-    }
-}
 @Composable
 fun PermissionGuide(animatedValueList: List<AnimationTarget>){
     Text(
@@ -641,9 +439,9 @@ fun getTargetValue(obId:Int,startPageAnimationState:Int,boxSize:IntSize):Animati
         listOf(
             AnimationTarget(0f,PxToDp(boxSize.height/2)-50.dp),
             AnimationTarget(1f,PxToDp(boxSize.height/2)-100.dp),
-            AnimationTarget(1f,150.dp),
-            AnimationTarget(1f,150.dp),
-            AnimationTarget(1f,150.dp),
+            AnimationTarget(1f,0.dp),
+            AnimationTarget(1f,0.dp),
+            AnimationTarget(1f,0.dp),
             AnimationTarget(0f,0.dp),
             ),
 
@@ -651,9 +449,9 @@ fun getTargetValue(obId:Int,startPageAnimationState:Int,boxSize:IntSize):Animati
         listOf(
             AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
             AnimationTarget(1f,PxToDp(boxSize.height/2)),
-            AnimationTarget(1f,250.dp),
-            AnimationTarget(1f,250.dp),
-            AnimationTarget(1f,250.dp),
+            AnimationTarget(1f,0.dp),
+            AnimationTarget(1f,0.dp),
+            AnimationTarget(1f,0.dp),
             AnimationTarget(0f,0.dp),
             ),
 
@@ -661,20 +459,20 @@ fun getTargetValue(obId:Int,startPageAnimationState:Int,boxSize:IntSize):Animati
         listOf(
             AnimationTarget(0f,PxToDp(boxSize.height)),
             AnimationTarget(0f,PxToDp(boxSize.height)),
-            AnimationTarget(1f,PxToDp(boxSize.height/2)+50.dp),
-            AnimationTarget(1f,PxToDp(boxSize.height/2)+50.dp),
-            AnimationTarget(1f,PxToDp(boxSize.height/2)+50.dp),
+            AnimationTarget(1f,0.dp),
+            AnimationTarget(1f,0.dp),
+            AnimationTarget(1f,0.dp),
             AnimationTarget(0f,0.dp),
             ),
 
         //버튼
         listOf(
-            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
-            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
-            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
-            AnimationTarget(1f,PxToDp(boxSize.height)-60.dp),
-            AnimationTarget(1f,PxToDp(boxSize.height)-60.dp),
-            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
+            AnimationTarget(0f,0.dp),
+            AnimationTarget(0f,0.dp),
+            AnimationTarget(0f,0.dp),
+            AnimationTarget(1f,0.dp),
+            AnimationTarget(1f,0.dp),
+            AnimationTarget(0f,0.dp),
         ),
 
         //설정 1번 설명
@@ -709,7 +507,7 @@ fun getTargetValue(obId:Int,startPageAnimationState:Int,boxSize:IntSize):Animati
             AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
             AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
             AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
-            AnimationTarget(1f,150.dp),
+            AnimationTarget(1f,0.dp),
             AnimationTarget(0f,0.dp),
         ),
 
@@ -721,7 +519,7 @@ fun getTargetValue(obId:Int,startPageAnimationState:Int,boxSize:IntSize):Animati
             AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
             AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
             AnimationTarget(0f,PxToDp(boxSize.height/2)+300.dp),
-            AnimationTarget(1f,240.dp),
+            AnimationTarget(1f,0.dp),
             AnimationTarget(0f,0.dp),
         ),
 
@@ -733,47 +531,29 @@ fun getTargetValue(obId:Int,startPageAnimationState:Int,boxSize:IntSize):Animati
             AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
             AnimationTarget(0f,PxToDp(boxSize.height/2)+100.dp),
             AnimationTarget(0f,PxToDp(boxSize.height/2)+510.dp),
-            AnimationTarget(1f,450.dp),
+            AnimationTarget(1f,0.dp),
             AnimationTarget(0f,0.dp),
         ),
 
         //설정 완료 버튼
         listOf(
-            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
-            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
-            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
-            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
-            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
-            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
-            AnimationTarget(1f,PxToDp(boxSize.height)-60.dp),
-            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
+            AnimationTarget(0f,0.dp),
+            AnimationTarget(0f,0.dp),
+            AnimationTarget(0f,0.dp),
+            AnimationTarget(0f,0.dp),
+            AnimationTarget(0f,0.dp),
+            AnimationTarget(0f,0.dp),
+            AnimationTarget(1f,0.dp),
+            AnimationTarget(0f,0.dp),
         ),
 
         //권한 필요하다고 설명
-        listOf(
-            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
-            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
-            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
-            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
-            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
-            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
-            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
-            AnimationTarget(0f,PxToDp(boxSize.height/2)),
-            AnimationTarget(1f,PxToDp(boxSize.height/2)-60.dp),
-        ),
+        List(8){AnimationTarget(0f,0.dp)}+
+                AnimationTarget(1f,0.dp),
 
         //권한 설정 시작 버튼
-        listOf(
-            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
-            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
-            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
-            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
-            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
-            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
-            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
-            AnimationTarget(0f,PxToDp(boxSize.height)-60.dp),
-            AnimationTarget(1f,PxToDp(boxSize.height)-60.dp),
-        ),
+        List(8){AnimationTarget(0f,0.dp)}+
+                AnimationTarget(1f,0.dp),
     )
 
     durationMillis=durationMillisList[startPageAnimationState]

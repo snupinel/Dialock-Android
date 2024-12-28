@@ -34,7 +34,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.dailysummary.components.SameEveryDayToggle
 import com.example.dailysummary.components.SettingOption
+import com.example.dailysummary.components.TabNavigationBar
+import com.example.dailysummary.components.TimeSetting
 import com.example.dailysummary.dto.AnimationTarget
 import com.example.dailysummary.model.BottomNavItem
 import com.example.dailysummary.viewModel.InitialSettingViewModel
@@ -53,10 +56,15 @@ fun MainPage(navController: NavController){
 
     val viewModel = hiltViewModel<MainPageViewModel>()
 
+    LaunchedEffect(Unit){
+        viewModel.settingInitialize()
+        viewModel.setCalenderEntries()
+    }
+
     val selectedTab by viewModel.selectedTab.collectAsState()
 
     Scaffold(bottomBar = { TabNavigationBar(tabBarItems) }, topBar = {}) {paddingValues->
-        Box(
+        Column(
             Modifier
                 .fillMaxSize()
                 .padding(paddingValues = paddingValues)
@@ -64,11 +72,14 @@ fun MainPage(navController: NavController){
             when (selectedTab){
                 Tab.Calender -> {
                     DSCalender()
+                    //SameEveryDayToggle(sameEveryDay = false, onToggle = {viewModel.setSameEveryDay(isToggle = true)})
                 }
                 Tab.Setting -> {
                     //
                     Column {
                         SettingAdviceOrForcing()
+
+                        SettingTime()
 
                         //Setting2(animatedValueList)
                     }
@@ -94,14 +105,36 @@ fun SettingAdviceOrForcing() {
 }
 
 @Composable
+fun SettingTime() {
+    val viewModel = hiltViewModel<MainPageViewModel>()
+
+    val myTime by viewModel.myTime.collectAsState()
+    val sameEveryDay by viewModel.sameEveryDay.collectAsState()
+    val currentMyTimeTab by viewModel.currentMyTimeTab.collectAsState()
+
+    //Log.d("aaaab",myTime.toString())
+    //Log.d("aaaab",currentMyTimeTab.toString())
+
+    TimeSetting(
+        title = "알림을 받을 시간을 설정해 주세요.\n잠자기 30분 정도가 좋아요.",
+        selectedHour = myTime[currentMyTimeTab].first,
+        selectedMinute = myTime[currentMyTimeTab].second,
+        onHourChange = { viewModel.setMyTime(hour = it) },
+        onMinuteChange = { viewModel.setMyTime(minute = it) },
+        sameEveryDay = sameEveryDay,
+        onToggleSameEveryDay = { viewModel.setSameEveryDay(isToggle = true) },
+        currentMyTimeTab = currentMyTimeTab,
+        onDayTabClick = { viewModel.setCurrentMyTimeTab(it) }
+    )
+}
+
+@Composable
 fun DSCalender(){
 
 
     val viewModel = hiltViewModel<MainPageViewModel>()
 
-    LaunchedEffect(Unit){
-        viewModel.setCalenderEntries()
-    }
+
 
     val selectedYearAndMonth by viewModel.selectedYearAndMonth.collectAsState()
     val calenderEntries by viewModel.calenderEntries.collectAsState()
@@ -127,57 +160,5 @@ fun DSCalender(){
     }
 }
 
-@Composable
-fun TabNavigationBar(tabBarItems: List<BottomNavItem>) {
-    val viewModel = hiltViewModel<MainPageViewModel>()
 
-    val selectedTabPage by viewModel.selectedTab.collectAsState()
-    NavigationBar(
-        containerColor = Color.White) {
-        // looping over each tab to generate the views and navigation for each item
-        tabBarItems.forEach{ tabBarItem ->
-            NavigationBarItem(
-                selected = selectedTabPage == Tab.valueOf(tabBarItem.title),
-                onClick = {
-                    viewModel.updateTab(tabBarItem.title)
-                },
-                icon = {
-                    TabBarIconView(
-                        isSelected = selectedTabPage == Tab.valueOf(tabBarItem.title),
-                        selectedIcon = tabBarItem.selectedIcon,
-                        unselectedIcon = tabBarItem.unselectedIcon,
-                        title = tabBarItem.title,
-                        badgeAmount = tabBarItem.badgeAmount
-                    )
-                },
-                label = {Text(tabBarItem.tag)})
-        }
-    }
-}
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TabBarIconView(
-    isSelected: Boolean,
-    selectedIcon: ImageVector,
-    unselectedIcon: ImageVector,
-    title: String,
-    badgeAmount: Int? = null
-) {
-    BadgedBox(badge = { TabBarBadgeView(badgeAmount) }) {
-        Icon(
-            imageVector = if (isSelected) {selectedIcon} else {unselectedIcon},
-            contentDescription = title
-        )
-    }
-}
-
-@Composable
-@OptIn(ExperimentalMaterial3Api::class)
-fun TabBarBadgeView(count: Int? = null) {
-    if (count != null) {
-        Badge {
-            Text(count.toString())
-        }
-    }
-}
 

@@ -1,14 +1,18 @@
 package com.example.dailysummary.viewModel
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.dailysummary.data.PrefRepository
+import com.example.dailysummary.dto.AdviceOrForcing
+import com.example.dailysummary.dto.Setting
 import com.example.dailysummary.dto.Summary
 import com.example.dailysummary.model.CalenderEntry
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.lang.StringBuilder
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -98,11 +102,89 @@ class MainPageViewModel @Inject constructor(
         _calenderEntries.value=list
     }
 
+
+
     private val _adviceOrForcing = MutableStateFlow(Pair(false,false))
     val adviceOrForcing: StateFlow<Pair<Boolean, Boolean>> = _adviceOrForcing.asStateFlow()
 
     fun clickAdviceOrForcing(clickedIsLeft:Boolean){
         _adviceOrForcing.value=Pair(clickedIsLeft,!clickedIsLeft)
+    }
+
+    private val _currentMyTimeTab = MutableStateFlow(0)
+    val currentMyTimeTab:StateFlow<Int> = _currentMyTimeTab.asStateFlow()
+
+    fun setCurrentMyTimeTab(tab:Int){
+        _currentMyTimeTab.value=tab
+        Log.d("aaaa","onTabCanged:$tab")
+    }
+
+    private val _myTime = MutableStateFlow(List(7){ Pair(23,0)})
+    val myTime:StateFlow<List<Pair<Int,Int>>> = _myTime.asStateFlow()
+
+    fun setMyTime(hour:Int?=null,minute:Int?=null,tab:Int?=null){
+        val index=tab?:currentMyTimeTab.value
+
+        _myTime.value=_myTime.value.toMutableList().apply {
+            this[index]=Pair(
+                hour ?: this[index].first,
+                minute ?: this[index].second
+            )
+        }
+        Log.d("setMyTime",myTime.value.joinToString(separator = ",") { "(${it.first},${it.second})" })
+    }
+
+    private val _sameEveryDay = MutableStateFlow(true)
+    val sameEveryDay:StateFlow<Boolean> = _sameEveryDay.asStateFlow()
+
+    fun setSameEveryDay( value:Boolean?=null,isToggle:Boolean=false,){
+        if(isToggle) _sameEveryDay.value=!_sameEveryDay.value
+        else if(value==null) return
+        else _sameEveryDay.value=value
+
+        if(_sameEveryDay.value) _currentMyTimeTab.value=0
+        //Log.d("aaaa",sameEveryDay.value.toString())
+    }
+
+    fun setRefSetting(setting: Setting){
+        val builder= StringBuilder()
+        builder.append(setting.adviceOrForcing.name+" ")
+        builder.append(setting.sameEveryDay.toString()+" ")
+        setting.alarmTimes.forEach{
+            builder.append("${it.first} ${it.second} ")
+        }
+        prefRepository.setPref("Setting",builder.toString())
+    }
+    fun getRefSetting(): Setting?{
+        val refList=prefRepository.getPref("Setting")?.trimEnd()?.split(" ")?: emptyList()
+
+        if(refList.isEmpty()) return null
+
+        val adviceOrForcing= AdviceOrForcing.valueOf(refList[0])
+        val sameEveryDay=refList[1].toBoolean()
+        val alarmTimes=refList.drop(2).chunked(2).map{
+                (first, second) -> Pair(first.toInt(), second.toInt())
+        }
+
+        return Setting(adviceOrForcing, sameEveryDay, alarmTimes)
+    }
+
+    fun isSettingCompleted():Boolean{
+        return getRefSetting()!=null
+    }
+
+    fun settingInitialize(){
+        if(!isSettingCompleted()) return
+        val setting:Setting = getRefSetting()!!
+        Log.d("ref","out:${setting.alarmTimes}")
+
+        clickAdviceOrForcing(setting.adviceOrForcing==AdviceOrForcing.Advice)
+
+        setting.alarmTimes.forEachIndexed { index, time ->
+            setMyTime(time.first,time.second,index)
+        }
+        Log.d("aaaa",myTime.value.toString())
+        setSameEveryDay(value=setting.sameEveryDay)
     }
 
 }
