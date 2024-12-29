@@ -1,5 +1,6 @@
 package com.example.dailysummary
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,6 +17,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.dailysummary.overlay.MyService
 import com.example.dailysummary.pages.MainPage
 import com.example.dailysummary.pages.StartPage
 import com.example.dailysummary.ui.theme.DailySummaryTheme
@@ -32,6 +34,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             DailySummaryTheme {
+                //startService(Intent(this, MyService::class.java))
                 // A surface container using the 'background' color from the theme
                 if(viewModel.isSettingCompleted()){
                     MyApp(startDestination = "MainPage")

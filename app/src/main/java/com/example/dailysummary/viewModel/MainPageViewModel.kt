@@ -1,6 +1,8 @@
 package com.example.dailysummary.viewModel
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.dailysummary.data.PrefRepository
@@ -8,6 +10,7 @@ import com.example.dailysummary.dto.AdviceOrForcing
 import com.example.dailysummary.dto.Setting
 import com.example.dailysummary.dto.Summary
 import com.example.dailysummary.model.CalenderEntry
+import com.example.dailysummary.overlay.MyService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -199,6 +202,8 @@ class MainPageViewModel @Inject constructor(
     }
 
 
-
+    fun PreviewSetting(context: Context){
+        context.startService(Intent(context, MyService::class.java))
+    }
 
 }

@@ -193,7 +193,7 @@ fun SettingPreviewButton() {
     AnimatedActionButton(
         text = "미리보기",
         onClick = {
-            //
+            viewModel.PreviewSetting(context)
         },
         backgroundColor = MaterialTheme.colorScheme.primary,
         textColor = Color.White,

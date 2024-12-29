@@ -42,6 +42,7 @@ fun DailySummaryTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
+    isOverlay: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -54,7 +55,7 @@ fun DailySummaryTheme(
         else -> LightColorScheme
     }
     val view = LocalView.current
-    if (!view.isInEditMode) {
+    if (!view.isInEditMode && !isOverlay) {
         SideEffect {
             val window = (view.context as Activity).window
             window.statusBarColor = colorScheme.primary.toArgb()
