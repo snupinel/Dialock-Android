@@ -24,6 +24,7 @@ enum class Tab{
 @SuppressLint("NewApi")
 class MainPageViewModel @Inject constructor(
     private val prefRepository: PrefRepository,
+
 ):ViewModel(){
     private val _selectedTab = MutableStateFlow(Tab.Calender)
     val selectedTab = _selectedTab.asStateFlow()
@@ -196,4 +197,8 @@ class MainPageViewModel @Inject constructor(
 
         return Setting(adviceOrForcing, sameEveryDay, alarmTimes)
     }
+
+
+
+
 }

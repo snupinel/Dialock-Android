@@ -188,12 +188,12 @@ fun SettingSaveButton() {
 @Composable
 fun SettingPreviewButton() {
     val viewModel = hiltViewModel<MainPageViewModel>()
+    val context = LocalContext.current
 
     AnimatedActionButton(
         text = "미리보기",
         onClick = {
-            //viewModel.setRefSetting(viewModel.extractCurrentSetting())
-
+            //
         },
         backgroundColor = MaterialTheme.colorScheme.primary,
         textColor = Color.White,
