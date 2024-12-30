@@ -1,7 +1,10 @@
 package com.example.dailysummary.pages
 
-import android.util.Log
+import android.content.Intent
+import android.os.Build
+import android.provider.Settings
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -17,36 +20,31 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.dailysummary.components.AnimatedActionButton
-import com.example.dailysummary.components.SameEveryDayToggle
 import com.example.dailysummary.components.SettingOption
 import com.example.dailysummary.components.TabNavigationBar
 import com.example.dailysummary.components.TimeSetting
-import com.example.dailysummary.dto.AnimationTarget
 import com.example.dailysummary.model.BottomNavItem
-import com.example.dailysummary.viewModel.InitialSettingViewModel
+import com.example.dailysummary.overlay.AlarmScheduler
 import com.example.dailysummary.viewModel.MainPageViewModel
 import com.example.dailysummary.viewModel.Tab
+import javax.inject.Inject
 
 val calenderTab = BottomNavItem(tag = "캘린더", title = "Calender", selectedIcon = Icons.Filled.Home, unselectedIcon = Icons.Outlined.Home)
 val settingTab = BottomNavItem(tag="설정", title="Setting", selectedIcon = Icons.Filled.Settings, unselectedIcon = Icons.Outlined.Settings)
@@ -55,6 +53,10 @@ val settingTab = BottomNavItem(tag="설정", title="Setting", selectedIcon = Ico
 // creating a list of all the tabs
 val tabBarItems = listOf(calenderTab, settingTab)
 
+//@Inject lateinit var alarmScheduler: AlarmScheduler
+
+
+@RequiresApi(Build.VERSION_CODES.S)
 @Composable
 fun MainPage(navController: NavController){
 
@@ -168,21 +170,63 @@ fun DSCalender(){
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.S)
 @Composable
 fun SettingSaveButton() {
     val viewModel = hiltViewModel<MainPageViewModel>()
 
     val context = LocalContext.current
+
+    //val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+    val (permissionRequested, setPermissionRequested) = remember { mutableStateOf(false) }
+
+
+    /*
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (alarmManager.canScheduleExactAlarms()) {
+
+        } else {
+
+        }
+    }*/
+
+    LaunchedEffect(permissionRequested){
+        if(permissionRequested){
+
+            //launcher.launch()
+            Toast.makeText(context, "스타트액티비티", Toast.LENGTH_SHORT).show()
+
+            val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+            startActivity(context,intent,null)
+
+            setPermissionRequested(false)
+        }
+    }
+
     AnimatedActionButton(
         text = "설정 완료",
         onClick = {
-            viewModel.setRefSetting(viewModel.extractCurrentSetting())
+            viewModel.settingConfirm()
+            //viewModel.setRefSetting(viewModel.extractCurrentSetting())
             Toast.makeText(context, "설정 완료", Toast.LENGTH_SHORT).show()
 
+            /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) { // Android 12+
+                scheduleOverlay(context)
+                setPermissionRequested(true)
+            } else {
+                // Pre-Android 12, directly schedule the alarm
+
+            }*/
+            //scheduleOverlay(context,p)
+            //setPermissionRequested(true)
+            viewModel.scheduleOverlay()
         },
         backgroundColor = MaterialTheme.colorScheme.primary,
         textColor = Color.White,
     )
+
+
 }
 
 @Composable
@@ -193,7 +237,7 @@ fun SettingPreviewButton() {
     AnimatedActionButton(
         text = "미리보기",
         onClick = {
-            viewModel.PreviewSetting(context)
+            viewModel.previewSetting(context)
         },
         backgroundColor = MaterialTheme.colorScheme.primary,
         textColor = Color.White,

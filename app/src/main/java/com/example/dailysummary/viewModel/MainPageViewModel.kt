@@ -10,6 +10,7 @@ import com.example.dailysummary.dto.AdviceOrForcing
 import com.example.dailysummary.dto.Setting
 import com.example.dailysummary.dto.Summary
 import com.example.dailysummary.model.CalenderEntry
+import com.example.dailysummary.overlay.AlarmScheduler
 import com.example.dailysummary.overlay.MyService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,8 +28,9 @@ enum class Tab{
 @SuppressLint("NewApi")
 class MainPageViewModel @Inject constructor(
     private val prefRepository: PrefRepository,
+    private val alarmScheduler: AlarmScheduler,
 
-):ViewModel(){
+    ):ViewModel(){
     private val _selectedTab = MutableStateFlow(Tab.Calender)
     val selectedTab = _selectedTab.asStateFlow()
 
@@ -201,9 +203,16 @@ class MainPageViewModel @Inject constructor(
         return Setting(adviceOrForcing, sameEveryDay, alarmTimes)
     }
 
+    fun settingConfirm(){
+        setRefSetting(extractCurrentSetting())
+    }
 
-    fun PreviewSetting(context: Context){
+    fun previewSetting(context: Context){
         context.startService(Intent(context, MyService::class.java))
+    }
+
+    fun scheduleOverlay(){
+        alarmScheduler.scheduleOverlay()
     }
 
 }

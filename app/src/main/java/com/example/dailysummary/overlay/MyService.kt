@@ -1,6 +1,9 @@
 package com.example.dailysummary.overlay
 
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
 import android.os.Build
@@ -8,6 +11,7 @@ import android.os.IBinder
 import android.util.Log
 import android.view.WindowManager
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
@@ -30,7 +34,9 @@ import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.example.dailysummary.R
+import com.example.dailysummary.data.PrefRepository
 import com.example.dailysummary.ui.theme.DailySummaryTheme
+import java.util.Calendar
 
 class MyService : Service() {
 
@@ -50,8 +56,8 @@ class MyService : Service() {
         }
 
         val params = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.MATCH_PARENT,
             layoutFlag,
             // https://developer.android.com/reference/android/view/WindowManager.LayoutParams
             // alt: WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
@@ -63,8 +69,9 @@ class MyService : Service() {
         val composeView = ComposeView(this)
         composeView.setContent {
             Overlay(onClick = {
-                Log.w("OverlayService", "*** Logging something from the overlay service")
-                Toast.makeText(applicationContext, "Hey!", Toast.LENGTH_SHORT).show()
+                //Log.w("OverlayService", "*** Logging something from the overlay service")
+                //Toast.makeText(applicationContext, "Hey!", Toast.LENGTH_SHORT).show()
+                windowManager.removeView(composeView)
             })
         }
 
@@ -115,3 +122,4 @@ fun Overlay(onClick: () -> Unit) {
         }
     }
 }
+

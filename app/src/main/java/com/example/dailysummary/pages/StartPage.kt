@@ -354,13 +354,16 @@ fun PermissionButton(animatedValueList: List<AnimationTarget>,navController: Nav
     }
 
      */
-
+    //val
     val multiplePermissionsLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
     ) { permissions ->
         // 권한 요청 결과 처리. permissions는 Map<String, Boolean> 형태입니다.
         if(permissions.entries.all { it.value }){
             //
+            Toast.makeText(context, "Overlay permission granted", Toast.LENGTH_SHORT).show()
+            viewModel.saveSetting()
+            navController.navigate("MainPage")
         }
     }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -372,6 +375,7 @@ fun PermissionButton(animatedValueList: List<AnimationTarget>,navController: Nav
             Toast.makeText(context, "Overlay permission denied", Toast.LENGTH_SHORT).show()
         }
     }
+
     /*
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // 마시멜로우(API 23)부터 적용
         if (!Settings.canDrawOverlays(context)) {
