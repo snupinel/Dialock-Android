@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Build
 import android.provider.Settings
 import android.util.Log
+import androidx.annotation.RequiresApi
 import com.example.dailysummary.data.PrefRepository
 import com.example.dailysummary.dto.AdviceOrForcing
 import com.example.dailysummary.dto.Setting
@@ -23,9 +24,10 @@ class AlarmScheduler @Inject constructor(
 ) {
 
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun scheduleOverlay() {
         // SharedPreferences에서 데이터를 가져옴
-        val setting = getRefSetting() ?: return
+        var setting = getRefSetting() ?: return
 
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
@@ -34,6 +36,8 @@ class AlarmScheduler @Inject constructor(
         //setting.alarmTimes
         //val timeParts = timeString.split(":")
         //if (timeParts.size != 2) return // 잘못된 시간 형식이면 종료
+        if(setting.sameEveryDay) setting = setting.copy(alarmTimes = List(7){setting.alarmTimes[0]})
+
         setting.alarmTimes.forEachIndexed { index, time ->
             val calendar = Calendar.getInstance().apply {
                 set(Calendar.DAY_OF_WEEK,index+1)
@@ -46,7 +50,13 @@ class AlarmScheduler @Inject constructor(
                 }
             }
 
-            val intent = Intent(context, MyService::class.java)
+            val intent = Intent(context, MyService::class.java).apply {
+                putExtra("year", calendar.get(Calendar.YEAR))
+                putExtra("month", calendar.get(Calendar.MONTH)+1)
+                putExtra("day", calendar.get(Calendar.DAY_OF_MONTH))
+            }
+
+            Log.d("aaaa","year:${calendar.get(Calendar.YEAR)}")
 
             val pendingIntent = PendingIntent.getService(
                 context,

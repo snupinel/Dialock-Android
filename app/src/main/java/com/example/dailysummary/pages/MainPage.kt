@@ -1,14 +1,14 @@
 package com.example.dailysummary.pages
 
 import android.content.Intent
-import android.os.Build
 import android.provider.Settings
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -19,7 +19,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.KeyboardArrowLeft
+import androidx.compose.material.icons.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -41,10 +45,8 @@ import com.example.dailysummary.components.SettingOption
 import com.example.dailysummary.components.TabNavigationBar
 import com.example.dailysummary.components.TimeSetting
 import com.example.dailysummary.model.BottomNavItem
-import com.example.dailysummary.overlay.AlarmScheduler
 import com.example.dailysummary.viewModel.MainPageViewModel
 import com.example.dailysummary.viewModel.Tab
-import javax.inject.Inject
 
 val calenderTab = BottomNavItem(tag = "캘린더", title = "Calender", selectedIcon = Icons.Filled.Home, unselectedIcon = Icons.Outlined.Home)
 val settingTab = BottomNavItem(tag="설정", title="Setting", selectedIcon = Icons.Filled.Settings, unselectedIcon = Icons.Outlined.Settings)
@@ -56,15 +58,15 @@ val tabBarItems = listOf(calenderTab, settingTab)
 //@Inject lateinit var alarmScheduler: AlarmScheduler
 
 
-@RequiresApi(Build.VERSION_CODES.S)
 @Composable
 fun MainPage(navController: NavController){
 
     val viewModel = hiltViewModel<MainPageViewModel>()
 
     LaunchedEffect(Unit){
+        viewModel.calenderRefresh()
         viewModel.settingInitialize()
-        viewModel.setCalenderEntries()
+        //viewModel.setCalenderEntries()
     }
 
     val selectedTab by viewModel.selectedTab.collectAsState()
@@ -148,8 +150,13 @@ fun DSCalender(){
 
     val selectedYearAndMonth by viewModel.selectedYearAndMonth.collectAsState()
     val calenderEntries by viewModel.calenderEntries.collectAsState()
+
     Column {
-        Text(text = selectedYearAndMonth.second.toString())
+        Row{
+            PrevButton { viewModel.prevMonth()}
+            Text(text = selectedYearAndMonth.second.toString())
+            NextButton {viewModel.nextMonth()}
+        }
         LazyVerticalGrid(
             columns = GridCells.Fixed(7),
         ){
@@ -162,7 +169,11 @@ fun DSCalender(){
                         if (it.isBlank) Modifier.background(color = Color.Gray)
                         else if (it.isWritten) Modifier.background(color = Color.Green)
                         else Modifier
-                    )){
+                    )
+                    .clickable {
+                        viewModel.setSummary(content = "Dummy",day= it.day)
+                    }
+                ){
                     if(!it.isBlank)Text(text = it.day.toString())
                 }
             }
@@ -170,7 +181,26 @@ fun DSCalender(){
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.S)
+@Composable
+fun PrevButton(onClick : () ->Unit){
+    IconButton(onClick = onClick) {
+        Icon(
+            imageVector = Icons.Outlined.KeyboardArrowLeft,
+            contentDescription = "Prev"
+        )
+    }
+}
+
+@Composable
+fun NextButton(onClick : () ->Unit){
+    IconButton(onClick = onClick) {
+        Icon(
+            imageVector = Icons.Outlined.KeyboardArrowRight,
+            contentDescription = "Next"
+        )
+    }
+}
+
 @Composable
 fun SettingSaveButton() {
     val viewModel = hiltViewModel<MainPageViewModel>()

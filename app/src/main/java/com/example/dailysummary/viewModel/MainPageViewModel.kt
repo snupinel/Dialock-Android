@@ -5,7 +5,9 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.dailysummary.data.PrefRepository
+import com.example.dailysummary.data.SummaryRepository
 import com.example.dailysummary.dto.AdviceOrForcing
 import com.example.dailysummary.dto.Setting
 import com.example.dailysummary.dto.Summary
@@ -13,9 +15,13 @@ import com.example.dailysummary.model.CalenderEntry
 import com.example.dailysummary.overlay.AlarmScheduler
 import com.example.dailysummary.overlay.MyService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.lang.StringBuilder
 import java.time.LocalDate
 import javax.inject.Inject
@@ -29,8 +35,9 @@ enum class Tab{
 class MainPageViewModel @Inject constructor(
     private val prefRepository: PrefRepository,
     private val alarmScheduler: AlarmScheduler,
-
+    private val summaryRepository: SummaryRepository,
     ):ViewModel(){
+
     private val _selectedTab = MutableStateFlow(Tab.Calender)
     val selectedTab = _selectedTab.asStateFlow()
 
@@ -50,9 +57,22 @@ class MainPageViewModel @Inject constructor(
 
     fun setSelectedYearAndMonth(year:Int,month: Int){
         _selectedYearAndMonth.value= Pair(year,month)
+        calenderRefresh()
     }
 
+    fun prevMonth(){
+        if(selectedYearAndMonth.value.second==1)
+            setSelectedYearAndMonth(selectedYearAndMonth.value.first-1,12)
+        else setSelectedYearAndMonth(selectedYearAndMonth.value.first,selectedYearAndMonth.value.second-1)
+    }
 
+    fun nextMonth(){
+        if(selectedYearAndMonth.value.second==12)
+            setSelectedYearAndMonth(selectedYearAndMonth.value.first+1,1)
+        else setSelectedYearAndMonth(selectedYearAndMonth.value.first,selectedYearAndMonth.value.second+1)
+    }
+
+    /*
     val summarySamples = listOf(
         Summary(
             writtenTime = LocalDate.of(2024,12,26),
@@ -76,12 +96,17 @@ class MainPageViewModel @Inject constructor(
             content = "솔크"),
 
 
-    )
+    )*/
 
-    //private val _currentMonthSummaries = MutableStateFlow(listOf<Summary>())
-    private val _currentMonthSummaries = MutableStateFlow(summarySamples)
+    private val _currentMonthSummaries = MutableStateFlow(listOf<Summary>())
+    //private val _currentMonthSummaries = MutableStateFlow(summarySamples)
 
     val currentMonthSummaries = _currentMonthSummaries.asStateFlow()
+
+    fun setCurrentMonthSummaries(list:List<Summary>){
+        _currentMonthSummaries.value=list
+        Log.d("currentsum","list:$list")
+    }
 
     private val _calenderEntries = MutableStateFlow(listOf<CalenderEntry>())
 
@@ -214,5 +239,40 @@ class MainPageViewModel @Inject constructor(
     fun scheduleOverlay(){
         alarmScheduler.scheduleOverlay()
     }
+
+    fun setSummary(content: String, day:Int) {
+        viewModelScope.launch{
+            summaryRepository.insertSummary(
+                Summary(
+                    content = content,
+                    date = LocalDate.of(
+                        selectedYearAndMonth.value.first,
+                        selectedYearAndMonth.value.second,
+                        day
+                    ),
+                    writtenTime = LocalDate.now()
+                )
+            )
+        }
+        calenderRefresh()
+    }
+
+    fun getSummariesByMonth(yearMonth: String): Flow<List<Summary>> {
+        return summaryRepository.getSummariesByMonth(yearMonth)
+    }
+
+    fun calenderRefresh(){
+        val yearMonth = "%04d-%02d".format(
+            selectedYearAndMonth.value.first,
+            selectedYearAndMonth.value.second
+        )
+        setCurrentMonthSummaries(
+            runBlocking {
+                getSummariesByMonth(yearMonth).first()
+            }
+        )
+        setCalenderEntries()
+    }
+
 
 }

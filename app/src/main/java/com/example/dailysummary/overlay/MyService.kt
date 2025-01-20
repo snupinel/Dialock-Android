@@ -12,14 +12,21 @@ import android.util.Log
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,7 +34,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.setViewTreeLifecycleOwner
@@ -35,20 +44,65 @@ import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.example.dailysummary.R
 import com.example.dailysummary.data.PrefRepository
+import com.example.dailysummary.data.SummaryRepository
+import com.example.dailysummary.dto.AdviceOrForcing
+import com.example.dailysummary.dto.Setting
+import com.example.dailysummary.dto.Summary
 import com.example.dailysummary.ui.theme.DailySummaryTheme
+import com.example.dailysummary.viewModel.OverlayViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.internal.lifecycle.HiltViewModelFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import java.time.LocalDate
 import java.util.Calendar
+import javax.inject.Inject
 
-class MyService : Service() {
+@AndroidEntryPoint
+@RequiresApi(Build.VERSION_CODES.O)
+class MyService  : Service() {
+
+    @Inject
+    lateinit var prefRepository : PrefRepository
+
+    @Inject
+    lateinit var summaryRepository: SummaryRepository
+
+
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    //private val viewModel: OverlayViewModel by viewModels()
 
     private val windowManager get() = getSystemService(WINDOW_SERVICE) as WindowManager
+    //private val viewModelStore = ViewModelStore()
+
+    private var year=2000
+    private var month =1
+    var day =1
+
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+         year = intent?.getIntExtra("year",0)!!
+         month = intent?.getIntExtra("month",0)!!
+         day = intent?.getIntExtra("day",0)!!
+
+        // 전달받은 매개변수 처리
+        //Log.d("MyService", "Value1: $value1, Value2: $value2")
+
+        return START_NOT_STICKY
+    }
 
     override fun onCreate() {
         super.onCreate()
         setTheme(R.style.Theme_DailySummary)
+        //Log.d("aaaa",repository.getPref("hi")?:"null but success")
         showOverlay()
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun showOverlay() {
+
         val layoutFlag: Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
         } else {
@@ -59,21 +113,16 @@ class MyService : Service() {
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.MATCH_PARENT,
             layoutFlag,
-            // https://developer.android.com/reference/android/view/WindowManager.LayoutParams
-            // alt: WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
-            // WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                    WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM, // 키보드 입력 허용
             PixelFormat.TRANSLUCENT
         )
 
+
+
         val composeView = ComposeView(this)
-        composeView.setContent {
-            Overlay(onClick = {
-                //Log.w("OverlayService", "*** Logging something from the overlay service")
-                //Toast.makeText(applicationContext, "Hey!", Toast.LENGTH_SHORT).show()
-                windowManager.removeView(composeView)
-            })
-        }
+
 
         // Trick The ComposeView into thinking we are tracking lifecycle
         val viewModelStoreOwner = object : ViewModelStoreOwner {
@@ -87,6 +136,30 @@ class MyService : Service() {
         composeView.setViewTreeViewModelStoreOwner(viewModelStoreOwner)
         composeView.setViewTreeSavedStateRegistryOwner(lifecycleOwner)
 
+
+
+        composeView.setContent {
+
+            Overlay(
+                close = {
+                    windowManager.removeView(composeView)
+                    stopSelf()
+                },
+                getSetting = { getRefSetting()!!},
+                saveDiary = {
+                    serviceScope.launch {
+                        summaryRepository.insertSummary(Summary(
+                            writtenTime = LocalDate.now(),
+                            date = LocalDate.of(year,month,day),
+                            content = it
+                        ))
+                    }
+
+                }
+                //setTextFieldValue =
+            )
+        }
+
         // This is required or otherwise the UI will not recompose
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_START)
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
@@ -97,29 +170,105 @@ class MyService : Service() {
     override fun onBind(intent: Intent): IBinder? {
         return null
     }
+
+    fun getRefSetting(): Setting?{
+
+        val refList=prefRepository.getPref("Setting")?.trimEnd()?.split(" ")?: emptyList()
+
+        if(refList.isEmpty()) return null
+
+        val adviceOrForcing= AdviceOrForcing.valueOf(refList[0])
+        val sameEveryDay=refList[1].toBoolean()
+        val alarmTimes=refList.drop(2).chunked(2).map{
+                (first, second) -> Pair(first.toInt(), second.toInt())
+        }
+
+        return Setting(adviceOrForcing, sameEveryDay, alarmTimes)
+    }
+
+
+    fun saveDiary(){
+
+    }
 }
 
 @Composable
-fun Overlay(onClick: () -> Unit) {
+fun Overlay(
+    //viewModel: OverlayViewModel,
+    close: () -> Unit,
+    //adviceOrForcing: AdviceOrForcing,
+    getSetting: () -> Setting,
+    //textFieldValue: String,
+    //setTextFieldValue: (String) -> Unit,
+    saveDiary : (String) -> Unit,
+) {
+    //val viewModel = hiltViewModel<OverlayViewModel>()
+
+    var adviceOrForcing by remember {
+        mutableStateOf(AdviceOrForcing.Advice)
+    }
+
+    var textFieldValue by remember {
+        mutableStateOf("")
+    }
+
+    LaunchedEffect(Unit) {
+        adviceOrForcing = getSetting().adviceOrForcing
+    }
+
     DailySummaryTheme(isOverlay = true) {
         Surface(color = MaterialTheme.colorScheme.surfaceVariant) {
             Column(
                 modifier = Modifier
+                    .fillMaxSize()
                     .padding(16.dp)
-                    .wrapContentSize()
             ) {
-                var showHello by remember { mutableStateOf(true) }
-                if (showHello) {
-                    Text(text = "Hello from Compose")
-                }
-                Button(onClick = {
-                    onClick()
-                    showHello = false
-                }) {
-                    Text("Tap me for a little surprise!")
+                // 상단의 글 쓰는 박스
+                TextField(
+                    value = textFieldValue,
+                    onValueChange = { textFieldValue = it},
+                    label = { Text("Write something...") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                )
+
+                // 하단의 버튼 영역
+                when (adviceOrForcing) {
+                    AdviceOrForcing.Advice -> {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Button(onClick = { close() }) {
+                                Text("취소")
+                            }
+                            Button(onClick = {
+                                saveDiary(textFieldValue)
+                                close()
+                            }) {
+                                Text("저장")
+                            }
+                        }
+                    }
+
+                    AdviceOrForcing.Forcing -> {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            Button(onClick = {
+                                saveDiary(textFieldValue)
+                                close()
+                            }) {
+                                Text("저장")
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 }
+
 

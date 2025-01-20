@@ -3,6 +3,8 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt")
     id("dagger.hilt.android.plugin")
+    id("com.google.devtools.ksp")
+
 }
 
 android {
@@ -54,6 +56,12 @@ android {
 }
 
 dependencies {
+
+    implementation ("androidx.room:room-runtime:2.6.1")
+    kapt ("androidx.room:room-compiler:2.6.1") // For annotation processing
+    implementation ("androidx.room:room-ktx:2.6.1") // For Kotlin extensions
+
+    implementation ("androidx.datastore:datastore-preferences:1.1.2")
 
     implementation ("com.jakewharton.threetenabp:threetenabp:1.4.4")
 
