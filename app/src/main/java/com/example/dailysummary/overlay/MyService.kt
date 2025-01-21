@@ -1,16 +1,11 @@
 package com.example.dailysummary.overlay
 
-import android.app.AlarmManager
-import android.app.PendingIntent
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.IBinder
-import android.util.Log
 import android.view.WindowManager
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,7 +13,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -26,7 +20,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,9 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.setViewTreeLifecycleOwner
@@ -49,15 +40,12 @@ import com.example.dailysummary.dto.AdviceOrForcing
 import com.example.dailysummary.dto.Setting
 import com.example.dailysummary.dto.Summary
 import com.example.dailysummary.ui.theme.DailySummaryTheme
-import com.example.dailysummary.viewModel.OverlayViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.internal.lifecycle.HiltViewModelFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.util.Calendar
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -113,9 +101,10 @@ class MyService  : Service() {
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.MATCH_PARENT,
             layoutFlag,
-            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
-                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
-                    WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM, // 키보드 입력 허용
+            // https://developer.android.com/reference/android/view/WindowManager.LayoutParams
+            // alt: WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
+            // WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
             PixelFormat.TRANSLUCENT
         )
 
@@ -145,7 +134,7 @@ class MyService  : Service() {
                     windowManager.removeView(composeView)
                     stopSelf()
                 },
-                getSetting = { getRefSetting()!!},
+                getSetting = { prefRepository.getRefSetting()!!},
                 saveDiary = {
                     serviceScope.launch {
                         summaryRepository.insertSummary(Summary(
@@ -171,20 +160,7 @@ class MyService  : Service() {
         return null
     }
 
-    fun getRefSetting(): Setting?{
 
-        val refList=prefRepository.getPref("Setting")?.trimEnd()?.split(" ")?: emptyList()
-
-        if(refList.isEmpty()) return null
-
-        val adviceOrForcing= AdviceOrForcing.valueOf(refList[0])
-        val sameEveryDay=refList[1].toBoolean()
-        val alarmTimes=refList.drop(2).chunked(2).map{
-                (first, second) -> Pair(first.toInt(), second.toInt())
-        }
-
-        return Setting(adviceOrForcing, sameEveryDay, alarmTimes)
-    }
 
 
     fun saveDiary(){

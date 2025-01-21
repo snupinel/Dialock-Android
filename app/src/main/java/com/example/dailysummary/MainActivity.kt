@@ -2,6 +2,7 @@ package com.example.dailysummary
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -37,6 +38,7 @@ class MainActivity : ComponentActivity() {
                 //startService(Intent(this, MyService::class.java))
                 // A surface container using the 'background' color from the theme
                 if(viewModel.isSettingCompleted()){
+                    Log.d("aaaa","completed")
                     MyApp(startDestination = "MainPage")
                 }else{
                     MyApp()

@@ -27,7 +27,7 @@ class AlarmScheduler @Inject constructor(
     @RequiresApi(Build.VERSION_CODES.O)
     fun scheduleOverlay() {
         // SharedPreferences에서 데이터를 가져옴
-        var setting = getRefSetting() ?: return
+        var setting = prefRepository.getRefSetting() ?: return
 
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
@@ -99,19 +99,7 @@ class AlarmScheduler @Inject constructor(
 
     }
 
-    fun getRefSetting(): Setting?{
-        val refList=prefRepository.getPref("Setting")?.trimEnd()?.split(" ")?: emptyList()
 
-        if(refList.isEmpty()) return null
-
-        val adviceOrForcing= AdviceOrForcing.valueOf(refList[0])
-        val sameEveryDay=refList[1].toBoolean()
-        val alarmTimes=refList.drop(2).chunked(2).map{
-                (first, second) -> Pair(first.toInt(), second.toInt())
-        }
-
-        return Setting(adviceOrForcing, sameEveryDay, alarmTimes)
-    }
     fun requestExactAlarmPermission(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {

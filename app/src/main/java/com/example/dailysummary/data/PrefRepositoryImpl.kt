@@ -1,7 +1,11 @@
 package com.example.dailysummary.data
 
 import android.content.Context
+import android.util.Log
+import com.example.dailysummary.dto.AdviceOrForcing
+import com.example.dailysummary.dto.Setting
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.lang.StringBuilder
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -29,6 +33,33 @@ class PrefRepositoryImpl @Inject constructor(
             this.remove(key)
             apply()
         }
+    }
+
+    override fun setRefSetting(setting: Setting){
+        val builder= StringBuilder()
+        builder.append(setting.adviceOrForcing.name+" ")
+        builder.append(setting.sameEveryDay.toString()+" ")
+        setting.alarmTimes.forEach{
+            builder.append("${it.first} ${it.second} ")
+        }
+        setPref("Setting",builder.toString())
+
+        Log.d("spref","setting set:${setting}")
+    }
+    override fun getRefSetting(): Setting?{
+        val refList=getPref("Setting")?.trimEnd()?.split(" ")?: emptyList()
+
+        Log.d("spref","setting :${refList}")
+
+        if(refList.isEmpty()) return null
+
+        val adviceOrForcing= AdviceOrForcing.valueOf(refList[0])
+        val sameEveryDay=refList[1].toBoolean()
+        val alarmTimes=refList.drop(2).chunked(2).map{
+                (first, second) -> Pair(first.toInt(), second.toInt())
+        }
+
+        return Setting(adviceOrForcing, sameEveryDay, alarmTimes)
     }
 
 }

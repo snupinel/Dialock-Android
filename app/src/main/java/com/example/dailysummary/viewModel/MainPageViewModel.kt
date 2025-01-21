@@ -177,36 +177,15 @@ class MainPageViewModel @Inject constructor(
         //Log.d("aaaa",sameEveryDay.value.toString())
     }
 
-    fun setRefSetting(setting: Setting){
-        val builder= StringBuilder()
-        builder.append(setting.adviceOrForcing.name+" ")
-        builder.append(setting.sameEveryDay.toString()+" ")
-        setting.alarmTimes.forEach{
-            builder.append("${it.first} ${it.second} ")
-        }
-        prefRepository.setPref("Setting",builder.toString())
-    }
-    fun getRefSetting(): Setting?{
-        val refList=prefRepository.getPref("Setting")?.trimEnd()?.split(" ")?: emptyList()
 
-        if(refList.isEmpty()) return null
-
-        val adviceOrForcing= AdviceOrForcing.valueOf(refList[0])
-        val sameEveryDay=refList[1].toBoolean()
-        val alarmTimes=refList.drop(2).chunked(2).map{
-                (first, second) -> Pair(first.toInt(), second.toInt())
-        }
-
-        return Setting(adviceOrForcing, sameEveryDay, alarmTimes)
-    }
 
     fun isSettingCompleted():Boolean{
-        return getRefSetting()!=null
+        return prefRepository.getRefSetting()!=null
     }
 
     fun settingInitialize(){
         if(!isSettingCompleted()) return
-        val setting:Setting = getRefSetting()!!
+        val setting:Setting = prefRepository.getRefSetting()!!
         Log.d("ref","out:${setting.alarmTimes}")
 
         clickAdviceOrForcing(setting.adviceOrForcing==AdviceOrForcing.Advice)
@@ -229,7 +208,7 @@ class MainPageViewModel @Inject constructor(
     }
 
     fun settingConfirm(){
-        setRefSetting(extractCurrentSetting())
+        prefRepository.setRefSetting(extractCurrentSetting())
     }
 
     fun previewSetting(context: Context){

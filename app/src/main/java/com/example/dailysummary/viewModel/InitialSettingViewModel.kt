@@ -65,19 +65,10 @@ class InitialSettingViewModel @Inject constructor(
         if(_sameEveryDay.value) _currentMyTimeTab.value=0
     }
 
-    fun setRefSetting(setting: Setting){
-        val builder=StringBuilder()
-        builder.append(setting.adviceOrForcing.name+" ")
-        builder.append(setting.sameEveryDay.toString()+" ")
-        setting.alarmTimes.forEach{
-            builder.append("${it.first} ${it.second} ")
-        }
-        prefRepository.setPref("Setting",builder.toString())
-        Log.d("ref",builder.toString())
-    }
+
 
     fun saveSetting(){
-        setRefSetting(
+        prefRepository.setRefSetting(
             Setting(
                 adviceOrForcing = if(_adviceOrForcing.value.first)AdviceOrForcing.Advice else AdviceOrForcing.Forcing,
                 sameEveryDay = _sameEveryDay.value,
