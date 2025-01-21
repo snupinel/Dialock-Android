@@ -133,7 +133,9 @@ class MainPageViewModel @Inject constructor(
         _calenderEntries.value=list
     }
 
-
+    fun readSummary(index:Int):Summary{
+        return currentMonthSummaries.value[index]
+    }
 
     private val _adviceOrForcing = MutableStateFlow(Pair(false,false))
     val adviceOrForcing: StateFlow<Pair<Boolean, Boolean>> = _adviceOrForcing.asStateFlow()

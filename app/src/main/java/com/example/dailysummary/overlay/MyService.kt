@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.IBinder
 import android.view.WindowManager
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -101,12 +102,11 @@ class MyService  : Service() {
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.MATCH_PARENT,
             layoutFlag,
-            // https://developer.android.com/reference/android/view/WindowManager.LayoutParams
-            // alt: WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
-            // WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
             PixelFormat.TRANSLUCENT
-        )
+        ).apply {
+            softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+        }
 
 
 
@@ -207,6 +207,7 @@ fun Overlay(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp)
+                        .focusable()
                 )
 
                 // 하단의 버튼 영역

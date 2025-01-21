@@ -34,7 +34,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            DailySummaryTheme {
+            DailySummaryTheme{
                 //startService(Intent(this, MyService::class.java))
                 // A surface container using the 'background' color from the theme
                 if(viewModel.isSettingCompleted()){
@@ -43,7 +43,6 @@ class MainActivity : ComponentActivity() {
                 }else{
                     MyApp()
                 }
-
             }
         }
     }

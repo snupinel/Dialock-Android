@@ -146,7 +146,7 @@ fun DSCalender(){
 
     val viewModel = hiltViewModel<MainPageViewModel>()
 
-
+    val context = LocalContext.current
 
     val selectedYearAndMonth by viewModel.selectedYearAndMonth.collectAsState()
     val calenderEntries by viewModel.calenderEntries.collectAsState()
@@ -171,7 +171,10 @@ fun DSCalender(){
                         else Modifier
                     )
                     .clickable {
-                        viewModel.setSummary(content = "Dummy",day= it.day)
+                        if(it.isWritten)
+                            Toast.makeText(context, viewModel.readSummary(it.summaryIndex).content, Toast.LENGTH_SHORT).show()
+                        else
+                            viewModel.setSummary(content = "Dummy",day= it.day)
                     }
                 ){
                     if(!it.isBlank)Text(text = it.day.toString())
