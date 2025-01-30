@@ -37,10 +37,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.dailysummary.components.AnimatedActionButton
+import com.example.dailysummary.components.DSCalender
 import com.example.dailysummary.components.SettingOption
 import com.example.dailysummary.components.TabNavigationBar
 import com.example.dailysummary.components.TimeSetting
@@ -76,6 +78,7 @@ fun MainPage(navController: NavController){
             Modifier
                 .fillMaxSize()
                 .padding(paddingValues = paddingValues)
+                .padding(all = 8.dp)
         ) {
             when (selectedTab){
                 Tab.Calender -> {
@@ -140,68 +143,21 @@ fun SettingTime() {
     )
 }
 
+
+
 @Composable
-fun DSCalender(){
-
-
+fun SettingPreviewButton() {
     val viewModel = hiltViewModel<MainPageViewModel>()
-
     val context = LocalContext.current
 
-    val selectedYearAndMonth by viewModel.selectedYearAndMonth.collectAsState()
-    val calenderEntries by viewModel.calenderEntries.collectAsState()
-
-    Column {
-        Row{
-            PrevButton { viewModel.prevMonth()}
-            Text(text = selectedYearAndMonth.second.toString())
-            NextButton {viewModel.nextMonth()}
-        }
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(7),
-        ){
-            items(calenderEntries){
-                Box(modifier = Modifier
-                    .height(30.dp)
-                    .padding(1.dp)
-                    .border(width = 1.dp, color = Color.Gray)
-                    .then(
-                        if (it.isBlank) Modifier.background(color = Color.Gray)
-                        else if (it.isWritten) Modifier.background(color = Color.Green)
-                        else Modifier
-                    )
-                    .clickable {
-                        if(it.isWritten)
-                            Toast.makeText(context, viewModel.readSummary(it.summaryIndex).content, Toast.LENGTH_SHORT).show()
-                        else
-                            viewModel.setSummary(content = "Dummy",day= it.day)
-                    }
-                ){
-                    if(!it.isBlank)Text(text = it.day.toString())
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun PrevButton(onClick : () ->Unit){
-    IconButton(onClick = onClick) {
-        Icon(
-            imageVector = Icons.Outlined.KeyboardArrowLeft,
-            contentDescription = "Prev"
-        )
-    }
-}
-
-@Composable
-fun NextButton(onClick : () ->Unit){
-    IconButton(onClick = onClick) {
-        Icon(
-            imageVector = Icons.Outlined.KeyboardArrowRight,
-            contentDescription = "Next"
-        )
-    }
+    AnimatedActionButton(
+        text = "미리보기",
+        onClick = {
+            viewModel.previewSetting(context)
+        },
+        backgroundColor = MaterialTheme.colorScheme.primary,
+        textColor = Color.White,
+    )
 }
 
 @Composable
@@ -231,7 +187,7 @@ fun SettingSaveButton() {
             Toast.makeText(context, "스타트액티비티", Toast.LENGTH_SHORT).show()
 
             val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
-            startActivity(context,intent,null)
+            ContextCompat.startActivity(context,intent,null)
 
             setPermissionRequested(false)
         }
@@ -261,21 +217,4 @@ fun SettingSaveButton() {
 
 
 }
-
-@Composable
-fun SettingPreviewButton() {
-    val viewModel = hiltViewModel<MainPageViewModel>()
-    val context = LocalContext.current
-
-    AnimatedActionButton(
-        text = "미리보기",
-        onClick = {
-            viewModel.previewSetting(context)
-        },
-        backgroundColor = MaterialTheme.colorScheme.primary,
-        textColor = Color.White,
-    )
-}
-
-
 
