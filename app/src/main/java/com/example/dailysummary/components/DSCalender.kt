@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -58,17 +60,20 @@ fun DSCalender(){
 
     Column {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(100.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ){
-            PrevButton { viewModel.prevMonth()}
+            AdjustMonthButton(isPrev = true,Modifier.weight(1f)){ viewModel.prevMonth()}
             CalenderMonth(
+                modifier = Modifier.weight(1f),
                 isCurrentYear=isCurrentYear,
                 year = selectedYearAndMonth.first,
                 month = selectedYearAndMonth.second
             )
-            NextButton {viewModel.nextMonth()}
+            AdjustMonthButton(isPrev = false,Modifier.weight(1f)) {viewModel.nextMonth()}
         }
         Row {
             val weekList= listOf(
@@ -110,11 +115,15 @@ fun DSCalender(){
 
 @Composable
 fun CalenderMonth(
+    modifier: Modifier = Modifier,
     isCurrentYear: Boolean,
     year:Int,
     month: Int
 ){
-    Column {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         if(!isCurrentYear) Text(text = year.toString())
         Text(text = month.toString())
     }
@@ -173,22 +182,25 @@ fun CalenderBox(
 }
 
 @Composable
-fun PrevButton(onClick : () ->Unit){
-    IconButton(onClick = onClick) {
+fun AdjustMonthButton(
+    isPrev:Boolean=true,
+    modifier: Modifier = Modifier,
+    onClick : () ->Unit,
+    ){
+
+    IconButton(
+        modifier = modifier
+            .fillMaxHeight(0.5f)
+            .fillMaxWidth()
+            .clip(shape= RoundedCornerShape(8.dp))
+            .background(color = MaterialTheme.colorScheme.primary),
+        onClick = onClick) {
         Icon(
-            imageVector = Icons.Outlined.KeyboardArrowLeft,
-            contentDescription = "Prev"
+            imageVector =
+            if(isPrev) Icons.Outlined.KeyboardArrowLeft
+            else Icons.Outlined.KeyboardArrowRight,
+            contentDescription = if(isPrev) "Prev" else "Next",
+            tint = MaterialTheme.colorScheme.onPrimary
         )
     }
 }
-
-@Composable
-fun NextButton(onClick : () ->Unit){
-    IconButton(onClick = onClick) {
-        Icon(
-            imageVector = Icons.Outlined.KeyboardArrowRight,
-            contentDescription = "Next"
-        )
-    }
-}
-
