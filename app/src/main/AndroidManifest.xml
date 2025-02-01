@@ -18,7 +18,7 @@
         android:theme="@style/Theme.DailySummary"
         tools:targetApi="31">
 
-        <service android:name=".overlay.MyService" />
+        <service android:name=".overlay.SummaryService" />
         <receiver android:name=".overlay.OverlayReceiver" />
 
         <activity

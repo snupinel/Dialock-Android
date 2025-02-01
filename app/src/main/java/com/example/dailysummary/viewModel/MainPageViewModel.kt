@@ -13,7 +13,7 @@ import com.example.dailysummary.dto.Setting
 import com.example.dailysummary.dto.Summary
 import com.example.dailysummary.model.CalenderEntry
 import com.example.dailysummary.overlay.AlarmScheduler
-import com.example.dailysummary.overlay.MyService
+import com.example.dailysummary.overlay.SummaryService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -214,7 +214,7 @@ class MainPageViewModel @Inject constructor(
     }
 
     fun previewSetting(context: Context){
-        context.startService(Intent(context, MyService::class.java))
+        context.startService(Intent(context, SummaryService::class.java))
     }
 
     fun scheduleOverlay(){

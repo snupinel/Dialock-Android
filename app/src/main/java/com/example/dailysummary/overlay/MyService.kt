@@ -2,9 +2,12 @@ package com.example.dailysummary.overlay
 
 import android.app.Service
 import android.content.Intent
+import android.content.res.Resources
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
+import android.view.Gravity
 import android.view.WindowManager
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.focusable
@@ -35,6 +38,7 @@ import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.example.dailysummary.R
+import com.example.dailysummary.components.Overlay
 import com.example.dailysummary.data.PrefRepository
 import com.example.dailysummary.data.SummaryRepository
 import com.example.dailysummary.dto.AdviceOrForcing
@@ -51,7 +55,7 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 @RequiresApi(Build.VERSION_CODES.O)
-class MyService  : Service() {
+class SummaryService  : Service() {
 
     @Inject
     lateinit var prefRepository : PrefRepository
@@ -85,12 +89,13 @@ class MyService  : Service() {
     override fun onCreate() {
         super.onCreate()
         setTheme(R.style.Theme_DailySummary)
-        //Log.d("aaaa",repository.getPref("hi")?:"null but success")
+        Log.d("summaryservice","SummaryService activated")
         showOverlay()
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun showOverlay() {
+
 
         val layoutFlag: Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
@@ -99,14 +104,24 @@ class MyService  : Service() {
         }
 
         val params = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.MATCH_PARENT,
-            WindowManager.LayoutParams.MATCH_PARENT,
+            (Resources.getSystem().displayMetrics.widthPixels * 0.8).toInt(),
+            (Resources.getSystem().displayMetrics.heightPixels * 0.6).toInt(),
             layoutFlag,
-            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                    WindowManager.LayoutParams.FLAG_DIM_BEHIND,  // 배경 흐리게
             PixelFormat.TRANSLUCENT
         ).apply {
+            gravity = Gravity.CENTER // 중앙 배치
             softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+            dimAmount = 0.5f  // 배경 흐림 정도 설정
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                blurBehindRadius = 20 // API 31 이상에서 블러 효과 추가
+                flags = flags or WindowManager.LayoutParams.FLAG_BLUR_BEHIND
+            }
         }
+
 
 
 
@@ -161,91 +176,8 @@ class MyService  : Service() {
     }
 
 
-
-
-    fun saveDiary(){
-
-    }
 }
 
-@Composable
-fun Overlay(
-    //viewModel: OverlayViewModel,
-    close: () -> Unit,
-    //adviceOrForcing: AdviceOrForcing,
-    getSetting: () -> Setting,
-    //textFieldValue: String,
-    //setTextFieldValue: (String) -> Unit,
-    saveDiary : (String) -> Unit,
-) {
-    //val viewModel = hiltViewModel<OverlayViewModel>()
 
-    var adviceOrForcing by remember {
-        mutableStateOf(AdviceOrForcing.Advice)
-    }
-
-    var textFieldValue by remember {
-        mutableStateOf("")
-    }
-
-    LaunchedEffect(Unit) {
-        adviceOrForcing = getSetting().adviceOrForcing
-    }
-
-    DailySummaryTheme(isOverlay = true) {
-        Surface(color = MaterialTheme.colorScheme.surfaceVariant) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-            ) {
-                // 상단의 글 쓰는 박스
-                TextField(
-                    value = textFieldValue,
-                    onValueChange = { textFieldValue = it},
-                    label = { Text("Write something...") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp)
-                        .focusable()
-                )
-
-                // 하단의 버튼 영역
-                when (adviceOrForcing) {
-                    AdviceOrForcing.Advice -> {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Button(onClick = { close() }) {
-                                Text("취소")
-                            }
-                            Button(onClick = {
-                                saveDiary(textFieldValue)
-                                close()
-                            }) {
-                                Text("저장")
-                            }
-                        }
-                    }
-
-                    AdviceOrForcing.Forcing -> {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End
-                        ) {
-                            Button(onClick = {
-                                saveDiary(textFieldValue)
-                                close()
-                            }) {
-                                Text("저장")
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
 
 

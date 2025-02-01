@@ -18,7 +18,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.dailysummary.overlay.MyService
 import com.example.dailysummary.pages.MainPage
 import com.example.dailysummary.pages.StartPage
 import com.example.dailysummary.ui.theme.DailySummaryTheme

@@ -50,7 +50,7 @@ class AlarmScheduler @Inject constructor(
                 }
             }
 
-            val intent = Intent(context, MyService::class.java).apply {
+            val intent = Intent(context, SummaryService::class.java).apply {
                 putExtra("year", calendar.get(Calendar.YEAR))
                 putExtra("month", calendar.get(Calendar.MONTH)+1)
                 putExtra("day", calendar.get(Calendar.DAY_OF_MONTH))
