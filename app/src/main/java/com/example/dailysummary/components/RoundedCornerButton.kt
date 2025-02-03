@@ -18,13 +18,14 @@ fun RoundedCornerButton(
     modifier: Modifier=Modifier,
     color: Color =MaterialTheme.colorScheme.primary,
     onClick:()->Unit={},
+    enabled:Boolean=true,
     content: @Composable() (BoxScope.() -> Unit)
 ){
     Box(
         modifier=modifier
             .clip(RoundedCornerShape(8.dp))
-            .background(color = color)
-            .clickable { onClick() },
+            .background(color = if(enabled)color else MaterialTheme.colorScheme.surfaceVariant)
+            .clickable(enabled=enabled) { onClick() },
         contentAlignment = Alignment.Center,
     ) {
         content()

@@ -1,17 +1,23 @@
 package com.example.dailysummary.components
 
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.dailysummary.model.BottomNavItem
 import com.example.dailysummary.viewModel.MainPageViewModel
@@ -23,10 +29,12 @@ fun TabNavigationBar(tabBarItems: List<BottomNavItem>) {
 
     val selectedTabPage by viewModel.selectedTab.collectAsState()
     NavigationBar(
-        containerColor = Color.White) {
+        modifier = Modifier.height(50.dp),
+        containerColor = MaterialTheme.colorScheme.primaryContainer) {
         // looping over each tab to generate the views and navigation for each item
         tabBarItems.forEach{ tabBarItem ->
             NavigationBarItem(
+                modifier = Modifier.fillMaxHeight(),
                 selected = selectedTabPage == Tab.valueOf(tabBarItem.title),
                 onClick = {
                     viewModel.updateTab(tabBarItem.title)
@@ -40,8 +48,8 @@ fun TabNavigationBar(tabBarItems: List<BottomNavItem>) {
                         badgeAmount = tabBarItem.badgeAmount
                     )
                 },
-                label = { Text(tabBarItem.tag) })
-        }
+                //label = { Text(tabBarItem.tag) }
+        ) }
     }
 }
 @OptIn(ExperimentalMaterial3Api::class)

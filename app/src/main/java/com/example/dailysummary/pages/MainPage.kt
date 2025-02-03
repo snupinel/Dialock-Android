@@ -3,30 +3,21 @@ package com.example.dailysummary.pages
 import android.content.Intent
 import android.provider.Settings
 import android.widget.Toast
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Group
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.KeyboardArrowLeft
-import androidx.compose.material.icons.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -38,7 +29,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.dailysummary.components.AnimatedActionButton
@@ -50,12 +40,13 @@ import com.example.dailysummary.model.BottomNavItem
 import com.example.dailysummary.viewModel.MainPageViewModel
 import com.example.dailysummary.viewModel.Tab
 
-val calenderTab = BottomNavItem(tag = "캘린더", title = "Calender", selectedIcon = Icons.Filled.Home, unselectedIcon = Icons.Outlined.Home)
-val settingTab = BottomNavItem(tag="설정", title="Setting", selectedIcon = Icons.Filled.Settings, unselectedIcon = Icons.Outlined.Settings)
+val homeTab = BottomNavItem(tag = "홈", title = "Home", selectedIcon = Icons.Filled.Home, unselectedIcon = Icons.Outlined.Home)
+val myTab = BottomNavItem(tag="설정", title="My", selectedIcon = Icons.Filled.Person, unselectedIcon = Icons.Outlined.Person)
+val socialTab = BottomNavItem(tag="소셜", title="Social", selectedIcon = Icons.Filled.Groups, unselectedIcon = Icons.Outlined.Groups)
 
 
 // creating a list of all the tabs
-val tabBarItems = listOf(calenderTab, settingTab)
+val tabBarItems = listOf(socialTab,homeTab, myTab,)
 
 //@Inject lateinit var alarmScheduler: AlarmScheduler
 
@@ -81,11 +72,11 @@ fun MainPage(navController: NavController){
                 .padding(all = 8.dp)
         ) {
             when (selectedTab){
-                Tab.Calender -> {
+                Tab.Home -> {
                     DSCalender()
                     //SameEveryDayToggle(sameEveryDay = false, onToggle = {viewModel.setSameEveryDay(isToggle = true)})
                 }
-                Tab.Setting -> {
+                Tab.My -> {
                     //
                     Column {
                         SettingAdviceOrForcing()
@@ -98,6 +89,9 @@ fun MainPage(navController: NavController){
 
                         //Setting2(animatedValueList)
                     }
+                }
+                Tab.Social-> {
+
                 }
             }
 

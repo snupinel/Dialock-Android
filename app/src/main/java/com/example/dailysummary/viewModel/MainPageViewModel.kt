@@ -22,12 +22,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import java.lang.StringBuilder
 import java.time.LocalDate
 import javax.inject.Inject
 
 enum class Tab{
-    Calender,Setting
+    Home,My,Social
 }
 
 @HiltViewModel
@@ -38,7 +37,7 @@ class MainPageViewModel @Inject constructor(
     private val summaryRepository: SummaryRepository,
     ):ViewModel(){
 
-    private val _selectedTab = MutableStateFlow(Tab.Calender)
+    private val _selectedTab = MutableStateFlow(Tab.Home)
     val selectedTab = _selectedTab.asStateFlow()
 
     fun updateTab(tab:String){

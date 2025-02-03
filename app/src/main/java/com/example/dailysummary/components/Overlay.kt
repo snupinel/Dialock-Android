@@ -17,12 +17,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.KeyboardArrowLeft
 import androidx.compose.material.icons.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.ThumbDown
 import androidx.compose.material.icons.outlined.ThumbUp
+import androidx.compose.material.icons.twotone.Favorite
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -76,6 +80,10 @@ fun Overlay(
         mutableStateOf(null)
     }
 
+    var isLikeChecked:Boolean by remember {
+        mutableStateOf(false)
+    }
+
     LaunchedEffect(Unit) {
         adviceOrForcing = getSetting().adviceOrForcing
     }
@@ -105,16 +113,13 @@ fun Overlay(
 
                 Spacer(modifier = Modifier.height(20.dp))
                 // 상단의 글 쓰는 박스
-                TextField(
-                    value = textFieldValue,
-                    onValueChange = { textFieldValue = it},
-                    label = { Text("Write something...") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp)
-                        .focusable()
-                )
 
+                TextBox(
+                    isLikeChecked = isLikeChecked,
+                    toggleLike = {isLikeChecked=!isLikeChecked},
+                    textFieldValue = textFieldValue,
+                    onValueChange = {textFieldValue=it}
+                )
                 // 하단의 버튼 영역
                 Thumbs(
                     isSummaryWritten = textFieldValue!="",
@@ -123,12 +128,60 @@ fun Overlay(
                     isUp=it
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                SaveButton{
+                SaveButton(enabled = textFieldValue!=""){
                     saveDiary(textFieldValue)
                     close()
                 }
             }
         }
+    }
+}
+
+@Composable
+fun LikeButton(
+    isChecked: Boolean=true,
+    onClick: () -> Unit,
+){
+    IconButton(onClick = onClick) {
+        when(isChecked){
+            false->
+                Icon(
+                    imageVector = Icons.Outlined.FavoriteBorder,
+                    contentDescription = "Favorite",
+                    )
+            true->
+                Icon(
+                    imageVector = Icons.Filled.Favorite,
+                    tint = MaterialTheme.colorScheme.primary,
+                    contentDescription = "Favorite")
+        }
+
+
+    }
+}
+
+@Composable
+fun TextBox(
+    isLikeChecked:Boolean=false,
+    toggleLike:()->Unit,
+    textFieldValue:String,
+    onValueChange:(String)->Unit,
+){
+    Row {
+        TextField(
+            value = textFieldValue,
+            onValueChange = onValueChange,
+            label = { Text("Write something...") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            trailingIcon = {
+                LikeButton(isChecked = isLikeChecked) {
+                    toggleLike()
+                }
+            }
+        )
+
     }
 }
 
@@ -246,6 +299,7 @@ fun MinimizeButton(
 @Composable
 fun SaveButton(
     modifier: Modifier=Modifier,
+    enabled:Boolean=true,
     onClick: () -> Unit,
 ){
     RoundedCornerButton(
@@ -253,40 +307,9 @@ fun SaveButton(
             .fillMaxWidth()
             .height(50.dp),
         onClick = onClick,
+        enabled = enabled,
     ) {
         Text("저장", color = MaterialTheme.colorScheme.onPrimary)
     }
 }
 
-@Composable
-fun PrettyTextField(
-    text: String,
-    onTextChange: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    OutlinedTextField(
-        value = text,
-        onValueChange = onTextChange,
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp)),
-        textStyle = TextStyle(fontSize = 16.sp),
-        placeholder = { Text("텍스트를 입력하세요", color = Color.Gray) },
-        singleLine = true,
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = MaterialTheme.colorScheme.primary,
-            unfocusedBorderColor = Color.LightGray,
-        )
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewPrettyTextField() {
-    var text by remember { mutableStateOf("") }
-
-    PrettyTextField(text = text, onTextChange = { text = it })
-}
