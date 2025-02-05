@@ -1,6 +1,7 @@
 package com.example.dailysummary.components
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Badge
@@ -14,10 +15,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.dailysummary.model.BottomNavItem
 import com.example.dailysummary.viewModel.MainPageViewModel
@@ -40,15 +43,18 @@ fun TabNavigationBar(tabBarItems: List<BottomNavItem>) {
                     viewModel.updateTab(tabBarItem.title)
                 },
                 icon = {
-                    TabBarIconView(
-                        isSelected = selectedTabPage == Tab.valueOf(tabBarItem.title),
-                        selectedIcon = tabBarItem.selectedIcon,
-                        unselectedIcon = tabBarItem.unselectedIcon,
-                        title = tabBarItem.title,
-                        badgeAmount = tabBarItem.badgeAmount
-                    )
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        TabBarIconView(
+                            isSelected = selectedTabPage == Tab.valueOf(tabBarItem.title),
+                            selectedIcon = tabBarItem.selectedIcon,
+                            unselectedIcon = tabBarItem.unselectedIcon,
+                            title = tabBarItem.title,
+                            badgeAmount = tabBarItem.badgeAmount
+                        )
+                        Text(tabBarItem.tag, fontSize = 10.sp)
+                    }
+
                 },
-                //label = { Text(tabBarItem.tag) }
         ) }
     }
 }
@@ -61,12 +67,15 @@ fun TabBarIconView(
     title: String,
     badgeAmount: Int? = null
 ) {
-    BadgedBox(badge = { TabBarBadgeView(badgeAmount) }) {
-        Icon(
-            imageVector = if (isSelected) {selectedIcon} else {unselectedIcon},
-            contentDescription = title
-        )
+    Column{
+        BadgedBox(badge = { TabBarBadgeView(badgeAmount) }) {
+            Icon(
+                imageVector = if (isSelected) {selectedIcon} else {unselectedIcon},
+                contentDescription = title
+            )
+        }
     }
+
 }
 
 @Composable

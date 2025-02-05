@@ -57,6 +57,9 @@ android {
 
 dependencies {
 
+    //Coli
+    implementation("io.coil-kt:coil-compose:1.4.0")
+    //icon
     implementation("androidx.compose.material:material-icons-extended:1.7.7")
 
     implementation ("androidx.room:room-runtime:2.6.1")
