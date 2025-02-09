@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,6 +30,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActionScope
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -64,6 +66,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -94,7 +97,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.dailysummary.components.BackButton
+import com.example.dailysummary.components.ConfirmButton
+import com.example.dailysummary.components.EditButton
 import com.example.dailysummary.components.ImagePager
+import com.example.dailysummary.components.RevertButton
 import com.example.dailysummary.components.SaveButton
 import com.example.dailysummary.ui.theme.DailySummaryTheme
 import com.example.dailysummary.viewModel.SummaryPageViewModel
@@ -141,7 +147,10 @@ fun SummaryPage(
     Scaffold(
         bottomBar = {SummaryPageBottomBar(
 
-        ) },
+        ){
+            viewModel.insertSummary()
+            navController.popBackStack()
+        } },
         topBar = {
             SummaryPageToolbar(
                 alpha = alpha.value,
@@ -181,7 +190,9 @@ fun SummaryPage(
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun SummaryPageBottomBar(){
+fun SummaryPageBottomBar(
+    onSave:()->Unit,
+){
     val viewModel = hiltViewModel<SummaryPageViewModel>()
 
     val isWritten by viewModel.isWritten.collectAsState()
@@ -190,7 +201,7 @@ fun SummaryPageBottomBar(){
     }
     else{
         SaveButton {
-
+            onSave()
         }
     }
 }
@@ -199,6 +210,8 @@ fun SummaryPageBottomBar(){
 @Composable
 fun TitlePart(){
     val viewModel = hiltViewModel<SummaryPageViewModel>()
+
+    val isWritten by viewModel.isWritten.collectAsState()
 
     val title = viewModel.summary.collectAsState().value.title
     val isEditingTitle by viewModel.isEditingTitle.collectAsState()
@@ -221,21 +234,58 @@ fun TitlePart(){
         }
     }
 
-    if(isEditingTitle){
+    EditAbleTextPart(
+        isWritten = isWritten,
+        isEditing = isEditingTitle,
+        value = title,
+        editValue = editTitleValue,
+        onEditValueChange = {editTitleValue=it},
+        focusRequester = focusRequester,
+        singleLine = true,
+        localFocusManager = localFocusManager,
+        hint = "제목",
+        setIsEditing = { viewModel.setIsEditingTitle(it) },
+        updateByDate = { viewModel.updateTitleByDate() },
+        saveText = {viewModel.setTitle(it)}
+    )
+
+
+}
+
+
+
+@Composable
+fun EditAbleTextPart(
+    isWritten:Boolean,
+    isEditing:Boolean,
+    value:String,
+    editValue:String,
+    onEditValueChange:(String)->Unit,
+    focusRequester:FocusRequester,
+    singleLine:Boolean,
+    localFocusManager:FocusManager,
+    onDone: (KeyboardActionScope.() -> Unit)? = {localFocusManager.clearFocus()},
+    hint:String,
+    setIsEditing:(Boolean)->Unit,
+    updateByDate:()->Unit,
+    saveText:(String)->Unit,
+){
+    if(isEditing||!isWritten){
         Column {
             BasicTextField(
-                value = editTitleValue,
-                onValueChange = { editTitleValue=it},
+                value = if (isWritten) editValue else value,
+                onValueChange = {
+                    if (isWritten) onEditValueChange(it)
+                    else saveText(it) },
                 modifier = Modifier
                     .focusRequester(focusRequester),
-                singleLine=true,
+                singleLine=singleLine,
                 keyboardOptions = KeyboardOptions.Default.copy(
                     imeAction = ImeAction.Done
                 ),
                 keyboardActions = KeyboardActions(
-                    onDone = { localFocusManager.clearFocus() }
+                    onDone = onDone
                 ),
-
                 textStyle = TextStyle(color = MaterialTheme.colorScheme.primaryContainer),
                 decorationBox = {
                         innerTextField ->
@@ -250,73 +300,49 @@ fun TitlePart(){
                                 shape = RoundedCornerShape(7.dp)
                             )
                             .padding(12.dp)
-                            .horizontalScroll(titleScrollState),
                     ){
-                        if(editTitleValue.isEmpty()){
-                            Text("제목", color = Color.Gray)
+                        if(isWritten){
+                            if(editValue.isEmpty()){
+                                Text(hint, color = Color.Gray)
+                            }
                         }
+                        else{
+                            if(value.isEmpty()){
+                                Text(hint, color = Color.Gray)
+                            }
+                        }
+
                         innerTextField()
                     }
                 }
             )
-            Row{
-                RevertButton {
-                    viewModel.setIsEditingTitle(false)
-                }
-                ConfirmButton {
-                    viewModel.setTitle(editTitleValue)
-                    viewModel.updateTitleByDate()
-                    viewModel.setIsEditingTitle(false)
+            if(isWritten){
+                Row(horizontalArrangement = Arrangement.SpaceBetween){
+                    RevertButton {
+                        setIsEditing(false)
+                    }
+                    ConfirmButton {
+                        saveText(editValue)
+                        updateByDate()
+                        setIsEditing(false)
+                    }
                 }
             }
+
         }
     }
     else{
         Row(verticalAlignment = Alignment.Bottom) {
-            Text(text=title, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            Text(text=value, fontSize = 24.sp, fontWeight = FontWeight.Bold)
             EditButton {
 
-                viewModel.setIsEditingTitle(true)
+                setIsEditing(true)
             }
         }
     }
-
-
 }
 
 
-
-@Composable
-fun EditTextField(){
-
-}
-
-
-@Composable
-fun EditButton(
-    onClick:()->Unit,
-){
-    IconButton(onClick = onClick) {
-        Icon(imageVector = Icons.Outlined.Edit, contentDescription = "Edit")
-    }
-}
-
-@Composable
-fun ConfirmButton(
-    onClick:()->Unit,
-){
-    IconButton(onClick = onClick) {
-        Icon(imageVector = Icons.Outlined.Check, contentDescription = "Confirm")
-    }
-}
-@Composable
-fun RevertButton(
-    onClick:()->Unit,
-){
-    IconButton(onClick = onClick) {
-        Icon(imageVector = Icons.Outlined.Replay, contentDescription = "Revert")
-    }
-}
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -378,6 +404,8 @@ fun SummaryPageTopAppBar(
 fun ContentPart(){
     val viewModel = hiltViewModel<SummaryPageViewModel>()
 
+    val isWritten by viewModel.isWritten.collectAsState()
+
     val content = viewModel.summary.collectAsState().value.content
     val isEditingContent by viewModel.isEditingContent.collectAsState()
     var editContentValue by rememberSaveable {
@@ -387,75 +415,30 @@ fun ContentPart(){
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
     val localFocusManager = LocalFocusManager.current
-    val titleScrollState = rememberScrollState()
 
 
     LaunchedEffect(isEditingContent) {
         editContentValue=content
         if (isEditingContent) {
-            //awaitFrame() // ✅ UI가 완전히 렌더링된 후 실행 보장
             focusRequester.requestFocus()  // 🚀 TextField가 렌더링된 후 포커스
             keyboardController?.show()  // 🚀 키보드 자동 표시
         }
     }
 
-    if(isEditingContent){
-        Column {
-            BasicTextField(
-                value = editContentValue,
-                onValueChange = { editContentValue=it},
-                modifier = Modifier
-                    .focusRequester(focusRequester),
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = ImeAction.Done
-                ),
-                keyboardActions = KeyboardActions(
-                    onDone = { localFocusManager.clearFocus() }
-                ),
-
-                textStyle = TextStyle(color = MaterialTheme.colorScheme.primaryContainer),
-                decorationBox = {
-                        innerTextField ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(max = 45.dp)
-                            .clip(RoundedCornerShape(5.dp))
-                            .border(
-                                width = 2.dp,
-                                color = MaterialTheme.colorScheme.primary,
-                                shape = RoundedCornerShape(7.dp)
-                            )
-                            .padding(12.dp)
-                            .horizontalScroll(titleScrollState),
-                    ){
-                        if(editContentValue.isEmpty()){
-                            Text("내용", color = Color.Gray)
-                        }
-                        innerTextField()
-                    }
-                }
-            )
-            Row{
-                RevertButton {
-                    viewModel.setIsEditingContent(false)
-                }
-                ConfirmButton {
-                    viewModel.setContent(editContentValue)
-                    viewModel.updateContentByDate()
-                    viewModel.setIsEditingContent(false)
-                }
-            }
-        }
-    }
-    else{
-        Row(verticalAlignment = Alignment.Bottom) {
-            Text(text=content, fontSize = 16.sp,)
-            EditButton {
-                viewModel.setIsEditingContent(true)
-            }
-        }
-    }
+    EditAbleTextPart(
+        isWritten = isWritten,
+        isEditing = isEditingContent,
+        value = content,
+        editValue = editContentValue,
+        onEditValueChange = {editContentValue=it},
+        focusRequester = focusRequester,
+        singleLine = false,
+        localFocusManager = localFocusManager,
+        hint = "상세 내용",
+        setIsEditing = {viewModel.setIsEditingContent(it)},
+        updateByDate = { viewModel.updateContentByDate() },
+        saveText = { viewModel.setContent(it) }
+    )
 
 
 }

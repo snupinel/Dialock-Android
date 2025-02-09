@@ -74,24 +74,7 @@ class SummaryPageViewModel @Inject constructor(
         setSummary(summary.value.copy(isLikeChecked = isLikeChecked))
     }
 
-    /*
-    private val _editTitleValue = MutableStateFlow("제목")
-    val editTitleValue: StateFlow<String> = _editTitleValue.asStateFlow()
 
-    fun setEditTextValue(text:String){
-        _editTitleValue.value=text
-    }
-
-
-
-    private val _editContentValue = MutableStateFlow("제목")
-    val editContentValue: StateFlow<String> = _editContentValue.asStateFlow()
-
-    fun setEditContentValue(text:String){
-        _editTitleValue.value=text
-    }
-
-*/
 
     fun initialize(year:Int, month:Int, day:Int){
 
@@ -147,6 +130,10 @@ class SummaryPageViewModel @Inject constructor(
         _isEditingContent.value=isEditing
     }
 
-
+    fun insertSummary(smry: Summary =summary.value){
+        viewModelScope.launch{
+            summaryRepository.insertSummary(smry)
+        }
+    }
 }
 
