@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.dailysummary.data.PrefRepository
@@ -71,31 +72,7 @@ class MainPageViewModel @Inject constructor(
         else setSelectedYearAndMonth(selectedYearAndMonth.value.first,selectedYearAndMonth.value.second+1)
     }
 
-    /*
-    val summarySamples = listOf(
-        Summary(
-            writtenTime = LocalDate.of(2024,12,26),
-            date = LocalDate.of(2024,12,26),
-            content = "박성학 접선"),
-        Summary(
-            writtenTime = LocalDate.of(2024,12,24),
-            date = LocalDate.of(2024,12,24),
-            content = "솔크"),
-        Summary(
-            writtenTime = LocalDate.of(2024,12,31),
-            date = LocalDate.of(2024,12,31),
-            content = "솔크"),
-        Summary(
-            writtenTime = LocalDate.of(2024,12,25),
-            date = LocalDate.of(2024,12,25),
-            content = "솔크"),
-        Summary(
-            writtenTime = LocalDate.of(2024,12,1),
-            date = LocalDate.of(2024,12,1),
-            content = "솔크"),
 
-
-    )*/
 
     private val _currentMonthSummaries = MutableStateFlow(listOf<Summary>())
     //private val _currentMonthSummaries = MutableStateFlow(summarySamples)
@@ -220,17 +197,20 @@ class MainPageViewModel @Inject constructor(
         alarmScheduler.scheduleOverlay()
     }
 
-    fun setSummary(content: String, day:Int) {
+    fun setSummary(content: String, day:Int, isThumbUp:Boolean, isLikeChecked:Boolean) {
         viewModelScope.launch{
             summaryRepository.insertSummary(
                 Summary(
-                    content = content,
+                    title = content,
+                    content = "",
                     date = LocalDate.of(
                         selectedYearAndMonth.value.first,
                         selectedYearAndMonth.value.second,
                         day
                     ),
-                    writtenTime = LocalDate.now()
+                    writtenTime = LocalDate.now(),
+                    isThumbUp = isThumbUp,
+                    isLikeChecked = isLikeChecked
                 )
             )
         }
@@ -254,5 +234,25 @@ class MainPageViewModel @Inject constructor(
         setCalenderEntries()
     }
 
+    private val _showPopup = MutableStateFlow(false)
+    val showPopup:StateFlow<Boolean> = _showPopup.asStateFlow()
+
+    fun setShowPopup(isShow:Boolean){
+        _showPopup.value=isShow
+    }
+
+    private val _popupPosition = MutableStateFlow(IntOffset(0, 0))
+    val popupPosition:StateFlow<IntOffset> = _popupPosition.asStateFlow()
+
+    fun setPopupPosition(it:IntOffset){
+        _popupPosition.value=it
+    }
+
+    private val _clickedBoxIndex = MutableStateFlow(0)
+    val clickedBoxIndex:StateFlow<Int> = _clickedBoxIndex.asStateFlow()
+
+    fun setClickedBoxIndex(index:Int){
+        _clickedBoxIndex.value=index
+    }
 
 }

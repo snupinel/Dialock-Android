@@ -8,7 +8,13 @@
       <entry key="PreviewPrettyTextField">
         <State />
       </entry>
+      <entry key="WriteSummaryPagePreview">
+        <State />
+      </entry>
       <entry key="app">
+        <State />
+      </entry>
+      <entry key="ff">
         <State />
       </entry>
     </value>

@@ -77,7 +77,7 @@ fun MainPage(navController: NavController){
         ) {
             when (selectedTab){
                 Tab.Home -> {
-                    DSCalender()
+                    DSCalender(navController = navController)
                     //SameEveryDayToggle(sameEveryDay = false, onToggle = {viewModel.setSameEveryDay(isToggle = true)})
                 }
                 Tab.My -> {

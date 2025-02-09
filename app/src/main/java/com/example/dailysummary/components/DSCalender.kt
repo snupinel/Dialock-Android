@@ -19,10 +19,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.KeyboardArrowLeft
 import androidx.compose.material.icons.outlined.KeyboardArrowRight
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -33,21 +35,35 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.round
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupPositionProvider
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.example.dailysummary.viewModel.MainPageViewModel
 import java.time.Month
 import java.time.Year
 
 @Composable
-fun DSCalender(){
+fun DSCalender(
+    modifier: Modifier=Modifier,
+    navController: NavController,
+){
 
 
     val viewModel = hiltViewModel<MainPageViewModel>()
@@ -58,55 +74,95 @@ fun DSCalender(){
     val calenderEntries by viewModel.calenderEntries.collectAsState()
     val isCurrentYear = selectedYearAndMonth.first == viewModel.currentYear
 
-    Column {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(100.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ){
-            AdjustMonthButton(isPrev = true,Modifier.weight(1f)){ viewModel.prevMonth()}
-            CalenderMonth(
-                modifier = Modifier.weight(1f),
-                isCurrentYear=isCurrentYear,
-                year = selectedYearAndMonth.first,
-                month = selectedYearAndMonth.second
-            )
-            AdjustMonthButton(isPrev = false,Modifier.weight(1f)) {viewModel.nextMonth()}
-        }
-        Row {
-            val weekList= listOf(
-                Pair(Color.Red,"S"),
-                Pair(null,"M"),
-                Pair(null,"T"),
-                Pair(null,"W"),
-                Pair(null,"T"),
-                Pair(null,"F"),
-                Pair(Color.Blue,"S"),
-            )
-            repeat(7){
-                CalenderDate(
+    val showPopup by viewModel.showPopup.collectAsState()
+    val popupPosition by viewModel.popupPosition.collectAsState()
+    val clickedBoxIndex by viewModel.clickedBoxIndex.collectAsState()
+    //var showPopup by remember { mutableStateOf(false) }
+    //val buttonPosition = remember { mutableStateOf(IntOffset(0, 0)) }
+
+    Box(){
+        Column(modifier = modifier) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                AdjustMonthButton(isPrev = true,Modifier.weight(1f)){ viewModel.prevMonth()}
+                CalenderMonth(
                     modifier = Modifier.weight(1f),
-                    color = weekList[it].first,
-                    text = weekList[it].second
+                    isCurrentYear=isCurrentYear,
+                    year = selectedYearAndMonth.first,
+                    month = selectedYearAndMonth.second
                 )
+                AdjustMonthButton(isPrev = false,Modifier.weight(1f)) {viewModel.nextMonth()}
+            }
+            Row {
+                val weekList= listOf(
+                    Pair(Color.Red,"S"),
+                    Pair(null,"M"),
+                    Pair(null,"T"),
+                    Pair(null,"W"),
+                    Pair(null,"T"),
+                    Pair(null,"F"),
+                    Pair(Color.Blue,"S"),
+                )
+                repeat(7){
+                    CalenderDate(
+                        modifier = Modifier.weight(1f),
+                        color = weekList[it].first,
+                        text = weekList[it].second
+                    )
+                }
+            }
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(7),
+            ){
+                itemsIndexed(calenderEntries){index, calenderEntry->
+                    CalenderBox(
+                        isBlank = calenderEntry.isBlank,
+                        isWritten = calenderEntry.isWritten,
+                        day = calenderEntry.day,
+                    ){intOffset->
+                        if(calenderEntry.isWritten){
+                            //Toast.makeText(context,viewModel.readSummary(it.summaryIndex).content,Toast.LENGTH_SHORT).show()
+                            if(!showPopup){
+                                viewModel.setClickedBoxIndex(index)
+                                viewModel.setPopupPosition(intOffset)
+                                viewModel.setShowPopup(true)
+
+                            }
+                        }
+                        else {
+                            navController.navigate("SummaryPage/${selectedYearAndMonth.first}/${selectedYearAndMonth.second}/${calenderEntry.day}")
+                        }
+
+                    }
+                }
             }
         }
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(7),
-        ){
-            items(calenderEntries){
-                CalenderBox(
-                    isBlank = it.isBlank,
-                    isWritten = it.isWritten,
-                    day = it.day
-                ){
-                    if(it.isWritten)
-                        Toast.makeText(context,viewModel.readSummary(it.summaryIndex).content,Toast.LENGTH_SHORT).show()
-                    else
-                        viewModel.setSummary("빈 씀므리",it.day)
-
+        if (showPopup) {
+            Popup(
+                onDismissRequest = { viewModel.setShowPopup(false) },
+                popupPositionProvider = object : PopupPositionProvider {
+                    override fun calculatePosition(anchorBounds: IntRect, windowSize: IntSize, layoutDirection: LayoutDirection, popupContentSize: IntSize): IntOffset {
+                        return IntOffset(
+                            x = popupPosition.x,
+                            y = popupPosition.y - popupContentSize.height - 16  // 버튼 위에 위치
+                        )
+                    }
+                }
+            ) {
+                Box(
+                    modifier = Modifier
+                        .background(Color.Black, shape = RoundedCornerShape(10.dp))
+                        .padding(12.dp)
+                        .clickable {
+                            navController.navigate("SummaryPage/${selectedYearAndMonth.first}/${selectedYearAndMonth.second}/${calenderEntries[clickedBoxIndex].day}")
+                        }
+                ) {
+                    Text(viewModel.readSummary(calenderEntries[clickedBoxIndex].summaryIndex).title, color = Color.White)
                 }
             }
         }
@@ -147,8 +203,10 @@ fun CalenderBox(
     isWritten:Boolean = false,
     isNotWritten:Boolean = !isWritten,
     day:Int=0,
-    onClick: () -> Unit,
+    onClick: (IntOffset) -> Unit,
 ){
+
+    var buttonPosition by remember { mutableStateOf(IntOffset(0, 0)) }
 
     Box(modifier = modifier
         .aspectRatio(1f)
@@ -158,7 +216,7 @@ fun CalenderBox(
             if (isBlank) Modifier.background(color = Color.Transparent)
             else {
                 Modifier
-                    .clickable { onClick() }
+                    .clickable { onClick(buttonPosition) }
                     .background(
                         color =
                         if (isWritten)
@@ -166,6 +224,11 @@ fun CalenderBox(
                         else
                             MaterialTheme.colorScheme.primaryContainer
                     )
+                    .onGloballyPositioned { coordinates ->
+                        buttonPosition = coordinates
+                            .positionInWindow()
+                            .round()
+                    }
 
             }
         ),
@@ -192,7 +255,7 @@ fun AdjustMonthButton(
         modifier = modifier
             .fillMaxHeight(0.5f)
             .fillMaxWidth()
-            .clip(shape= RoundedCornerShape(8.dp))
+            .clip(shape = RoundedCornerShape(8.dp))
             .background(color = MaterialTheme.colorScheme.primary),
         onClick = onClick) {
         Icon(

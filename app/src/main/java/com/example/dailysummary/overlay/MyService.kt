@@ -151,12 +151,15 @@ class SummaryService  : Service() {
                     stopSelf()
                 },
                 getSetting = { prefRepository.getRefSetting()!!},
-                saveDiary = {
+                saveDiary = { content, isLikeChecked, isThumbUp ->
                     serviceScope.launch {
                         summaryRepository.insertSummary(Summary(
                             writtenTime = LocalDate.now(),
                             date = LocalDate.of(year,month,day),
-                            content = it
+                            title = content,
+                            content = "",
+                            isLikeChecked = isLikeChecked,
+                            isThumbUp = isThumbUp,
                         ))
                     }
 

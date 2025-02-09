@@ -24,4 +24,8 @@ interface SummaryDAO {
 
     @Delete
     suspend fun deleteSummary(summary: Summary)
+
+
+    @Query(" UPDATE summary SET title = :title WHERE date = :date")
+    suspend fun updateTitleByDate(date: LocalDate, title: String): Int
 }

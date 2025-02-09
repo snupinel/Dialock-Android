@@ -64,7 +64,7 @@ fun Overlay(
     getSetting: () -> Setting,
     //textFieldValue: String,
     //setTextFieldValue: (String) -> Unit,
-    saveDiary : (String) -> Unit,
+    saveDiary : (content:String,isThumbUp:Boolean,isLikeChecked:Boolean) -> Unit,
 ) {
     //val viewModel = hiltViewModel<OverlayViewModel>()
 
@@ -129,7 +129,7 @@ fun Overlay(
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 SaveButton(enabled = textFieldValue!=""){
-                    saveDiary(textFieldValue)
+                    saveDiary(textFieldValue,isUp!!,isLikeChecked)
                     close()
                 }
             }
@@ -194,8 +194,7 @@ fun OverlayPreview(){
         Overlay(
             close = {},
             getSetting = {  Setting(AdviceOrForcing.Advice,true,List(7){Pair(0,0)})},
-            saveDiary = {
-
+            saveDiary = { content, isThumbUp, isLikeChecked ->
             }
             //setTextFieldValue =
         )

@@ -20,6 +20,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.dailysummary.pages.MainPage
 import com.example.dailysummary.pages.StartPage
+import com.example.dailysummary.pages.SummaryPage
 import com.example.dailysummary.ui.theme.DailySummaryTheme
 import com.example.dailysummary.viewModel.InitialSettingViewModel
 import com.example.dailysummary.viewModel.MainViewModel
@@ -64,6 +65,13 @@ private fun MyApp(
             }
             composable("MainPage") {
                 MainPage(navController)
+            }
+            composable("SummaryPage/{year}/{month}/{day}"){
+                val year = it.arguments!!.getString("year")!!.toInt()
+                val month = it.arguments!!.getString("month")!!.toInt()
+                val day = it.arguments!!.getString("day")!!.toInt()
+                Log.d("aaaa",year.toString())
+                SummaryPage(navController,year,month,day)
             }
         }
     }
