@@ -32,4 +32,15 @@ class SummaryRepository @Inject constructor(
     suspend fun updateTitleByDate(date: LocalDate, title: String){
         summaryDAO.updateTitleByDate(date, title)
     }
+
+    suspend fun updateContentByDate(date: LocalDate, content: String){
+        summaryDAO.updateContentByDate(date, content)
+    }
+    suspend fun updateThumbByDate(date: LocalDate, isThumbUp: Boolean){
+        summaryDAO.updateThumbByDate(date, isThumbUp)
+    }
+    suspend fun updateLikeByDate(date: LocalDate, isLiked: Boolean){
+        summaryDAO.updateLikeByDate(date, isLiked)
+    }
+
 }

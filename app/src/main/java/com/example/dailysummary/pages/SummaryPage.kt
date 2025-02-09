@@ -75,6 +75,7 @@ import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -102,15 +103,12 @@ import java.time.LocalDate
 
 
 @RequiresApi(Build.VERSION_CODES.O)
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SummaryPage(
     navController: NavController, year:Int,month:Int,day:Int){
 
     val viewModel = hiltViewModel<SummaryPageViewModel>()
 
-    val title by viewModel.title.collectAsState()
-    val editTitleValue by viewModel.editTitleValue.collectAsState()
 
     LaunchedEffect(true) {
         viewModel.initialize(year, month, day)
@@ -141,7 +139,9 @@ fun SummaryPage(
         }
     }*/
     Scaffold(
-        bottomBar = { },
+        bottomBar = {SummaryPageBottomBar(
+
+        ) },
         topBar = {
             SummaryPageToolbar(
                 alpha = alpha.value,
@@ -167,9 +167,10 @@ fun SummaryPage(
                 )*/
             }
             item {
-                Text("${year}년 ${month}월 ${day}일")
-                TitlePart()
 
+                TitlePart()
+                Text("${year}년 ${month}월 ${day}일")
+                ContentPart()
 
 
             }
@@ -180,23 +181,39 @@ fun SummaryPage(
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
+fun SummaryPageBottomBar(){
+    val viewModel = hiltViewModel<SummaryPageViewModel>()
+
+    val isWritten by viewModel.isWritten.collectAsState()
+    if(isWritten){
+
+    }
+    else{
+        SaveButton {
+
+        }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
 fun TitlePart(){
     val viewModel = hiltViewModel<SummaryPageViewModel>()
 
-    val title by viewModel.title.collectAsState()
+    val title = viewModel.summary.collectAsState().value.title
+    val isEditingTitle by viewModel.isEditingTitle.collectAsState()
+    var editTitleValue by rememberSaveable {
+        mutableStateOf("")
+    }
 
-    var isTitleFocused by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
     val localFocusManager = LocalFocusManager.current
-
-    val editTitleValue by viewModel.editTitleValue.collectAsState()
-
     val titleScrollState = rememberScrollState()
 
-    val isEditingTitle by viewModel.isEditingTitle.collectAsState()
 
     LaunchedEffect(isEditingTitle) {
+        editTitleValue=title
         if (isEditingTitle) {
             //awaitFrame() // ✅ UI가 완전히 렌더링된 후 실행 보장
             focusRequester.requestFocus()  // 🚀 TextField가 렌더링된 후 포커스
@@ -208,12 +225,9 @@ fun TitlePart(){
         Column {
             BasicTextField(
                 value = editTitleValue,
-                onValueChange = { viewModel.setEditTextValue(it)},
+                onValueChange = { editTitleValue=it},
                 modifier = Modifier
-                    .focusRequester(focusRequester)
-                    .onFocusChanged { focusState ->
-                        isTitleFocused = focusState.isFocused
-                    },
+                    .focusRequester(focusRequester),
                 singleLine=true,
                 keyboardOptions = KeyboardOptions.Default.copy(
                     imeAction = ImeAction.Done
@@ -221,6 +235,8 @@ fun TitlePart(){
                 keyboardActions = KeyboardActions(
                     onDone = { localFocusManager.clearFocus() }
                 ),
+
+                textStyle = TextStyle(color = MaterialTheme.colorScheme.primaryContainer),
                 decorationBox = {
                         innerTextField ->
                     Box(
@@ -230,7 +246,7 @@ fun TitlePart(){
                             .clip(RoundedCornerShape(5.dp))
                             .border(
                                 width = 2.dp,
-                                color = if (isTitleFocused) Color.Black else Color.Gray,
+                                color = MaterialTheme.colorScheme.primary,
                                 shape = RoundedCornerShape(7.dp)
                             )
                             .padding(12.dp)
@@ -357,572 +373,89 @@ fun SummaryPageTopAppBar(
     )
 }
 
-/*
-
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun WriteGoodsPostPage(viewModel: MainViewModel,navController: NavController){
-    val context=LocalContext.current
+fun ContentPart(){
+    val viewModel = hiltViewModel<SummaryPageViewModel>()
 
-    val uploadImages by viewModel.uploadImages.collectAsState()
+    val content = viewModel.summary.collectAsState().value.content
+    val isEditingContent by viewModel.isEditingContent.collectAsState()
+    var editContentValue by rememberSaveable {
+        mutableStateOf("")
+    }
 
-    var title by rememberSaveable { mutableStateOf("") }
-    var isTitleFocused by remember { mutableStateOf(false) }
-    val titleScrollState = rememberScrollState()
-    var sellPrice by rememberSaveable { mutableStateOf("") }
-    var isSellPriceFocused by remember { mutableStateOf(false) }
-    var offerYn by rememberSaveable { mutableStateOf(false) }
-    var description by rememberSaveable { mutableStateOf("") }
-    var isDescriptionFocused by remember { mutableStateOf(false) }
+    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
     val localFocusManager = LocalFocusManager.current
+    val titleScrollState = rememberScrollState()
 
-    val (permissionRequested, setPermissionRequested) = remember { mutableStateOf(false) }
 
-    val allPermissionsGranted = viewModel.neededStoragePermissions().all {
-        ContextCompat.checkSelfPermission(LocalContext.current, it) == PackageManager.PERMISSION_GRANTED
-    }
-
-    val multiplePermissionsLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions(),
-    ) { permissions ->
-        // 권한 요청 결과 처리. permissions는 Map<String, Boolean> 형태입니다.
-        if(permissions.entries.all { it.value }){
-            Log.d("aaaa","all_granted")
-            navController.navigate("GalleryViewPage")
-        }
-    }
-    LaunchedEffect(permissionRequested) {
-        if (permissionRequested) {
-            if (allPermissionsGranted) {
-                // 모든 권한이 이미 부여되었을 경우의 처리
-                Log.d("aaaa","already_granted")
-                navController.navigate("GalleryViewPage")
-            } else {
-                // 하나 이상의 권한이 부여되지 않았을 경우 권한 요청 로직
-                multiplePermissionsLauncher.launch(viewModel.neededStoragePermissions())
-            }
-
-            setPermissionRequested(false) // 상태를 다시 초기화
+    LaunchedEffect(isEditingContent) {
+        editContentValue=content
+        if (isEditingContent) {
+            //awaitFrame() // ✅ UI가 완전히 렌더링된 후 실행 보장
+            focusRequester.requestFocus()  // 🚀 TextField가 렌더링된 후 포커스
+            keyboardController?.show()  // 🚀 키보드 자동 표시
         }
     }
 
-    Scaffold(bottomBar = {
-        Box (modifier = Modifier
-            .fillMaxWidth()
-            .height(80.dp)
-            .padding(horizontal = 16.dp, vertical = 10.dp)
-            .clip(RoundedCornerShape(5.dp))
-            .border(width = 2.dp, color = Color.Gray, shape = RoundedCornerShape(7.dp))
-            .clickable {
-                if (title.isNotEmpty() && sellPrice.isNotEmpty() && description.isNotEmpty()) {
-                    CoroutineScope(Dispatchers.IO).launch {
-                        try {
-                            val images=if(viewModel.uploadImages.value.isNotEmpty())viewModel.uploadImages(uploadImages,context).images else null
-                            //
-                            Log.d("submitpost", "image success")
-                            viewModel.submitPost(
-                                SubmitPostRequest(
-                                    areaId = viewModel.getRefAreaId()[0],
-                                    title = title,
-                                    description = description,
-                                    type = if (sellPrice.toInt() == 0) "SHARE" else "TRADE",
-                                    repImg=if(images!=null)images[0] else images,
-                                    images = images,
-                                    deadline = 0L,
-                                    offerYn = offerYn,
-                                    sellPrice = sellPrice.toInt()
-                                )
-                            )
-                            withContext(Dispatchers.Main) {
-                                //게시글 작성에 성공.
-                                // 내가 쓴 글 페이지로 이동(현재 페이지를 stack에서 지우면서)
-                                navController.popBackStack()
-                            }
-                        } catch (e: Exception) {
-                            //
-                            Log.d("submitpost", "submitpost failed:$e")
-                        }
-                    }
-                }
-            },
-            contentAlignment = Alignment.Center){
-            Text(text = "작성 완료", textAlign = TextAlign.Center)
-        }
-    }){paddingValues->
-        LazyColumn(Modifier.padding(paddingValues)){
-            item{
-                TopAppBar(
+    if(isEditingContent){
+        Column {
+            BasicTextField(
+                value = editContentValue,
+                onValueChange = { editContentValue=it},
+                modifier = Modifier
+                    .focusRequester(focusRequester),
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = { localFocusManager.clearFocus() }
+                ),
 
-                    title = {Text("당근")},
-                    navigationIcon = {
-                        Row{
-                            BackButton(navController = navController)
-                        }
-                    },
-                    actions = {
-                        Text("임시저장")
-                    },
-                )
-                Divider(
-                    Modifier
-                        .fillMaxWidth()
-                        .height(1.dp))
-                Column(Modifier.padding(16.dp)){
-                    Row {
-                        Box(
-                            Modifier
-                                .size(80.dp)
-                                .clip(RoundedCornerShape(5.dp))
-                                .border(
-                                    width = 2.dp,
-                                    color = Color.Gray,
-                                    shape = RoundedCornerShape(7.dp)
-                                )
-                                .clickable {
-                                    setPermissionRequested(true)
-                                },
-                            contentAlignment = Alignment.Center
-                        ){
-                            Column(horizontalAlignment = Alignment.CenterHorizontally){
-                                Icon(
-                                    imageVector = Icons.Outlined.CameraAlt,
-                                    contentDescription = "CameraAlt"
-                                )
-                                Text("${uploadImages.size}/10")
-                            }
-                        }
-                        LazyRow{
-                            items(uploadImages){  uri->
-                                Spacer(modifier = Modifier.fillMaxHeight().width(16.dp))
-                                Box(modifier = Modifier
-                                    .size(80.dp)
-                                    .clip(RoundedCornerShape(5.dp))
-                                    .border(
-                                        width = 2.dp,
-                                        color = Color.Gray,
-                                        shape = RoundedCornerShape(7.dp))
-                                    .clickable {
-                                        val updateList=uploadImages.toMutableList()
-                                        updateList.remove(uri)
-                                        viewModel.updateUploadImages(updateList)
-                                    }){
-                                    Image(
-                                        painter = rememberImagePainter(data = uri),
-                                        contentDescription = null,
-                                        modifier = Modifier
-                                            .fillMaxSize(),
-                                        contentScale =  ContentScale.FillWidth
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier
-                        .fillMaxWidth()
-                        .height(40.dp))
-
-                    Text("제목")
-                    Spacer(modifier = Modifier
-                        .fillMaxWidth()
-                        .height(20.dp))
-                    BasicTextField(
-                        value = title,
-                        onValueChange = { title = it},
-                        modifier = Modifier.onFocusChanged { focusState ->
-                            isTitleFocused = focusState.isFocused
-                        },
-                        singleLine=true,
-                        keyboardOptions = KeyboardOptions.Default.copy(
-                            imeAction = ImeAction.Next
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onNext = { localFocusManager.moveFocus(FocusDirection.Down) }
-                        ),
-                        decorationBox = {
-                                innerTextField ->
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .heightIn(max = 45.dp)
-                                    .clip(RoundedCornerShape(5.dp))
-                                    .border(
-                                        width = 2.dp,
-                                        color = if (isTitleFocused) Color.Black else Color.Gray,
-                                        shape = RoundedCornerShape(7.dp)
-                                    )
-                                    .padding(12.dp)
-                                    .horizontalScroll(titleScrollState),
-                            ){
-                                if(title.isEmpty()){
-                                    Text("제목", color = Color.Gray)
-                                }
-                                innerTextField()
-                            }
-                        }
-                    )
-                    LaunchedEffect(title) {
-                        titleScrollState.scrollTo(titleScrollState.maxValue)
-                    }
-                    Spacer(modifier = Modifier
-                        .fillMaxWidth()
-                        .height(40.dp))
-
-                    Text("거래 방식")
-                    Spacer(modifier = Modifier
-                        .fillMaxWidth()
-                        .height(20.dp))
-                    BasicTextField(
-                        value = sellPrice,
-                        onValueChange = {newText->
-                            if (newText.all { it.isDigit() }&&newText.length<10) {
-                                sellPrice = newText
-                            }
-
-                        },
-                        modifier = Modifier.onFocusChanged { focusState ->
-                            isSellPriceFocused = focusState.isFocused
-                        },
-                        keyboardOptions = KeyboardOptions.Default.copy(
-                            imeAction = ImeAction.Next,
-                            keyboardType = KeyboardType.Number,
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onNext = { localFocusManager.moveFocus(FocusDirection.Down) }
-                        ),
-                        decorationBox = {
-                                innerTextField ->
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(5.dp))
-                                    .border(
-                                        width = 2.dp,
-                                        color = if (isSellPriceFocused) Color.Black else Color.Gray,
-                                        shape = RoundedCornerShape(7.dp)
-                                    )
-                                    .padding(12.dp),
-                            ){
-                                Row {
-                                    Text("￦")
-                                    Box{
-                                        if(sellPrice.isEmpty()){
-                                            Text("가격을 입력해주세요.", color = Color.Gray)
-                                        }
-                                        innerTextField()
-                                    }
-                                }
-
-                            }
-                        }
-                    )
-                    Spacer(modifier = Modifier
-                        .fillMaxWidth()
-                        .height(20.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically){
-                        Checkbox(
-                            checked = offerYn,
-                            onCheckedChange = { offerYn = it }
-                        )
-                        Box(contentAlignment = Alignment.Center){Text("가격 제안 받기")}
-                    }
-
-                    Spacer(modifier = Modifier
-                        .fillMaxWidth()
-                        .height(40.dp))
-
-                    Text("자세한 설명")
-                    Spacer(modifier = Modifier
-                        .fillMaxWidth()
-                        .height(20.dp))
-                    BasicTextField(
-                        value = description,
-                        onValueChange = { description = it},
-                        modifier = Modifier.onFocusChanged { focusState ->
-                            isDescriptionFocused = focusState.isFocused
-                        },
-                        keyboardOptions = KeyboardOptions.Default.copy(
-                            //
-                        ),
-                        keyboardActions = KeyboardActions(
-                            //
-                        ),
-                        decorationBox = {
-                                innerTextField ->
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .heightIn(min = 160.dp)
-                                    .clip(RoundedCornerShape(5.dp))
-                                    .border(
-                                        width = 2.dp,
-                                        color = if (isDescriptionFocused) Color.Black else Color.Gray,
-                                        shape = RoundedCornerShape(7.dp)
-                                    )
-                                    .padding(12.dp),
-                            ){
-                                if(description.isEmpty()){
-                                    Text("(지역명)에 올릴 게시글 내용을 작성해 주세요.\n" +
-                                            "(판매 금지 물품은 게시가 제한될 수 있어요.)\n" +
-                                            "\n" +
-                                            "신뢰할 수 있는 거래를 위해 자세히 적어주세요.\n" +
-                                            "과학기술정보통신부, 한국 인터넷진흥원과 함께해요.", color = Color.Gray)
-                                }
-                                innerTextField()
-                            }
-                        }
-                    )
-                }
-            }
-        }
-    }
-}
-@Composable
-fun WriteSummaryPage() {
-
-
-    LaunchedEffect(Unit) {
-        //viewModel.updateGoodsPostContent(DefaultGoodsPostContentSample)
-        //viewModel.getGoodsPostContent(id)
-    }
-    val listState = rememberLazyListState()
-    val imgHeight = 400
-    val alpha = remember {
-        derivedStateOf {
-            if (listState.layoutInfo.visibleItemsInfo.firstOrNull() == null)
-                0f
-            else if (listState.firstVisibleItemIndex == 0)
-                (listState.firstVisibleItemScrollOffset.toFloat() / listState.layoutInfo.visibleItemsInfo.firstOrNull()!!.size)
-            else 1f
-        }
-    }
-
-    //dpToPixel(imgHeight.toFloat(),)
-    /*
-    val alpha by remember {
-        derivedStateOf {
-            // Calculate the alpha based on the scroll offset
-            // Coerce the value to be between 0f and 1f
-            (
-                    //1f-(listState.layoutInfo.visibleItemsInfo.firstOrNull()?.size?:0)/imgHeight
-
-            ).toFloat()//.coerceIn(0f, 1f)
-        }
-    }*/
-    Scaffold(
-        bottomBar = { },
-        topBar = {
-            GoodsPostToolbar(
-                alpha = alpha.value,
-                navController = navController
-            )
-        }) { paddingValues ->
-
-        LazyColumn(
-            state = listState,
-            modifier = Modifier.padding(bottom = paddingValues.calculateBottomPadding())
-        ) {
-            item {
-                ImagePager(
-                    images = goodsPostContent.images, modifier = Modifier
-                        .fillMaxWidth()
-                        .height(imgHeight.dp)
-                )
-            }
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(100.dp)
-                        .padding(start = 16.dp, end = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    val painter =
-                        rememberImagePainter(data = if (goodsPostContent.profileImg != "") goodsPostContent.profileImg else "https://d1unjqcospf8gs.cloudfront.net/assets/users/default_profile_80-c649f052a34ebc4eee35048815d8e4f73061bf74552558bb70e07133f25524f9.png")
-                    Image(
-                        painter = painter,
-                        contentDescription = null,
+                textStyle = TextStyle(color = MaterialTheme.colorScheme.primaryContainer),
+                decorationBox = {
+                        innerTextField ->
+                    Box(
                         modifier = Modifier
-                            .size(60.dp)
-                            .border(
-                                1.dp,
-                                Color.Gray.copy(alpha = 0.2f),
-                                shape = CircleShape
-                            )
-                            .clip(shape = CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column {
-                        Text(text = goodsPostContent.authorName, fontWeight = FontWeight.Bold)
-                        Text(text = goodsPostContent.sellingArea, color = Color.Gray, fontSize = 12.sp)
-                    }
-                    Column(horizontalAlignment = Alignment.End, modifier = Modifier.weight(1f)) {
-                        val temp = goodsPostContent.authorMannerTemperature
-                        val color = calculateMannerTempColor(temp)
-                        val normalizedTemp = (temp - 30).coerceIn(0.0, 15.0) / 15f
-                        Text(text = "${temp}도", color = color, fontSize = 14.sp)
-                        LinearProgressIndicator(
-                            progress = normalizedTemp.toFloat(), // Normalize to 0.0 to 1.0
-                            modifier = Modifier
-                                .width(48.dp)
-                                .clip(CircleShape),
-                            color = color
-                        )
-                    }
-                }
-                Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
-                    Divider(
-                        modifier = Modifier
-                            .height(1.dp)
                             .fillMaxWidth()
-                    )
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Text(
-                        text = goodsPostContent.title,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    Text(
-                        text = formatProductTime(
-                            goodsPostContent.createdAt,
-                            goodsPostContent.refreshedAt
-                        ),
-                        fontSize = 15.sp,
-                        color = Color.Gray,
-                    )
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Text(text = goodsPostContent.description, fontSize = 20.sp, lineHeight = 30.sp)
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Text(
-                        text = (if (goodsPostContent.chatCnt > 0)
-                            "채팅 ${goodsPostContent.chatCnt}·" else "") +
-                                (if (goodsPostContent.wishCnt > 0)
-                                    "관심 ${goodsPostContent.wishCnt}·" else "") +
-                                "조회 ${goodsPostContent.viewCnt}",
-                        fontSize = 15.sp, color = Color.Gray,
-                    )
-                    Spacer(modifier = Modifier.height(60.dp))
-                }
-
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun GoodsPostToolbar(alpha: Float, navController: NavController) {
-    val interpolatedColor = lerp(Color.White, Color.Black, alpha)
-    TopAppBar(
-
-        title = { },
-        navigationIcon = {
-            Row {
-                BackButton(navController = navController)
-                HomeButton(navController = navController)
-            }
-        },
-        actions = {
-            ShareButton()
-            MoreVertButton()
-        },
-
-        colors = TopAppBarDefaults.smallTopAppBarColors(
-            containerColor = Color.White.copy(alpha = alpha),
-            navigationIconContentColor = interpolatedColor,
-            titleContentColor = interpolatedColor, // Color for the title
-            actionIconContentColor = interpolatedColor // Color for action icons
-        ),
-    )
-
-}
-
-@Composable
-
-fun GoodsPostBottomBar(viewModel: MainViewModel, chatViewModel: ChatViewModel, goodsPostContent:GoodsPostContent, navController: NavController){
-    Divider(modifier = Modifier
-        .height(1.dp)
-        .fillMaxWidth())
-    Row(modifier = Modifier
-        .fillMaxWidth()
-        .height(80.dp)
-        .padding(top = 16.dp, bottom = 16.dp),
-        verticalAlignment = Alignment.CenterVertically){
-        IconButton(onClick = {
-            Log.d("aaaa", "wishToggle called")
-            CoroutineScope(Dispatchers.IO).launch {
-                try {
-                    viewModel.wishToggle(goodsPostContent.id, !goodsPostContent.isWish)
-                    withContext(Dispatchers.Main) {
-                        Log.d("aaaa", (!goodsPostContent.isWish).toString())
-                        viewModel.updateGoodsPostContent(
-                            goodsPostContent.copy(
-                                isWish = !goodsPostContent.isWish,
-                                wishCnt = goodsPostContent.wishCnt + if (goodsPostContent.isWish) -1 else 1
+                            .heightIn(max = 45.dp)
+                            .clip(RoundedCornerShape(5.dp))
+                            .border(
+                                width = 2.dp,
+                                color = MaterialTheme.colorScheme.primary,
+                                shape = RoundedCornerShape(7.dp)
                             )
-                        )
-                    }
-                    //api 통해서 wish 변화를 서버로 전달
-                    //Log.d("aaaa",response.toString())
-                } catch (e: Exception) {
-                    Log.d("aaaa", "wishToggle failed:$e")
-                }
-            }
-
-
-        }) {
-            Icon(
-                imageVector = if (goodsPostContent.isWish) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                contentDescription = "Wish",
-                tint = bunnyColor,
-            )
-        }
-        Divider(
-            modifier = Modifier
-                .width(1.dp)
-                .fillMaxHeight()
-        )
-        Column(Modifier.padding(start = 16.dp), verticalArrangement = Arrangement.Center) {
-            Text("${goodsPostContent.sellPrice}원", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-            Text(if (goodsPostContent.offerYn) "가격 제안 가능" else "가격 제안 불가", fontSize = 15.sp, color = Color.Gray)
-        }
-        if(goodsPostContent.type == "AUCTION"){
-            Box(modifier = Modifier
-                .padding(start = 12.dp, end = 16.dp)
-                .height(50.dp)
-                .width(100.dp)
-                .clip(shape = RoundedCornerShape(4.dp))
-                .background(color = bunnyColor)
-                .clickable {
-                    Log.d("aaaa123", goodsPostContent.id.toString() + goodsPostContent.maxBidPrice?.bidPrice.toString())
-                    navController.navigate("AuctionPage?id=${goodsPostContent.id}&maxPrice=${goodsPostContent.maxBidPrice?.bidPrice}")
-                }, contentAlignment = Alignment.Center
-            ) {
-                Text("경매 제안하기", color = Color.White)
-            }
-        } else{
-            Spacer(modifier = Modifier.weight(1f))
-        }
-        Box(modifier = Modifier
-            .height(50.dp)
-            .width(90.dp)
-            .clip(shape = RoundedCornerShape(4.dp))
-            .background(color = bunnyColor)
-            .clickable {
-                if (goodsPostContent.authorId.toInt() != viewModel.userInfo.value.id) {
-                    CoroutineScope(Dispatchers.IO).launch {
-                        val channelId = chatViewModel.makeChatRoom(goodsPostContent.id)
-                        Log.d("GoodsPostPage", "$channelId 의 channel 생성 완료")
-                        withContext(Dispatchers.Main) {
-                            navController.navigate("ChatRoomPage/${channelId}")
+                            .padding(12.dp)
+                            .horizontalScroll(titleScrollState),
+                    ){
+                        if(editContentValue.isEmpty()){
+                            Text("내용", color = Color.Gray)
                         }
+                        innerTextField()
                     }
                 }
-
-            }, contentAlignment = Alignment.Center
-        ) {
-            Text("채팅하기", color = Color.White)
+            )
+            Row{
+                RevertButton {
+                    viewModel.setIsEditingContent(false)
+                }
+                ConfirmButton {
+                    viewModel.setContent(editContentValue)
+                    viewModel.updateContentByDate()
+                    viewModel.setIsEditingContent(false)
+                }
+            }
         }
-
     }
-}*/
+    else{
+        Row(verticalAlignment = Alignment.Bottom) {
+            Text(text=content, fontSize = 16.sp,)
+            EditButton {
+                viewModel.setIsEditingContent(true)
+            }
+        }
+    }
+
+
+}

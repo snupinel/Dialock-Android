@@ -28,4 +28,12 @@ interface SummaryDAO {
 
     @Query(" UPDATE summary SET title = :title WHERE date = :date")
     suspend fun updateTitleByDate(date: LocalDate, title: String): Int
+    @Query(" UPDATE summary SET content = :content WHERE date = :date")
+    suspend fun updateContentByDate(date: LocalDate, content: String): Int
+
+    @Query(" UPDATE summary SET isThumbUp = :isThumbUp WHERE date = :date")
+    suspend fun updateThumbByDate(date: LocalDate, isThumbUp: Boolean): Int
+
+    @Query(" UPDATE summary SET isLikeChecked = :isLikeChecked WHERE date = :date")
+    suspend fun updateLikeByDate(date: LocalDate, isLikeChecked: Boolean): Int
 }

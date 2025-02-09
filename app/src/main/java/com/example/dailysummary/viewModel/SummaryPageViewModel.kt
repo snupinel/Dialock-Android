@@ -6,6 +6,7 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.dailysummary.data.SummaryRepository
+import com.example.dailysummary.dto.DEFAULT_SUMMARY
 import com.example.dailysummary.dto.Summary
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -23,7 +24,7 @@ enum class EditState{
 }
 
 @HiltViewModel
-//@SuppressLint("NewApi")
+@RequiresApi(Build.VERSION_CODES.O)
 class SummaryPageViewModel @Inject constructor(
     //private val prefRepository: PrefRepository,
     //private val alarmScheduler: AlarmScheduler,
@@ -37,14 +38,43 @@ class SummaryPageViewModel @Inject constructor(
         _uploadImages.value=newContent
         //Log.d("aaaa","update gallery called")
     }
+    private val _isWritten= MutableStateFlow(false)
 
-    private val _title = MutableStateFlow("")
-    val title: StateFlow<String> = _title.asStateFlow()
+    val isWritten:StateFlow<Boolean> = _isWritten.asStateFlow()
 
-    fun setTitle(text:String){
-        _title.value=text
+    fun setIsWritten(isWritten:Boolean){
+        _isWritten.value=isWritten
     }
 
+    private val _summary= MutableStateFlow(DEFAULT_SUMMARY)
+
+    val summary:StateFlow<Summary> = _summary.asStateFlow()
+
+    fun setSummary(summary:Summary){
+        _summary.value=summary
+    }
+
+    fun setTitle(title:String){
+        setSummary(summary.value.copy(title = title))
+    }
+
+    fun setContent(content:String){
+        setSummary(summary.value.copy(content = content))
+    }
+
+    fun setDate(date:LocalDate){
+        setSummary(summary.value.copy(date = date))
+    }
+
+    fun setThumb(isThumbUp:Boolean){
+        setSummary(summary.value.copy(isThumbUp = isThumbUp))
+    }
+
+    fun setLike(isLikeChecked:Boolean){
+        setSummary(summary.value.copy(isLikeChecked = isLikeChecked))
+    }
+
+    /*
     private val _editTitleValue = MutableStateFlow("제목")
     val editTitleValue: StateFlow<String> = _editTitleValue.asStateFlow()
 
@@ -52,51 +82,71 @@ class SummaryPageViewModel @Inject constructor(
         _editTitleValue.value=text
     }
 
-    private val _year = MutableStateFlow(0)
-    val year: StateFlow<Int> = _year.asStateFlow()
-
-    private val _month = MutableStateFlow(0)
-    val month: StateFlow<Int> = _month.asStateFlow()
-
-    private val _day = MutableStateFlow(0)
-    val day: StateFlow<Int> = _day.asStateFlow()
 
 
+    private val _editContentValue = MutableStateFlow("제목")
+    val editContentValue: StateFlow<String> = _editContentValue.asStateFlow()
 
-    @RequiresApi(Build.VERSION_CODES.O)
+    fun setEditContentValue(text:String){
+        _editTitleValue.value=text
+    }
+
+*/
+
     fun initialize(year:Int, month:Int, day:Int){
-        _year.value=year
-        _month.value=month
-        _day.value=day
+
 
         viewModelScope.launch{
-            val summary = withContext(Dispatchers.IO){
+            val gotSummary = withContext(Dispatchers.IO){
                 summaryRepository.getSummariesByDate(LocalDate.of(year,month,day))
             }
-            if (summary == null) {
-               //
+            if (gotSummary == null) {
+                setDate(LocalDate.of(year,month,day))
+                setIsWritten(false)
             } else {
-                _title.value = summary.title
+                setSummary(gotSummary)
+                setIsWritten(true)
             }
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun updateTitleByDate(
-        date: LocalDate = LocalDate.of(year.value,month.value,day.value),
-        title:String=_title.value
+        date: LocalDate = summary.value.date,
+        title:String=summary.value.title
     ){
         viewModelScope.launch{
             summaryRepository.updateTitleByDate(date, title)
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun updateContentByDate(
+        date: LocalDate = summary.value.date,
+        content:String=summary.value.content
+    ){
+        viewModelScope.launch{
+            summaryRepository.updateContentByDate(date, content)
+        }
+    }
+
+
+
     private val _isEditingTitle = MutableStateFlow(false)
     val isEditingTitle: StateFlow<Boolean> = _isEditingTitle.asStateFlow()
 
     fun setIsEditingTitle(isEditing:Boolean){
-        if(isEditing) _editTitleValue.value = _title.value
         _isEditingTitle.value=isEditing
     }
+
+
+    private val _isEditingContent = MutableStateFlow(false)
+    val isEditingContent: StateFlow<Boolean> = _isEditingContent.asStateFlow()
+
+    fun setIsEditingContent(isEditing:Boolean){
+        _isEditingContent.value=isEditing
+    }
+
+
 }
 

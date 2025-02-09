@@ -1,5 +1,7 @@
 package com.example.dailysummary.dto
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -14,4 +16,14 @@ data class Summary(
     @ColumnInfo(name = "content") val content: String,
     @ColumnInfo(name = "isThumbUp") val isThumbUp: Boolean,
     @ColumnInfo(name = "isLikeChecked") val isLikeChecked: Boolean,
+)
+
+@RequiresApi(Build.VERSION_CODES.O)
+val DEFAULT_SUMMARY = Summary(
+    writtenTime = LocalDate.of(2000,1,1),
+    date = LocalDate.of(2000,1,1),
+    title = "",
+    content = "",
+    isThumbUp = false,
+    isLikeChecked = false
 )
