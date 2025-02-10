@@ -26,6 +26,8 @@ class AlarmScheduler @Inject constructor(
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun scheduleOverlay() {
+        Log.d("alarm","scheduleOverlay activated")
+
         // SharedPreferences에서 데이터를 가져옴
         var setting = prefRepository.getRefSetting() ?: return
 

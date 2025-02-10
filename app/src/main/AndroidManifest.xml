@@ -34,9 +34,11 @@
 
         <receiver android:name=".overlay.AlarmResetReceiver"
             android:enabled="true"
-            android:exported="false">
+            android:exported="false"
+            android:directBootAware="true">
             <intent-filter>
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
         </receiver>
 
