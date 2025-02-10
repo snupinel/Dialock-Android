@@ -32,11 +32,11 @@ class SummaryPageViewModel @Inject constructor(
 ): ViewModel(){
 
 
-    private val _uploadImages = MutableStateFlow(listOf<Uri>())
-    val uploadImages: StateFlow<List<Uri>> = _uploadImages.asStateFlow()
-    fun updateUploadImages(newContent: List<Uri>) {
-        _uploadImages.value=newContent
-        //Log.d("aaaa","update gallery called")
+    private val _images = MutableStateFlow(listOf<Uri>())
+    val images: StateFlow<List<Uri>> = _images.asStateFlow()
+    fun setImages(newContent: List<Uri>) {
+        _images.value=newContent
+        //_images.d("aaaa","update gallery called")
     }
     private val _isWritten= MutableStateFlow(false)
 

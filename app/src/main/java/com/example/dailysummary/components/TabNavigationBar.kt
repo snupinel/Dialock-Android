@@ -2,8 +2,11 @@ package com.example.dailysummary.components
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,7 +35,7 @@ fun TabNavigationBar(tabBarItems: List<BottomNavItem>) {
 
     val selectedTabPage by viewModel.selectedTab.collectAsState()
     NavigationBar(
-        modifier = Modifier.height(50.dp),
+        modifier = Modifier.height(50.dp+ WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()),
         containerColor = MaterialTheme.colorScheme.primaryContainer) {
         // looping over each tab to generate the views and navigation for each item
         tabBarItems.forEach{ tabBarItem ->

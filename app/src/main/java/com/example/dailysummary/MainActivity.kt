@@ -1,11 +1,13 @@
 package com.example.dailysummary
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -13,7 +15,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.view.WindowCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -31,10 +35,17 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModels()
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             DailySummaryTheme{
+                window?.let {
+                    WindowCompat.setDecorFitsSystemWindows(it, false) // ✅ 시스템 UI가 콘텐츠를 덮지 않도록 설정
+                    it.statusBarColor = Color.Transparent.toArgb()
+                    //it.navigationBarColor = Color.Transparent.toArgb()// ✅ 상태바 배경을 투명하게 설정
+                }
+
                 //startService(Intent(this, MyService::class.java))
                 // A surface container using the 'background' color from the theme
                 if(viewModel.isSettingCompleted()){
@@ -48,6 +59,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun MyApp(
     modifier: Modifier = Modifier,

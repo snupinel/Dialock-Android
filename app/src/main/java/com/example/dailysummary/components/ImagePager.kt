@@ -1,5 +1,6 @@
 package com.example.dailysummary.components
 
+import android.net.Uri
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -27,7 +28,7 @@ import coil.compose.rememberImagePainter
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ImagePager(
-    images:List<String>,
+    images:List<Uri>,
     modifier: Modifier=Modifier
 ){
     val pagerState = rememberPagerState(pageCount = {

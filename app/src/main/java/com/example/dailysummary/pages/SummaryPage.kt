@@ -1,5 +1,6 @@
 package com.example.dailysummary.pages
 
+import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -115,13 +117,15 @@ fun SummaryPage(
 
     val viewModel = hiltViewModel<SummaryPageViewModel>()
 
+    val images by viewModel.images.collectAsState()
+
 
     LaunchedEffect(true) {
         viewModel.initialize(year, month, day)
     }
 
     val listState = rememberLazyListState()
-    val imgHeight = 400
+    //val imgHeight = 400
     val alpha = remember {
         derivedStateOf {
             if (listState.layoutInfo.visibleItemsInfo.firstOrNull() == null)
@@ -164,19 +168,17 @@ fun SummaryPage(
         LazyColumn(
             state = listState,
             modifier = Modifier
-                .padding(paddingValues)
-                .padding(8.dp)
+                .padding(paddingValues.calculateBottomPadding())
         ) {
             item {
-                /*
                 ImagePager(
-                    images = goodsPostContent.images, modifier = Modifier
+                    images = images, modifier = Modifier
                         .fillMaxWidth()
-                        .height(imgHeight.dp)
-                )*/
+                        .aspectRatio(1f)
+                )
             }
-            item {
-
+            item{
+                ImagePart()
                 TitlePart()
                 Text("${year}년 ${month}월 ${day}일")
                 ContentPart()
@@ -187,6 +189,41 @@ fun SummaryPage(
         }
     }
 }
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun ImagePart(){
+
+    val viewModel= hiltViewModel<SummaryPageViewModel>()
+
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris: List<Uri?> ->
+        viewModel.setImages(uris.filterNotNull())   // 선택한 이미지 URI 저장
+    }
+
+    Box(
+        Modifier
+            .size(80.dp)
+            .clip(RoundedCornerShape(5.dp))
+            .border(
+                width = 2.dp,
+                color = Color.Gray,
+                shape = RoundedCornerShape(7.dp)
+            )
+            .clickable {
+                launcher.launch("image/*")
+            },
+        contentAlignment = Alignment.Center
+    ){
+        Column(horizontalAlignment = Alignment.CenterHorizontally){
+            Icon(
+                imageVector = Icons.Outlined.CameraAlt,
+                contentDescription = "CameraAlt"
+            )
+            //Text("${uploadImages.size}/10")
+        }
+    }
+}
+
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -351,7 +388,7 @@ fun SummaryPageToolbar(
     alpha: Float, year: Int,month: Int,day: Int,
     onNav:()->Unit,
     ) {
-    //val interpolatedColor = lerp(Color.White, Color.Black, alpha)
+    val interpolatedColor = lerp(Color.White, Color.Black, alpha)
     TopAppBar(
 
         title = {  },
@@ -368,14 +405,14 @@ fun SummaryPageToolbar(
             //MoreVertButton()
         },
 
-        /*
+
         colors = topAppBarColors(
             containerColor = Color.White.copy(alpha = alpha),
             scrolledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
             navigationIconContentColor = interpolatedColor,
             titleContentColor = interpolatedColor, // Color for the title
             actionIconContentColor = interpolatedColor // Color for action icons
-        ),*/
+        ),
     )
 
 

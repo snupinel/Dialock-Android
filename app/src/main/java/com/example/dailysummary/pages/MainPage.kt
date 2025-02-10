@@ -1,12 +1,18 @@
 package com.example.dailysummary.pages
 
+import android.app.Activity
 import android.content.Intent
 import android.provider.Settings
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Groups
@@ -30,9 +36,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.dailysummary.components.AnimatedActionButton
@@ -60,15 +68,31 @@ fun MainPage(navController: NavController){
 
     val viewModel = hiltViewModel<MainPageViewModel>()
 
+
+    val context = LocalContext.current
+    val window = (context as? Activity)?.window
+
     LaunchedEffect(Unit){
         viewModel.calenderRefresh()
         viewModel.settingInitialize()
         //viewModel.setCalenderEntries()
+        window?.let {
+            WindowCompat.setDecorFitsSystemWindows(it, false) // ✅ 시스템 UI가 콘텐츠를 덮지 않도록 설정
+            it.statusBarColor = Color.Transparent.toArgb()
+            //it.navigationBarColor = Color.Transparent.toArgb()// ✅ 상태바 배경을 투명하게 설정
+        }
     }
 
     val selectedTab by viewModel.selectedTab.collectAsState()
 
-    Scaffold(bottomBar = { TabNavigationBar(tabBarItems) }, topBar = {MainPageToolbar()}) {paddingValues->
+    Scaffold(
+        modifier = Modifier.height(100.dp),
+        bottomBar = {
+            Column {
+                TabNavigationBar(tabBarItems)
+            }
+                    },
+        topBar = {MainPageToolbar()}) {paddingValues->
         Column(
             Modifier
                 .fillMaxSize()
