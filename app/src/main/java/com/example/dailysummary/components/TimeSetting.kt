@@ -76,6 +76,8 @@ fun TimeSetting(
     sameEveryDay: Boolean,
     onToggleSameEveryDay: () -> Unit,
     currentMyTimeTab: Int,
+    isNextDay:Boolean,
+    onToggleIsNextDay: () -> Unit,
     onDayTabClick: (Int) -> Unit
 ) {
     Column(modifier = modifier){
@@ -90,7 +92,6 @@ fun TimeSetting(
                 .alpha(animatedValues[0].alpha),
             textAlign = TextAlign.Center
         )
-
         TimePicker(
             modifier = Modifier
                 .fillMaxWidth()
@@ -102,7 +103,8 @@ fun TimeSetting(
             selectedMinute = selectedMinute,
             onHourChange = onHourChange,
             onMinuteChange = onMinuteChange,
-            currentMyTimeTab = currentMyTimeTab
+            currentMyTimeTab = currentMyTimeTab,
+            isNextDay=isNextDay
         )
 
         Column(
@@ -113,6 +115,10 @@ fun TimeSetting(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            IsNextDayToggle(
+                isNextDay = isNextDay,
+                onToggle = onToggleIsNextDay
+            )
             AnimatedVisibility(
                 visible = !sameEveryDay,
                 enter = fadeIn(animationSpec = tween(500)) + expandVertically(animationSpec = tween(500)),
@@ -184,11 +190,13 @@ fun TimePicker(
     currentMyTimeTab: Int,
     onHourChange: (Int) -> Unit,
     onMinuteChange: (Int) -> Unit,
+    isNextDay: Boolean,
 ) {
     val hours = (0..23).toList()
     val minutes = (0..59).toList()
 
-    Box(modifier = modifier){
+    Box(modifier = modifier,
+        contentAlignment = Alignment.Center){
         Row(modifier = Modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically) {
@@ -247,6 +255,47 @@ fun SameEveryDayToggle(
             fontSize = 20.sp,
             fontWeight = FontWeight.Normal,
             color = if (sameEveryDay) Color.DarkGray else Color.LightGray,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .height(IntrinsicSize.Min)
+        )
+    }
+}
+@Composable
+fun IsNextDayToggle(
+    isNextDay: Boolean,
+    onToggle: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .height(40.dp)
+            .clickable(
+                indication = null,
+                interactionSource = interactionSource,
+                onClick = onToggle
+            )
+    ) {
+        Box(
+            modifier = Modifier
+                .size(20.dp)
+                .border(width = 2.dp, color = Color.DarkGray)
+                .then(
+                    if (isNextDay) Modifier.background(color = MaterialTheme.colorScheme.primary)
+                    else Modifier
+                ),
+            contentAlignment = Alignment.TopCenter
+        ) {
+            if (isNextDay) Text(text = "V")
+        }
+        Spacer(modifier = Modifier.width(5.dp))
+        Text(
+            text = "다음 날",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Normal,
+            color = if (isNextDay) Color.DarkGray else Color.LightGray,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .height(IntrinsicSize.Min)

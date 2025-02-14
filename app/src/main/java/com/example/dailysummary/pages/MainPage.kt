@@ -6,19 +6,13 @@ import android.provider.Settings
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
@@ -145,23 +139,26 @@ fun SettingAdviceOrForcing() {
 fun SettingTime() {
     val viewModel = hiltViewModel<MainPageViewModel>()
 
-    val myTime by viewModel.myTime.collectAsState()
+    val myTime by viewModel.alarmtime.collectAsState()
     val sameEveryDay by viewModel.sameEveryDay.collectAsState()
     val currentMyTimeTab by viewModel.currentMyTimeTab.collectAsState()
+    val isNextDay by viewModel.isNextDay.collectAsState()
 
     //Log.d("aaaab",myTime.toString())
     //Log.d("aaaab",currentMyTimeTab.toString())
 
     TimeSetting(
         title = "알림을 받을 시간을 설정해 주세요.\n잠자기 30분 정도가 좋아요.",
-        selectedHour = myTime[currentMyTimeTab].first,
-        selectedMinute = myTime[currentMyTimeTab].second,
+        selectedHour = myTime[currentMyTimeTab].hour,
+        selectedMinute = myTime[currentMyTimeTab].minute,
         onHourChange = { viewModel.setMyTime(hour = it) },
         onMinuteChange = { viewModel.setMyTime(minute = it) },
         sameEveryDay = sameEveryDay,
         onToggleSameEveryDay = { viewModel.setSameEveryDay(isToggle = true) },
         currentMyTimeTab = currentMyTimeTab,
-        onDayTabClick = { viewModel.setCurrentMyTimeTab(it) }
+        onDayTabClick = { viewModel.setCurrentMyTimeTab(it) },
+        isNextDay = isNextDay,
+        onToggleIsNextDay = {viewModel.setIsNextDay(!isNextDay)}
     )
 }
 

@@ -53,6 +53,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.dailysummary.dto.AdviceOrForcing
+import com.example.dailysummary.dto.DEFAULT_ALARMTIME
 import com.example.dailysummary.dto.Setting
 import com.example.dailysummary.ui.theme.DailySummaryTheme
 
@@ -193,7 +194,7 @@ fun OverlayPreview(){
     DailySummaryTheme {
         Overlay(
             close = {},
-            getSetting = {  Setting(AdviceOrForcing.Advice,true,List(7){Pair(0,0)})},
+            getSetting = {  Setting(AdviceOrForcing.Advice,true,List(7){ DEFAULT_ALARMTIME})},
             saveDiary = { content, isThumbUp, isLikeChecked ->
             }
             //setTextFieldValue =

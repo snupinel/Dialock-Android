@@ -8,6 +8,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.dailysummary.data.PrefRepository
 import com.example.dailysummary.dto.AdviceOrForcing
+import com.example.dailysummary.dto.AlarmTime
+import com.example.dailysummary.dto.DEFAULT_ALARMTIME
 import com.example.dailysummary.dto.Setting
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +22,14 @@ import javax.inject.Inject
 class InitialSettingViewModel @Inject constructor(
     private val prefRepository: PrefRepository,
 ):ViewModel(){
+
+    private val _isNextDay = MutableStateFlow(true)
+    val isNextDay:StateFlow<Boolean> = _isNextDay.asStateFlow()
+
+    fun setIsNextDay(value:Boolean){
+        _isNextDay.value=value
+        //Log.d("aaaa",sameEveryDay.value.toString())
+    }
 
     private val _startPageAnimationState = MutableStateFlow(0)
     val startPageAnimationState: StateFlow<Int> = _startPageAnimationState.asStateFlow()
@@ -42,19 +52,20 @@ class InitialSettingViewModel @Inject constructor(
         _currentMyTimeTab.value=tab
     }
 
-    private val _myTime = MutableStateFlow(List(7){ Pair(23,0)})
-    val myTime:StateFlow<List<Pair<Int,Int>>> = _myTime.asStateFlow()
+    private val _myTime = MutableStateFlow(List(7){ DEFAULT_ALARMTIME })
+    val myTime:StateFlow<List<AlarmTime>> = _myTime.asStateFlow()
 
     fun setMyTime(hour:Int?=null,minute:Int?=null,tab:Int?=null){
         val index=tab?:currentMyTimeTab.value
 
         _myTime.value=_myTime.value.toMutableList().apply {
-            this[index]=Pair(
-                hour ?: this[index].first,
-                minute ?: this[index].second
+            this[index]= AlarmTime(
+                hour ?: this[index].hour,
+                minute ?: this[index].minute,
+                this[index].isNextDay,
             )
         }
-        Log.d("setMyTime",myTime.value.joinToString(separator = ",") { "(${it.first},${it.second})" })
+        Log.d("setMyTime",myTime.value.joinToString(separator = ",") { "(${it.hour},${it.minute})" })
     }
 
     private val _sameEveryDay = MutableStateFlow(true)
@@ -72,7 +83,7 @@ class InitialSettingViewModel @Inject constructor(
             Setting(
                 adviceOrForcing = if(_adviceOrForcing.value.first)AdviceOrForcing.Advice else AdviceOrForcing.Forcing,
                 sameEveryDay = _sameEveryDay.value,
-                alarmTimes = _myTime.value,
+                alarmTimesByDay = _myTime.value,
             )
         )
     }

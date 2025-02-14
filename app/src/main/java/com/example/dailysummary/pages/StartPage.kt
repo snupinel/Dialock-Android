@@ -285,18 +285,21 @@ fun Setting2(animatedValueList: List<AnimationTarget>) {
     val myTime by viewModel.myTime.collectAsState()
     val sameEveryDay by viewModel.sameEveryDay.collectAsState()
     val currentMyTimeTab by viewModel.currentMyTimeTab.collectAsState()
+    val isNextDay by viewModel.isNextDay.collectAsState()
 
     TimeSetting(
         animatedValues = animatedValueList.subList(6, 9),
         title = "알림을 받을 시간을 설정해 주세요.\n잠자기 30분 정도가 좋아요.",
-        selectedHour = myTime[currentMyTimeTab].first,
-        selectedMinute = myTime[currentMyTimeTab].second,
+        selectedHour = myTime[currentMyTimeTab].hour,
+        selectedMinute = myTime[currentMyTimeTab].minute,
         onHourChange = { viewModel.setMyTime(hour = it) },
         onMinuteChange = { viewModel.setMyTime(minute = it) },
         sameEveryDay = sameEveryDay,
         onToggleSameEveryDay = { viewModel.toggleSameEveryDay() },
         currentMyTimeTab = currentMyTimeTab,
-        onDayTabClick = { viewModel.setCurrentMyTimeTab(it) }
+        onDayTabClick = { viewModel.setCurrentMyTimeTab(it) },
+        isNextDay = isNextDay,
+        onToggleIsNextDay = {viewModel.setIsNextDay(!isNextDay)}
     )
 }
 

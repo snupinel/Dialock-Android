@@ -10,6 +10,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.dailysummary.data.PrefRepository
 import com.example.dailysummary.data.SummaryRepository
 import com.example.dailysummary.dto.AdviceOrForcing
+import com.example.dailysummary.dto.AlarmTime
+import com.example.dailysummary.dto.DEFAULT_ALARMTIME
 import com.example.dailysummary.dto.Setting
 import com.example.dailysummary.dto.Summary
 import com.example.dailysummary.model.CalenderEntry
@@ -128,19 +130,20 @@ class MainPageViewModel @Inject constructor(
         Log.d("aaaa","onTabCanged:$tab")
     }
 
-    private val _myTime = MutableStateFlow(List(7){ Pair(23,0)})
-    val myTime:StateFlow<List<Pair<Int,Int>>> = _myTime.asStateFlow()
+    private val _myTime = MutableStateFlow(List(7){DEFAULT_ALARMTIME})
+    val alarmtime:StateFlow<List<AlarmTime>> = _myTime.asStateFlow()
 
     fun setMyTime(hour:Int?=null,minute:Int?=null,tab:Int?=null){
         val index=tab?:currentMyTimeTab.value
 
         _myTime.value=_myTime.value.toMutableList().apply {
-            this[index]=Pair(
-                hour ?: this[index].first,
-                minute ?: this[index].second
+            this[index]= AlarmTime(
+                hour ?: this[index].hour,
+                minute ?: this[index].minute,
+                this[index].isNextDay,
             )
         }
-        Log.d("setMyTime",myTime.value.joinToString(separator = ",") { "(${it.first},${it.second})" })
+        Log.d("setMyTime",alarmtime.value.joinToString(separator = ",") { "(${it.hour},${it.minute})" })
     }
 
     private val _sameEveryDay = MutableStateFlow(true)
@@ -155,6 +158,14 @@ class MainPageViewModel @Inject constructor(
         //Log.d("aaaa",sameEveryDay.value.toString())
     }
 
+    private val _isNextDay = MutableStateFlow(true)
+    val isNextDay:StateFlow<Boolean> = _isNextDay.asStateFlow()
+
+    fun setIsNextDay(value:Boolean){
+        _isNextDay.value=value
+        //Log.d("aaaa",sameEveryDay.value.toString())
+    }
+
 
 
     fun isSettingCompleted():Boolean{
@@ -164,14 +175,14 @@ class MainPageViewModel @Inject constructor(
     fun settingInitialize(){
         if(!isSettingCompleted()) return
         val setting:Setting = prefRepository.getRefSetting()!!
-        Log.d("ref","out:${setting.alarmTimes}")
+        //Log.d("ref","out:${setting.alarmTimes}")
 
         clickAdviceOrForcing(setting.adviceOrForcing==AdviceOrForcing.Advice)
 
-        setting.alarmTimes.forEachIndexed { index, time ->
-            setMyTime(time.first,time.second,index)
+        setting.alarmTimesByDay.forEachIndexed { index, time ->
+            setMyTime(time.hour,time.minute,index)
         }
-        Log.d("aaaa",myTime.value.toString())
+        Log.d("aaaa",alarmtime.value.toString())
         setSameEveryDay(value=setting.sameEveryDay)
     }
 
@@ -180,7 +191,7 @@ class MainPageViewModel @Inject constructor(
 
         val adviceOrForcing= if(_adviceOrForcing.value.first)AdviceOrForcing.Advice else AdviceOrForcing.Forcing
         val sameEveryDay=_sameEveryDay.value
-        val alarmTimes=myTime.value
+        val alarmTimes=alarmtime.value
 
         return Setting(adviceOrForcing, sameEveryDay, alarmTimes)
     }

@@ -64,6 +64,9 @@ class SummaryService  : Service() {
     @Inject
     lateinit var summaryRepository: SummaryRepository
 
+    @Inject
+    lateinit var alarmScheduler: AlarmScheduler
+
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     //private val viewModel: OverlayViewModel by viewModels()
@@ -92,6 +95,7 @@ class SummaryService  : Service() {
         setTheme(R.style.Theme_DailySummary)
         Log.d("summaryservice","SummaryService activated")
         showOverlay()
+        alarmScheduler.scheduleOverlay()
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
