@@ -15,12 +15,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -100,6 +103,7 @@ import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.dailysummary.components.BackButton
 import com.example.dailysummary.components.ConfirmButton
+import com.example.dailysummary.components.DeleteButton
 import com.example.dailysummary.components.EditButton
 import com.example.dailysummary.components.ImagePager
 import com.example.dailysummary.components.RevertButton
@@ -118,6 +122,9 @@ fun SummaryPage(
     val viewModel = hiltViewModel<SummaryPageViewModel>()
 
     val images by viewModel.images.collectAsState()
+
+    val backStackEntry = navController.previousBackStackEntry
+
 
 
     LaunchedEffect(true) {
@@ -159,10 +166,13 @@ fun SummaryPage(
             SummaryPageToolbar(
                 alpha = alpha.value,
                 year,month,day,
-            ){
-                navController.popBackStack()
-            }
-
+                onNav = {navController.popBackStack()},
+                onDelete = {
+                    viewModel.deleteSummaryByDate()
+                    backStackEntry?.savedStateHandle?.set("shouldRefresh", true)
+                    navController.popBackStack()
+                }
+            )
         }) { paddingValues ->
 
         LazyColumn(
@@ -237,7 +247,7 @@ fun SummaryPageBottomBar(
 
     }
     else{
-        SaveButton {
+        SaveButton(Modifier.padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())) {
             onSave()
         }
     }
@@ -387,6 +397,7 @@ fun EditAbleTextPart(
 fun SummaryPageToolbar(
     alpha: Float, year: Int,month: Int,day: Int,
     onNav:()->Unit,
+    onDelete:()->Unit,
     ) {
     val interpolatedColor = lerp(Color.White, Color.Black, alpha)
     TopAppBar(
@@ -401,8 +412,9 @@ fun SummaryPageToolbar(
             }
         },
         actions = {
-            //ShareButton()
-            //MoreVertButton()
+            DeleteButton {
+                onDelete()
+            }
         },
 
 

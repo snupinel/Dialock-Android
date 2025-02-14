@@ -37,6 +37,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.dailysummary.components.AnimatedActionButton
 import com.example.dailysummary.components.DSCalender
 import com.example.dailysummary.components.SettingOption
@@ -60,13 +61,17 @@ val tabBarItems = listOf(socialTab,homeTab, myTab,)
 @Composable
 fun MainPage(navController: NavController){
 
+    val backStackEntry = navController.currentBackStackEntryAsState().value
+    val shouldRefresh = backStackEntry?.savedStateHandle?.get<Boolean>("shouldRefresh")?:false
+
     val viewModel = hiltViewModel<MainPageViewModel>()
 
 
     val context = LocalContext.current
     val window = (context as? Activity)?.window
 
-    LaunchedEffect(Unit){
+    LaunchedEffect(shouldRefresh){
+        viewModel.setShowPopup(false)
         viewModel.calenderRefresh()
         viewModel.settingInitialize()
         //viewModel.setCalenderEntries()
@@ -75,6 +80,7 @@ fun MainPage(navController: NavController){
             it.statusBarColor = Color.Transparent.toArgb()
             //it.navigationBarColor = Color.Transparent.toArgb()// ✅ 상태바 배경을 투명하게 설정
         }
+        backStackEntry?.savedStateHandle?.set("shouldRefresh", false)
     }
 
     val selectedTab by viewModel.selectedTab.collectAsState()
@@ -139,10 +145,10 @@ fun SettingAdviceOrForcing() {
 fun SettingTime() {
     val viewModel = hiltViewModel<MainPageViewModel>()
 
-    val myTime by viewModel.alarmtime.collectAsState()
+    val myTime by viewModel.myTime.collectAsState()
     val sameEveryDay by viewModel.sameEveryDay.collectAsState()
     val currentMyTimeTab by viewModel.currentMyTimeTab.collectAsState()
-    val isNextDay by viewModel.isNextDay.collectAsState()
+    val isNextDay = viewModel.myTime.collectAsState().value[currentMyTimeTab].isNextDay
 
     //Log.d("aaaab",myTime.toString())
     //Log.d("aaaab",currentMyTimeTab.toString())

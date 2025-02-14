@@ -23,13 +23,7 @@ class InitialSettingViewModel @Inject constructor(
     private val prefRepository: PrefRepository,
 ):ViewModel(){
 
-    private val _isNextDay = MutableStateFlow(true)
-    val isNextDay:StateFlow<Boolean> = _isNextDay.asStateFlow()
 
-    fun setIsNextDay(value:Boolean){
-        _isNextDay.value=value
-        //Log.d("aaaa",sameEveryDay.value.toString())
-    }
 
     private val _startPageAnimationState = MutableStateFlow(0)
     val startPageAnimationState: StateFlow<Int> = _startPageAnimationState.asStateFlow()
@@ -76,7 +70,15 @@ class InitialSettingViewModel @Inject constructor(
         if(_sameEveryDay.value) _currentMyTimeTab.value=0
     }
 
-
+    fun setIsNextDay(value:Boolean,index:Int =currentMyTimeTab.value){
+        _myTime.value=myTime.value.toMutableList().apply {
+            this[index]= AlarmTime(
+                hour = this[index].hour,
+                minute = this[index].minute,
+                isNextDay = value
+            )
+        }
+    }
 
     fun saveSetting(){
         prefRepository.setRefSetting(

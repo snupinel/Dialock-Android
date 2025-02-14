@@ -104,7 +104,6 @@ fun TimeSetting(
             onHourChange = onHourChange,
             onMinuteChange = onMinuteChange,
             currentMyTimeTab = currentMyTimeTab,
-            isNextDay=isNextDay
         )
 
         Column(
@@ -190,7 +189,6 @@ fun TimePicker(
     currentMyTimeTab: Int,
     onHourChange: (Int) -> Unit,
     onMinuteChange: (Int) -> Unit,
-    isNextDay: Boolean,
 ) {
     val hours = (0..23).toList()
     val minutes = (0..59).toList()

@@ -285,7 +285,7 @@ fun Setting2(animatedValueList: List<AnimationTarget>) {
     val myTime by viewModel.myTime.collectAsState()
     val sameEveryDay by viewModel.sameEveryDay.collectAsState()
     val currentMyTimeTab by viewModel.currentMyTimeTab.collectAsState()
-    val isNextDay by viewModel.isNextDay.collectAsState()
+    val isNextDay = viewModel.myTime.collectAsState().value[currentMyTimeTab].isNextDay
 
     TimeSetting(
         animatedValues = animatedValueList.subList(6, 9),

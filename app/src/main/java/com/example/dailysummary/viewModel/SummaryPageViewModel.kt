@@ -94,6 +94,15 @@ class SummaryPageViewModel @Inject constructor(
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
+    fun deleteSummaryByDate(
+        date: LocalDate = summary.value.date,
+    ){
+        viewModelScope.launch{
+            summaryRepository.deleteSummaryByDate(date)
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
     fun updateTitleByDate(
         date: LocalDate = summary.value.date,
         title:String=summary.value.title

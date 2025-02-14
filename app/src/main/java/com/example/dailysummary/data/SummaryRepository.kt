@@ -29,6 +29,10 @@ class SummaryRepository @Inject constructor(
         summaryDAO.deleteSummary(summary)
     }
 
+    suspend fun deleteSummaryByDate(date: LocalDate) {
+        summaryDAO.deleteSummaryByDate(date)
+    }
+
     suspend fun updateTitleByDate(date: LocalDate, title: String){
         summaryDAO.updateTitleByDate(date, title)
     }

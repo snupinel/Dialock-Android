@@ -41,6 +41,8 @@ class AlarmScheduler @Inject constructor(
         if(setting.sameEveryDay) setting = setting.copy(alarmTimesByDay = List(7){setting.alarmTimesByDay[0]})
 
         setting.alarmTimesByDay.forEachIndexed { index, time ->
+            Log.d("alarmscheduler", "${index+1} 번째 요일 의 세팅 엔트리:\n" +
+                    "$time")
             val calendar = Calendar.getInstance().apply {
                 set(Calendar.DAY_OF_WEEK,index+1)
                 set(Calendar.HOUR_OF_DAY, time.hour)
@@ -49,7 +51,7 @@ class AlarmScheduler @Inject constructor(
                 set(Calendar.MILLISECOND, 0)
                 if(time.isNextDay) add(Calendar.DATE, 1)
                 if (before(Calendar.getInstance())) {
-                    add(Calendar.DATE, 7) // 시간이 현재보다 이전이라면 다음 날로 설정
+                    add(Calendar.DATE, 7) // 시간이 현재보다 이전이라면 다음주로 설정
                 }
             }
 
@@ -57,6 +59,7 @@ class AlarmScheduler @Inject constructor(
                 putExtra("year", calendar.get(Calendar.YEAR))
                 putExtra("month", calendar.get(Calendar.MONTH)+1)
                 putExtra("day", calendar.get(Calendar.DAY_OF_MONTH))
+                putExtra("isNextDay", time.isNextDay)
             }
 
             //Log.d("aaaa","year:${calendar.get(Calendar.YEAR)}")
@@ -94,7 +97,7 @@ class AlarmScheduler @Inject constructor(
 
             val dateFormat = DateFormat.getDateTimeInstance()
             val formattedDate = dateFormat.format(calendar.time)
-            Log.d("alarm","${index}번째 요일 알람 설정 완료\n" +
+            Log.d("alarm","${index+1}번째 요일 알람 설정 완료\n" +
                     "설정 시간:${formattedDate}")
             // PendingIntent 정보를 SharedPreferences에 저장
             //prefRepository.setPref("alarm_pending_intent", "0") // 고유 ID 또는 기타 정보 저장

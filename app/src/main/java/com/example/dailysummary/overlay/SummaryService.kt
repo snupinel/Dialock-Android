@@ -52,13 +52,17 @@ class SummaryService  : Service() {
 
     private var year=2000
     private var month =1
-    var day =1
+    private var day =1
+    private var isNextDay =false
+
 
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-         year = intent?.getIntExtra("year",0)!!
-         month = intent?.getIntExtra("month",0)!!
-         day = intent?.getIntExtra("day",0)!!
+        year = intent?.getIntExtra("year",0)!!
+        month = intent?.getIntExtra("month",0)!!
+        day = intent?.getIntExtra("day",0)!!
+        isNextDay=intent?.getBooleanExtra("isNextDay",false)!!
+
 
         // 전달받은 매개변수 처리
         //Log.d("MyService", "Value1: $value1, Value2: $value2")
@@ -135,7 +139,9 @@ class SummaryService  : Service() {
                     serviceScope.launch {
                         summaryRepository.insertSummary(Summary(
                             writtenTime = LocalDate.now(),
-                            date = LocalDate.of(year,month,day),
+                            date = LocalDate.of(year,month,day).let{
+                                if (isNextDay) it.minusDays(1) else it
+                            },
                             title = content,
                             content = "",
                             isLikeChecked = isLikeChecked,
@@ -144,6 +150,7 @@ class SummaryService  : Service() {
                     }
 
                 }
+
                 //setTextFieldValue =
             )
         }

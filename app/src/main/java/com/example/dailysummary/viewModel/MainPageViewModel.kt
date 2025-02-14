@@ -131,7 +131,7 @@ class MainPageViewModel @Inject constructor(
     }
 
     private val _myTime = MutableStateFlow(List(7){DEFAULT_ALARMTIME})
-    val alarmtime:StateFlow<List<AlarmTime>> = _myTime.asStateFlow()
+    val myTime:StateFlow<List<AlarmTime>> = _myTime.asStateFlow()
 
     fun setMyTime(hour:Int?=null,minute:Int?=null,tab:Int?=null){
         val index=tab?:currentMyTimeTab.value
@@ -143,7 +143,7 @@ class MainPageViewModel @Inject constructor(
                 this[index].isNextDay,
             )
         }
-        Log.d("setMyTime",alarmtime.value.joinToString(separator = ",") { "(${it.hour},${it.minute})" })
+        Log.d("setMyTime",myTime.value.joinToString(separator = ",") { "(${it.hour},${it.minute})" })
     }
 
     private val _sameEveryDay = MutableStateFlow(true)
@@ -158,13 +158,17 @@ class MainPageViewModel @Inject constructor(
         //Log.d("aaaa",sameEveryDay.value.toString())
     }
 
-    private val _isNextDay = MutableStateFlow(true)
-    val isNextDay:StateFlow<Boolean> = _isNextDay.asStateFlow()
 
-    fun setIsNextDay(value:Boolean){
-        _isNextDay.value=value
-        //Log.d("aaaa",sameEveryDay.value.toString())
+    fun setIsNextDay(value:Boolean,index:Int =currentMyTimeTab.value){
+        _myTime.value=myTime.value.toMutableList().apply {
+            this[index]= AlarmTime(
+                hour = this[index].hour,
+                minute = this[index].minute,
+                isNextDay = value
+            )
+        }
     }
+
 
 
 
@@ -181,8 +185,9 @@ class MainPageViewModel @Inject constructor(
 
         setting.alarmTimesByDay.forEachIndexed { index, time ->
             setMyTime(time.hour,time.minute,index)
+            setIsNextDay(time.isNextDay,index)
         }
-        Log.d("aaaa",alarmtime.value.toString())
+        Log.d("aaaa",myTime.value.toString())
         setSameEveryDay(value=setting.sameEveryDay)
     }
 
@@ -191,7 +196,7 @@ class MainPageViewModel @Inject constructor(
 
         val adviceOrForcing= if(_adviceOrForcing.value.first)AdviceOrForcing.Advice else AdviceOrForcing.Forcing
         val sameEveryDay=_sameEveryDay.value
-        val alarmTimes=alarmtime.value
+        val alarmTimes=myTime.value
 
         return Setting(adviceOrForcing, sameEveryDay, alarmTimes)
     }
@@ -231,6 +236,7 @@ class MainPageViewModel @Inject constructor(
     fun getSummariesByMonth(yearMonth: String): Flow<List<Summary>> {
         return summaryRepository.getSummariesByMonth(yearMonth)
     }
+
 
     fun calenderRefresh(){
         val yearMonth = "%04d-%02d".format(
