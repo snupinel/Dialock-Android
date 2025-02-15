@@ -1,7 +1,10 @@
 package com.example.dailysummary.pages
 
+import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
@@ -106,6 +109,7 @@ import com.example.dailysummary.components.BackButton
 import com.example.dailysummary.components.ConfirmButton
 import com.example.dailysummary.components.DeleteButton
 import com.example.dailysummary.components.EditButton
+import com.example.dailysummary.components.ImageButton
 import com.example.dailysummary.components.ImagePager
 import com.example.dailysummary.components.RevertButton
 import com.example.dailysummary.components.SaveButton
@@ -120,11 +124,30 @@ import java.time.LocalDate
 fun SummaryPage(
     navController: NavController, year:Int,month:Int,day:Int){
 
+    val context = LocalContext.current
+
     val viewModel = hiltViewModel<SummaryPageViewModel>()
 
-    val images by viewModel.images.collectAsState()
+    val images = viewModel.summary.collectAsState().value.imageUris
 
     val backStackEntry = navController.previousBackStackEntry
+
+    val isWritten by viewModel.isWritten.collectAsState()
+
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris: List<Uri?> ->
+        val validUris = uris.filterNotNull()
+        validUris.forEach { uri ->
+            saveUriToPreferences(uri, context) // ✅ 영구 권한 부여
+        }
+
+        viewModel.setImages(validUris)
+
+        if (isWritten){
+            viewModel.updateImageUrisByDate()
+            Log.d("SummaryPage","Image update called")
+        }
+    // 선택한 이미지 URI 저장
+    }
 
 
 
@@ -172,6 +195,9 @@ fun SummaryPage(
                     viewModel.deleteSummaryByDate()
                     backStackEntry?.savedStateHandle?.set("shouldRefresh", true)
                     navController.popBackStack()
+                },
+                onImage = {
+                    launcher.launch(arrayOf("image/*"))
                 }
             )
         }) { paddingValues ->
@@ -190,7 +216,6 @@ fun SummaryPage(
             }
             item{
                 Column(Modifier.padding(8.dp)) {
-                    ImagePart()
                     TitlePart()
                     Text("${year}년 ${month}월 ${day}일")
                     ContentPart()
@@ -200,39 +225,19 @@ fun SummaryPage(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-fun ImagePart(){
+fun saveUriToPreferences(uri: Uri, context: Context) {
+    val resolver = context.contentResolver
+    val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
 
-    val viewModel= hiltViewModel<SummaryPageViewModel>()
-
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris: List<Uri?> ->
-        viewModel.setImages(uris.filterNotNull())   // 선택한 이미지 URI 저장
-    }
-
-    Box(
-        Modifier
-            .size(80.dp)
-            .clip(RoundedCornerShape(5.dp))
-            .border(
-                width = 2.dp,
-                color = Color.Gray,
-                shape = RoundedCornerShape(7.dp)
-            )
-            .clickable {
-                launcher.launch("image/*")
-            },
-        contentAlignment = Alignment.Center
-    ){
-        Column(horizontalAlignment = Alignment.CenterHorizontally){
-            Icon(
-                imageVector = Icons.Outlined.CameraAlt,
-                contentDescription = "CameraAlt"
-            )
-            //Text("${uploadImages.size}/10")
-        }
+    try {
+        resolver.takePersistableUriPermission(uri, flags) // ✅ 영구 권한 부여
+    } catch (e: SecurityException) {
+        e.printStackTrace()
     }
 }
+
+
+
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -417,6 +422,7 @@ fun SummaryPageToolbar(
     alpha: Float, year: Int,month: Int,day: Int,
     onNav:()->Unit,
     onDelete:()->Unit,
+    onImage:()->Unit,
     ) {
     val interpolatedColor = lerp(Color.White, Color.Black, alpha)
     TopAppBar(
@@ -431,6 +437,9 @@ fun SummaryPageToolbar(
             }
         },
         actions = {
+            ImageButton {
+                onImage()
+            }
             DeleteButton {
                 onDelete()
             }

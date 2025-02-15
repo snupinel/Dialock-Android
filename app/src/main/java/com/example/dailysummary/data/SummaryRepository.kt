@@ -1,6 +1,7 @@
 package com.example.dailysummary.data
 
 import android.content.Context
+import android.net.Uri
 import android.util.Log
 import com.example.dailysummary.dto.Summary
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -45,6 +46,10 @@ class SummaryRepository @Inject constructor(
     }
     suspend fun updateLikeByDate(date: LocalDate, isLiked: Boolean){
         summaryDAO.updateLikeByDate(date, isLiked)
+    }
+
+    suspend fun updateImageUrisByDate(date: LocalDate,imageUris:List<Uri>){
+        summaryDAO.updateImageUrisByDate(date,imageUris)
     }
 
 }

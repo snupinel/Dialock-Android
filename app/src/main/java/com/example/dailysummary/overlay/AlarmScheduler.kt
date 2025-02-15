@@ -43,17 +43,34 @@ class AlarmScheduler @Inject constructor(
         setting.alarmTimesByDay.forEachIndexed { index, time ->
             Log.d("alarmscheduler", "${index+1} 번째 요일 의 세팅 엔트리:\n" +
                     "$time")
+            val now = Calendar.getInstance() // 현재 시간
+            val futureLimit = Calendar.getInstance().apply { add(Calendar.DATE, 7) } // 현재 + 7일
+
             val calendar = Calendar.getInstance().apply {
-                set(Calendar.DAY_OF_WEEK,index+1)
+                set(Calendar.DAY_OF_WEEK, index + 1)
                 set(Calendar.HOUR_OF_DAY, time.hour)
                 set(Calendar.MINUTE, time.minute)
                 set(Calendar.SECOND, 0)
                 set(Calendar.MILLISECOND, 0)
-                if(time.isNextDay) add(Calendar.DATE, 1)
-                if (before(Calendar.getInstance())) {
-                    add(Calendar.DATE, 7) // 시간이 현재보다 이전이라면 다음주로 설정
+
+                // ✅ isNextDay가 true이면 하루 추가
+                if (time.isNextDay) {
+                    add(Calendar.DATE, 1)
                 }
+
+                if (after(futureLimit)) {
+                    add(Calendar.DATE, -7)
+                }
+
+                // ✅ 설정 시간이 현재보다 이전이면 다음 주로 이동
+                if (before(now)) {
+                    add(Calendar.DATE, 7)
+                }
+
+                // ✅ 설정 시간이 현재 + 7일 이후라면 7일 빼기
+
             }
+
 
             val intent = Intent(context, SummaryService::class.java).apply {
                 putExtra("year", calendar.get(Calendar.YEAR))

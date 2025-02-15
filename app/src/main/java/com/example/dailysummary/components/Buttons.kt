@@ -5,6 +5,7 @@ import androidx.compose.material.icons.outlined.ArrowBackIosNew
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.Replay
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -20,7 +21,15 @@ fun BackButton(
         Icon(imageVector = Icons.Outlined.ArrowBackIosNew, contentDescription = "Back")
     }
 }
-
+@Composable
+fun ImageButton(
+    modifier: Modifier=Modifier,
+    onClick:()->Unit,
+){
+    IconButton(modifier = modifier,onClick = onClick) {
+        Icon(imageVector = Icons.Outlined.Image, contentDescription = "Image")
+    }
+}
 @Composable
 fun DeleteButton(
     modifier: Modifier=Modifier,

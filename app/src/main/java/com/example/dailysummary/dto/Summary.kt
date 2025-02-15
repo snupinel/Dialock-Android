@@ -1,5 +1,6 @@
 package com.example.dailysummary.dto
 
+import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.room.ColumnInfo
@@ -14,8 +15,9 @@ data class Summary(
     @ColumnInfo(name = "date") val date: LocalDate,
     @ColumnInfo(name = "title") val title: String,
     @ColumnInfo(name = "content") val content: String,
-    @ColumnInfo(name = "isThumbUp") val isThumbUp: Boolean,
-    @ColumnInfo(name = "isLikeChecked") val isLikeChecked: Boolean,
+    @ColumnInfo(name = "is_thumb_up") val isThumbUp: Boolean,
+    @ColumnInfo(name = "is_like_checked") val isLikeChecked: Boolean,
+    @ColumnInfo(name="image_uris") val imageUris:List<Uri>,
 )
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -25,5 +27,6 @@ val DEFAULT_SUMMARY = Summary(
     title = "",
     content = "",
     isThumbUp = false,
-    isLikeChecked = false
+    isLikeChecked = false,
+    imageUris = emptyList(),
 )

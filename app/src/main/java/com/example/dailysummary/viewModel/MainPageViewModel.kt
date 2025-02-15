@@ -77,7 +77,6 @@ class MainPageViewModel @Inject constructor(
 
 
     private val _currentMonthSummaries = MutableStateFlow(listOf<Summary>())
-    //private val _currentMonthSummaries = MutableStateFlow(summarySamples)
 
     val currentMonthSummaries = _currentMonthSummaries.asStateFlow()
 
@@ -117,25 +116,7 @@ class MainPageViewModel @Inject constructor(
 
 
 
-    fun setSummary(content: String, day:Int, isThumbUp:Boolean, isLikeChecked:Boolean) {
-        viewModelScope.launch{
-            summaryRepository.insertSummary(
-                Summary(
-                    title = content,
-                    content = "",
-                    date = LocalDate.of(
-                        selectedYearAndMonth.value.first,
-                        selectedYearAndMonth.value.second,
-                        day
-                    ),
-                    writtenTime = LocalDate.now(),
-                    isThumbUp = isThumbUp,
-                    isLikeChecked = isLikeChecked
-                )
-            )
-        }
-        calenderRefresh()
-    }
+
 
     fun getSummariesByMonth(yearMonth: String): Flow<List<Summary>> {
         return summaryRepository.getSummariesByMonth(yearMonth)

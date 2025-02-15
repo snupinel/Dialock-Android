@@ -78,7 +78,8 @@ fun TimeSetting(
     currentMyTimeTab: Int,
     isNextDay:Boolean,
     onToggleIsNextDay: () -> Unit,
-    onDayTabClick: (Int) -> Unit
+    onDayTabClick: (Int) -> Unit,
+    changeToggle: Boolean=true,
 ) {
     Column(modifier = modifier){
         Text(
@@ -104,6 +105,7 @@ fun TimeSetting(
             onHourChange = onHourChange,
             onMinuteChange = onMinuteChange,
             currentMyTimeTab = currentMyTimeTab,
+            changeToggle = changeToggle
         )
 
         Column(
@@ -189,9 +191,11 @@ fun TimePicker(
     currentMyTimeTab: Int,
     onHourChange: (Int) -> Unit,
     onMinuteChange: (Int) -> Unit,
+    changeToggle: Boolean=true,
 ) {
     val hours = (0..23).toList()
     val minutes = (0..59).toList()
+
 
     Box(modifier = modifier,
         contentAlignment = Alignment.Center){
@@ -204,6 +208,7 @@ fun TimePicker(
                 onNumberChange = onHourChange,
                 modifier = Modifier.weight(1f),
                 currentMyTimeTab = currentMyTimeTab,
+                changeToggle =changeToggle
             )
             Text(text = ":", fontSize = 32.sp, modifier = Modifier.padding(horizontal = 8.dp))
             NumberScroller(
@@ -212,6 +217,7 @@ fun TimePicker(
                 onNumberChange = onMinuteChange,
                 modifier = Modifier.weight(1f),
                 currentMyTimeTab = currentMyTimeTab,
+                changeToggle =changeToggle
 
                 )
         }
@@ -309,6 +315,7 @@ fun NumberScroller(
     onNumberChange: (Int) -> Unit,
     modifier: Modifier = Modifier,
     currentMyTimeTab:Int,
+    changeToggle:Boolean=true,
 ) {
     Log.d("aaaab",selectedNumber.toString())
 
@@ -325,7 +332,7 @@ fun NumberScroller(
             lazyListState.scrollToItem(initialIndex)
         }
     }*/
-    LaunchedEffect(currentMyTimeTab){
+    LaunchedEffect(key1=currentMyTimeTab,key2=changeToggle){
         val initialIndex = numbers.size * 50 + selectedNumber -1
         lazyListState.scrollToItem(initialIndex)
     }

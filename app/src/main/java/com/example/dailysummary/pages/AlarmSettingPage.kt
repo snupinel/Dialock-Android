@@ -3,6 +3,7 @@ package com.example.dailysummary.pages
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
+import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
@@ -36,8 +37,11 @@ import com.example.dailysummary.viewModel.SettingPageViewModel
 fun AlarmSettingPage(navController: NavController){
 
     val viewModel = hiltViewModel<SettingPageViewModel>()
+
+
     LaunchedEffect(Unit){
         viewModel.settingInitialize()
+        viewModel.toggleChangeToggle()
 
     }
 
@@ -97,9 +101,13 @@ fun SettingTime() {
     val currentMyTimeTab by viewModel.currentMyTimeTab.collectAsState()
     val isNextDay = viewModel.myTime.collectAsState().value[currentMyTimeTab].isNextDay
 
+    val changeToggle by viewModel.changeToggle.collectAsState()
+
+
     //Log.d("aaaab",myTime.toString())
     //Log.d("aaaab",currentMyTimeTab.toString())
-
+    Log.d("SettingTime","SettingTime recompositioned:\n" +
+            "$myTime")
     TimeSetting(
         title = "알림을 받을 시간을 설정해 주세요.\n잠자기 30분 정도가 좋아요.",
         selectedHour = myTime[currentMyTimeTab].hour,
@@ -111,7 +119,8 @@ fun SettingTime() {
         currentMyTimeTab = currentMyTimeTab,
         onDayTabClick = { viewModel.setCurrentMyTimeTab(it) },
         isNextDay = isNextDay,
-        onToggleIsNextDay = {viewModel.setIsNextDay(!isNextDay)}
+        onToggleIsNextDay = {viewModel.setIsNextDay(!isNextDay)},
+        changeToggle = changeToggle
     )
 }
 

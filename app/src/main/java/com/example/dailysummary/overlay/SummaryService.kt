@@ -146,6 +146,7 @@ class SummaryService  : Service() {
                             content = "",
                             isLikeChecked = isLikeChecked,
                             isThumbUp = isThumbUp,
+                            imageUris = emptyList()
                         ))
                     }
 

@@ -2,6 +2,7 @@ package com.example.dailysummary.viewModel
 
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -32,12 +33,8 @@ class SummaryPageViewModel @Inject constructor(
 ): ViewModel(){
 
 
-    private val _images = MutableStateFlow(listOf<Uri>())
-    val images: StateFlow<List<Uri>> = _images.asStateFlow()
-    fun setImages(newContent: List<Uri>) {
-        _images.value=newContent
-        //_images.d("aaaa","update gallery called")
-    }
+
+
     private val _isWritten= MutableStateFlow(false)
 
     val isWritten:StateFlow<Boolean> = _isWritten.asStateFlow()
@@ -49,6 +46,13 @@ class SummaryPageViewModel @Inject constructor(
     private val _summary= MutableStateFlow(DEFAULT_SUMMARY)
 
     val summary:StateFlow<Summary> = _summary.asStateFlow()
+
+    fun setImages(imageUris: List<Uri>) {
+        setSummary(
+            summary.value.copy(imageUris=imageUris)
+        )
+        //_images.d("aaaa","update gallery called")
+    }
 
     fun setSummary(summary:Summary){
         _summary.value=summary
@@ -83,6 +87,7 @@ class SummaryPageViewModel @Inject constructor(
             val gotSummary = withContext(Dispatchers.IO){
                 summaryRepository.getSummariesByDate(LocalDate.of(year,month,day))
             }
+
             if (gotSummary == null) {
                 setDate(LocalDate.of(year,month,day))
                 setIsWritten(false)
@@ -90,6 +95,7 @@ class SummaryPageViewModel @Inject constructor(
                 setSummary(gotSummary)
                 setIsWritten(true)
             }
+            Log.d("summarypageviewmodel","initialize:${summary.value}")
         }
     }
 
@@ -142,6 +148,16 @@ class SummaryPageViewModel @Inject constructor(
     fun insertSummary(smry: Summary =summary.value){
         viewModelScope.launch{
             summaryRepository.insertSummary(smry)
+            Log.d("insertSummary","$smry")
+        }
+    }
+
+    fun updateImageUrisByDate(
+        date: LocalDate = summary.value.date,
+        imageUris:List<Uri> = summary.value.imageUris
+    ){
+        viewModelScope.launch{
+            summaryRepository.updateImageUrisByDate(date, imageUris)
         }
     }
 }

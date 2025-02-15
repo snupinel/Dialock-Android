@@ -39,6 +39,14 @@ class SettingPageViewModel @Inject constructor(
         Log.d("aaaa","onTabCanged:$tab")
     }
 
+    private val _changeToggle = MutableStateFlow(true)
+    val changeToggle: StateFlow<Boolean> = _changeToggle.asStateFlow()
+
+    fun toggleChangeToggle(){
+        _changeToggle.value=!changeToggle.value
+    }
+
+
     private val _myTime = MutableStateFlow(List(7){ DEFAULT_ALARMTIME })
     val myTime: StateFlow<List<AlarmTime>> = _myTime.asStateFlow()
 
@@ -96,7 +104,8 @@ class SettingPageViewModel @Inject constructor(
             setMyTime(time.hour,time.minute,index)
             setIsNextDay(time.isNextDay,index)
         }
-        Log.d("aaaa",myTime.value.toString())
+        Log.d("setting","Setting initialize activate:\n" +
+                "${myTime.value}")
         setSameEveryDay(value=setting.sameEveryDay)
     }
 

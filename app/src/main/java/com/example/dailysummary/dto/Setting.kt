@@ -15,4 +15,4 @@ data class AlarmTime(
     val isNextDay:Boolean,
 )
 
-val DEFAULT_ALARMTIME = AlarmTime(0,0,false)
+val DEFAULT_ALARMTIME = AlarmTime(23,0,false)
