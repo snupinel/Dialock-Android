@@ -93,6 +93,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.unit.sp
@@ -178,7 +179,7 @@ fun SummaryPage(
         LazyColumn(
             state = listState,
             modifier = Modifier
-                .padding(paddingValues.calculateBottomPadding())
+                .padding(bottom = paddingValues.calculateBottomPadding())
         ) {
             item {
                 ImagePager(
@@ -188,14 +189,13 @@ fun SummaryPage(
                 )
             }
             item{
-                ImagePart()
-                TitlePart()
-                Text("${year}년 ${month}월 ${day}일")
-                ContentPart()
-
-
+                Column(Modifier.padding(8.dp)) {
+                    ImagePart()
+                    TitlePart()
+                    Text("${year}년 ${month}월 ${day}일")
+                    ContentPart()
+                }
             }
-
         }
     }
 }
@@ -293,7 +293,9 @@ fun TitlePart(){
         hint = "제목",
         setIsEditing = { viewModel.setIsEditingTitle(it) },
         updateByDate = { viewModel.updateTitleByDate() },
-        saveText = {viewModel.setTitle(it)}
+        saveText = {viewModel.setTitle(it)},
+        fontSize = 24.sp,
+        fontWeight = FontWeight.Bold
     )
 
 
@@ -316,7 +318,12 @@ fun EditAbleTextPart(
     setIsEditing:(Boolean)->Unit,
     updateByDate:()->Unit,
     saveText:(String)->Unit,
+    fontSize: TextUnit = TextUnit.Unspecified,
+    fontStyle: FontStyle? = null,
+    fontWeight: FontWeight? = null,
 ){
+    var textFieldHeight by remember { mutableStateOf(0) }
+
     if(isEditing||!isWritten){
         Column {
             BasicTextField(
@@ -325,7 +332,11 @@ fun EditAbleTextPart(
                     if (isWritten) onEditValueChange(it)
                     else saveText(it) },
                 modifier = Modifier
-                    .focusRequester(focusRequester),
+                    .focusRequester(focusRequester)
+                    .then(
+                        if (singleLine) Modifier
+                        else Modifier.heightIn(min = 40.dp, max = 200.dp)
+                    ),
                 singleLine=singleLine,
                 keyboardOptions = KeyboardOptions.Default.copy(
                     imeAction = ImeAction.Done
@@ -334,6 +345,9 @@ fun EditAbleTextPart(
                     onDone = onDone
                 ),
                 textStyle = TextStyle(color = MaterialTheme.colorScheme.primaryContainer),
+                onTextLayout = { textLayoutResult ->
+                    textFieldHeight = textLayoutResult.size.height
+                },
                 decorationBox = {
                         innerTextField ->
                     Box(
@@ -379,12 +393,17 @@ fun EditAbleTextPart(
         }
     }
     else{
-        Row(verticalAlignment = Alignment.Bottom) {
-            Text(text=value, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+        Column {
             EditButton {
 
                 setIsEditing(true)
             }
+            Text(
+                text=value,
+                fontSize = fontSize,
+                fontWeight = fontWeight,
+            )
+
         }
     }
 }

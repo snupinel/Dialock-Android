@@ -56,6 +56,7 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.dailysummary.viewModel.MainPageViewModel
+import java.time.LocalDate
 import java.time.Month
 import java.time.Year
 
@@ -134,8 +135,15 @@ fun DSCalender(
 
                             }
                         }
-                        else {
-                            navController.navigate("SummaryPage/${selectedYearAndMonth.first}/${selectedYearAndMonth.second}/${calenderEntry.day}")
+                        else{
+                            val targetDate = LocalDate.of(selectedYearAndMonth.first,selectedYearAndMonth.second,calenderEntry.day)
+
+                            if(targetDate.isAfter(LocalDate.now())){
+
+                            }
+                            else {
+                                navController.navigate("SummaryPage/${selectedYearAndMonth.first}/${selectedYearAndMonth.second}/${calenderEntry.day}")
+                            }
                         }
 
                     }

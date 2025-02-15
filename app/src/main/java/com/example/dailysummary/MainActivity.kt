@@ -22,6 +22,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.dailysummary.pages.AlarmSettingPage
 import com.example.dailysummary.pages.MainPage
 import com.example.dailysummary.pages.StartPage
 import com.example.dailysummary.pages.SummaryPage
@@ -84,6 +85,10 @@ private fun MyApp(
                 val day = it.arguments!!.getString("day")!!.toInt()
                 Log.d("aaaa",year.toString())
                 SummaryPage(navController,year,month,day)
+            }
+            composable("AlarmSettingPage"){
+                Log.d("nav","AlarmSettingPage called")
+                AlarmSettingPage(navController)
             }
         }
     }

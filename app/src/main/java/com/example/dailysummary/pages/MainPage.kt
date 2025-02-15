@@ -9,15 +9,20 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -48,12 +53,12 @@ import com.example.dailysummary.viewModel.MainPageViewModel
 import com.example.dailysummary.viewModel.Tab
 
 val homeTab = BottomNavItem(tag = "홈", title = "Home", selectedIcon = Icons.Filled.Home, unselectedIcon = Icons.Outlined.Home)
-val myTab = BottomNavItem(tag="설정", title="My", selectedIcon = Icons.Filled.Person, unselectedIcon = Icons.Outlined.Person)
+val myTab = BottomNavItem(tag="MY", title="My", selectedIcon = Icons.Filled.Person, unselectedIcon = Icons.Outlined.Person)
 val socialTab = BottomNavItem(tag="소셜", title="Social", selectedIcon = Icons.Filled.Groups, unselectedIcon = Icons.Outlined.Groups)
 
 
 // creating a list of all the tabs
-val tabBarItems = listOf(socialTab,homeTab, myTab,)
+val tabBarItems = listOf(homeTab,socialTab,myTab)
 
 //@Inject lateinit var alarmScheduler: AlarmScheduler
 
@@ -73,7 +78,6 @@ fun MainPage(navController: NavController){
     LaunchedEffect(shouldRefresh){
         viewModel.setShowPopup(false)
         viewModel.calenderRefresh()
-        viewModel.settingInitialize()
         //viewModel.setCalenderEntries()
         window?.let {
             WindowCompat.setDecorFitsSystemWindows(it, false) // ✅ 시스템 UI가 콘텐츠를 덮지 않도록 설정
@@ -92,7 +96,17 @@ fun MainPage(navController: NavController){
                 TabNavigationBar(tabBarItems)
             }
                     },
-        topBar = {MainPageToolbar()}) {paddingValues->
+        topBar = {MainPageToolbar()},
+        floatingActionButton = {
+            when(selectedTab){
+                Tab.Home->{
+                    AlarmSettingFloating {navController.navigate("AlarmSettingPage")}
+                }
+                else->{}
+            }
+        },
+        floatingActionButtonPosition = FabPosition.End
+        ){ paddingValues->
         Column(
             Modifier
                 .fillMaxSize()
@@ -106,17 +120,7 @@ fun MainPage(navController: NavController){
                 }
                 Tab.My -> {
                     //
-                    Column {
-                        SettingAdviceOrForcing()
 
-                        SettingTime()
-
-                        SettingSaveButton()
-
-                        SettingPreviewButton()
-
-                        //Setting2(animatedValueList)
-                    }
                 }
                 Tab.Social-> {
                     SocialTab()
@@ -128,120 +132,19 @@ fun MainPage(navController: NavController){
 }
 
 @Composable
-fun SettingAdviceOrForcing() {
-    //Log.d("aaaa","aaaa")
-    val viewModel = hiltViewModel<MainPageViewModel>()
-    val adviceOrForcing by viewModel.adviceOrForcing.collectAsState()
+fun AlarmSettingFloating(onClick:()->Unit){
+    ExtendedFloatingActionButton(
+        modifier = Modifier.size(60.dp),
+        onClick = onClick,
+        shape = CircleShape,
+        contentColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
 
-    SettingOption(
-        title = "권유 or 강요",
-        adviceOrForcing = adviceOrForcing,
-        onOptionSelected = { clickedIsLeft ->
-            viewModel.clickAdviceOrForcing(clickedIsLeft)
-        },)
-}
-
-@Composable
-fun SettingTime() {
-    val viewModel = hiltViewModel<MainPageViewModel>()
-
-    val myTime by viewModel.myTime.collectAsState()
-    val sameEveryDay by viewModel.sameEveryDay.collectAsState()
-    val currentMyTimeTab by viewModel.currentMyTimeTab.collectAsState()
-    val isNextDay = viewModel.myTime.collectAsState().value[currentMyTimeTab].isNextDay
-
-    //Log.d("aaaab",myTime.toString())
-    //Log.d("aaaab",currentMyTimeTab.toString())
-
-    TimeSetting(
-        title = "알림을 받을 시간을 설정해 주세요.\n잠자기 30분 정도가 좋아요.",
-        selectedHour = myTime[currentMyTimeTab].hour,
-        selectedMinute = myTime[currentMyTimeTab].minute,
-        onHourChange = { viewModel.setMyTime(hour = it) },
-        onMinuteChange = { viewModel.setMyTime(minute = it) },
-        sameEveryDay = sameEveryDay,
-        onToggleSameEveryDay = { viewModel.setSameEveryDay(isToggle = true) },
-        currentMyTimeTab = currentMyTimeTab,
-        onDayTabClick = { viewModel.setCurrentMyTimeTab(it) },
-        isNextDay = isNextDay,
-        onToggleIsNextDay = {viewModel.setIsNextDay(!isNextDay)}
-    )
-}
-
-
-
-@Composable
-fun SettingPreviewButton() {
-    val viewModel = hiltViewModel<MainPageViewModel>()
-    val context = LocalContext.current
-
-    AnimatedActionButton(
-        text = "미리보기",
-        onClick = {
-            viewModel.previewSetting(context)
-        },
-        backgroundColor = MaterialTheme.colorScheme.primary,
-        textColor = Color.White,
-    )
-}
-
-@Composable
-fun SettingSaveButton() {
-    val viewModel = hiltViewModel<MainPageViewModel>()
-
-    val context = LocalContext.current
-
-    //val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
-    val (permissionRequested, setPermissionRequested) = remember { mutableStateOf(false) }
-
-
-    /*
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (alarmManager.canScheduleExactAlarms()) {
-
-        } else {
-
-        }
-    }*/
-
-    LaunchedEffect(permissionRequested){
-        if(permissionRequested){
-
-            //launcher.launch()
-            Toast.makeText(context, "스타트액티비티", Toast.LENGTH_SHORT).show()
-
-            val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
-            ContextCompat.startActivity(context,intent,null)
-
-            setPermissionRequested(false)
-        }
+    ){
+        Icon(imageVector = Icons.Filled.Alarm, contentDescription = "AlarmSetting")
     }
-
-    AnimatedActionButton(
-        text = "설정 완료",
-        onClick = {
-            viewModel.settingConfirm()
-            //viewModel.setRefSetting(viewModel.extractCurrentSetting())
-            Toast.makeText(context, "설정 완료", Toast.LENGTH_SHORT).show()
-
-            /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) { // Android 12+
-                scheduleOverlay(context)
-                setPermissionRequested(true)
-            } else {
-                // Pre-Android 12, directly schedule the alarm
-
-            }*/
-            //scheduleOverlay(context,p)
-            //setPermissionRequested(true)
-            viewModel.scheduleOverlay()
-        },
-        backgroundColor = MaterialTheme.colorScheme.primary,
-        textColor = Color.White,
-    )
-
-
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
