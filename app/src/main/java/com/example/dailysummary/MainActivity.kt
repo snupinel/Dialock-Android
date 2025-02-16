@@ -23,6 +23,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.dailysummary.pages.AlarmSettingPage
+import com.example.dailysummary.pages.GroupSettingPage
 import com.example.dailysummary.pages.MainPage
 import com.example.dailysummary.pages.StartPage
 import com.example.dailysummary.pages.SummaryPage
@@ -49,11 +50,14 @@ class MainActivity : ComponentActivity() {
 
                 //startService(Intent(this, MyService::class.java))
                 // A surface container using the 'background' color from the theme
+
+
                 if(viewModel.isSettingCompleted()){
                     Log.d("aaaa","completed")
                     MyApp(startDestination = "MainPage")
                 }else{
-                    MyApp()
+                    //MyApp()
+                    MyApp(startDestination = "MainPage")
                 }
             }
         }
@@ -90,6 +94,7 @@ private fun MyApp(
                 Log.d("nav","AlarmSettingPage called")
                 AlarmSettingPage(navController)
             }
+
         }
     }
 

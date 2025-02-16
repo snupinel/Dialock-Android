@@ -215,7 +215,7 @@ fun SummaryPage(
                 )
             }
             item{
-                Column(Modifier.padding(8.dp)) {
+                Column(Modifier.padding(12.dp)) {
                     TitlePart()
                     Text("${year}년 ${month}월 ${day}일")
                     ContentPart()

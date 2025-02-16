@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.example.dailysummary.dto.AdviceOrForcing
 import com.example.dailysummary.dto.AlarmTime
+import com.example.dailysummary.dto.SAMPLE_ALARM_TIME
 import com.example.dailysummary.dto.Setting
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.lang.StringBuilder
@@ -40,8 +41,10 @@ class PrefRepositoryImpl @Inject constructor(
         val builder= StringBuilder()
         builder.append(setting.adviceOrForcing.name+" ")
         builder.append(setting.sameEveryDay.toString()+" ")
+
+        builder.append("${setting.defaultAlarmTime.hour} ${setting.defaultAlarmTime.minute} ")
         setting.alarmTimesByDay.forEach{
-            builder.append("${it.hour} ${it.minute} ${it.isNextDay} ")
+            builder.append("${it.hour} ${it.minute} ${it.isGrouped} ")
         }
         setPref("Setting",builder.toString())
 
@@ -56,11 +59,15 @@ class PrefRepositoryImpl @Inject constructor(
 
         val adviceOrForcing= AdviceOrForcing.valueOf(refList[0])
         val sameEveryDay=refList[1].toBoolean()
-        val alarmTimes=refList.drop(2).chunked(3).map{
-                (first, second, third) -> AlarmTime(first.toInt(),second.toInt(),third.toBoolean())
+        val defaultAlarmTime = AlarmTime(refList[2].toInt(),refList[3].toInt(), isGrouped = false)
+
+        var alarmTimes=refList.drop(4).chunked(3).map{
+                (first, second, third) -> AlarmTime(first.toInt(),second.toInt(), isGrouped = third.toBoolean())
         }
 
-        return Setting(adviceOrForcing, sameEveryDay, alarmTimes)
+        if(alarmTimes.size<7) alarmTimes= alarmTimes+List(7-alarmTimes.size){ SAMPLE_ALARM_TIME}
+
+        return Setting(adviceOrForcing, sameEveryDay, defaultAlarmTime,alarmTimes)
     }
 
 }

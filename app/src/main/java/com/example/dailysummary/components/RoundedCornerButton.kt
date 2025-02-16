@@ -19,7 +19,7 @@ fun RoundedCornerButton(
     color: Color =MaterialTheme.colorScheme.primary,
     onClick:()->Unit={},
     enabled:Boolean=true,
-    content: @Composable() (BoxScope.() -> Unit)
+    content: @Composable() (() -> Unit)
 ){
     Box(
         modifier=modifier

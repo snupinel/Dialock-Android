@@ -79,11 +79,7 @@ fun MainPage(navController: NavController){
         viewModel.setShowPopup(false)
         viewModel.calenderRefresh()
         //viewModel.setCalenderEntries()
-        window?.let {
-            WindowCompat.setDecorFitsSystemWindows(it, false) // ✅ 시스템 UI가 콘텐츠를 덮지 않도록 설정
-            it.statusBarColor = Color.Transparent.toArgb()
-            //it.navigationBarColor = Color.Transparent.toArgb()// ✅ 상태바 배경을 투명하게 설정
-        }
+
         backStackEntry?.savedStateHandle?.set("shouldRefresh", false)
     }
 
@@ -111,7 +107,7 @@ fun MainPage(navController: NavController){
             Modifier
                 .fillMaxSize()
                 .padding(paddingValues = paddingValues)
-                .padding(horizontal = 8.dp)
+                .padding(horizontal = 12.dp)
         ) {
             when (selectedTab){
                 Tab.Home -> {

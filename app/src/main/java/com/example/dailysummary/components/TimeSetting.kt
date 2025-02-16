@@ -31,12 +31,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,18 +46,16 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.dailysummary.dto.AnimationTarget
-import com.example.dailysummary.viewModel.InitialSettingViewModel
-import com.example.dailysummary.viewModel.MainPageViewModel
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
@@ -93,6 +91,7 @@ fun TimeSetting(
                 .alpha(animatedValues[0].alpha),
             textAlign = TextAlign.Center
         )
+        /*
         TimePicker(
             modifier = Modifier
                 .fillMaxWidth()
@@ -105,8 +104,9 @@ fun TimeSetting(
             onHourChange = onHourChange,
             onMinuteChange = onMinuteChange,
             currentMyTimeTab = currentMyTimeTab,
-            changeToggle = changeToggle
-        )
+            changeToggle = changeToggle,
+
+        )*/
 
         Column(
             modifier = Modifier
@@ -188,39 +188,67 @@ fun TimePicker(
     modifier: Modifier= Modifier,
     selectedHour: Int,
     selectedMinute: Int,
-    currentMyTimeTab: Int,
     onHourChange: (Int) -> Unit,
     onMinuteChange: (Int) -> Unit,
     changeToggle: Boolean=true,
+    height:Dp
 ) {
+    val strings = listOf("그날 오후","다음 날 오전")
     val hours = (0..23).toList()
     val minutes = (0..59).toList()
 
+    val visibleItemsCount =5
 
-    Box(modifier = modifier,
-        contentAlignment = Alignment.Center){
+    val selectedStringIndex = 1-selectedHour/12
+
+
+    //val itemHeight = (parentHeight/visibleItemsCount).dp
+
+
+
+    Box(modifier = modifier
+        .clip(RoundedCornerShape(8.dp))
+        .height(height)
+        .background(MaterialTheme.colorScheme.primaryContainer),
+        contentAlignment = Alignment.Center,
+        ){
+        Box(Modifier
+            .fillMaxWidth()
+            .fillMaxHeight(1f/visibleItemsCount)
+            .clip(RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.primary)
+        )
         Row(modifier = Modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically) {
+            StringScrolled(
+                modifier= Modifier.weight(1f).fillMaxHeight(),
+                strings = strings,
+                selectedIndex = selectedStringIndex,
+                visibleItemsCount= visibleItemsCount,
+                maxHeight=height)
+            Text(text = ":", fontSize = 16.sp, modifier = Modifier.padding(horizontal = 8.dp))
             NumberScroller(
                 numbers = hours,
                 selectedNumber = selectedHour,
                 onNumberChange = onHourChange,
-                modifier = Modifier.weight(1f),
-                currentMyTimeTab = currentMyTimeTab,
-                changeToggle =changeToggle
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+                changeToggle =changeToggle,
+                visibleItemsCount=visibleItemsCount,
+                maxHeight=height
             )
-            Text(text = ":", fontSize = 32.sp, modifier = Modifier.padding(horizontal = 8.dp))
+            Text(text = ":", fontSize = 16.sp, modifier = Modifier.padding(horizontal = 8.dp))
             NumberScroller(
                 numbers = minutes,
                 selectedNumber = selectedMinute,
                 onNumberChange = onMinuteChange,
-                modifier = Modifier.weight(1f),
-                currentMyTimeTab = currentMyTimeTab,
-                changeToggle =changeToggle
-
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+                changeToggle =changeToggle,
+                visibleItemsCount=visibleItemsCount,
+                maxHeight=height
                 )
         }
+
     }
 }
 
@@ -314,8 +342,9 @@ fun NumberScroller(
     selectedNumber: Int,
     onNumberChange: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    currentMyTimeTab:Int,
     changeToggle:Boolean=true,
+    visibleItemsCount:Int,
+    maxHeight:Dp
 ) {
     Log.d("aaaab",selectedNumber.toString())
 
@@ -323,8 +352,11 @@ fun NumberScroller(
     //val currentMyTimeTab by viewModel.currentMyTimeTab.collectAsState()
     val lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
-    val itemHeight = 50.dp
-    val visibleItemsCount = 3
+
+
+
+
+    val itemHeight = maxHeight/visibleItemsCount
     /*
     LaunchedEffect(selectedNumber) {
         coroutineScope.launch {
@@ -332,15 +364,15 @@ fun NumberScroller(
             lazyListState.scrollToItem(initialIndex)
         }
     }*/
-    LaunchedEffect(key1=currentMyTimeTab,key2=changeToggle){
-        val initialIndex = numbers.size * 50 + selectedNumber -1
+    LaunchedEffect(changeToggle){
+        val initialIndex = numbers.size * 50 + selectedNumber -(visibleItemsCount/2)
         lazyListState.scrollToItem(initialIndex)
     }
 
     LazyColumn(
         state = lazyListState,
         modifier = modifier
-            .height(itemHeight * visibleItemsCount)
+            .fillMaxHeight()
             .pointerInput(Unit) {
                 detectVerticalDragGestures { change, dragAmount ->
                     coroutineScope.launch {
@@ -349,25 +381,17 @@ fun NumberScroller(
                     change.consume()
                 }
             },
+
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         itemsIndexed(List(numbers.size * 100) { it % numbers.size }) { index, number ->
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(itemHeight)
-                /*
-                .combinedClickable(
-                    onClick = {
-                        coroutineScope.launch {
-                            onNumberChange(number)
-                            lazyListState.animateScrollToItem(index)
-                        }
-                    }
-                ),*/,
+                    .height(itemHeight),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = String.format("%02d", number), fontSize = 24.sp)
+                Text(text = String.format("%02d", number), fontSize = 16.sp)
             }
         }
     }
@@ -385,14 +409,99 @@ fun NumberScroller(
 
     LaunchedEffect(lazyListState.isScrollInProgress) {
         if (wasScrolling && !lazyListState.isScrollInProgress) {
+            val TopIndex = (lazyListState.firstVisibleItemIndex + lazyListState.firstVisibleItemScrollOffset / with(density) { itemHeight.toPx() }).roundToInt()
+            val actualTopIndex = TopIndex % numbers.size
+            onNumberChange(numbers[(actualTopIndex + (visibleItemsCount/2)) % numbers.size])
+            coroutineScope.launch {
+                lazyListState.animateScrollToItem(TopIndex)
+            }
+            Log.d("aaaa", "!lazyListState.isScrollInProgress called")
+        }
+        wasScrolling = lazyListState.isScrollInProgress
+    }
+}
+@Composable
+fun StringScrolled(
+    strings: List<String>,
+    selectedIndex: Int,
+    modifier: Modifier = Modifier,
+    visibleItemsCount:Int,
+    maxHeight: Dp
+) {
+
+    val dummyList= List(visibleItemsCount/2){""}
+
+    val dummyAddedList = dummyList+strings+dummyList
+
+    val lazyListState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+
+
+    val itemHeight = maxHeight/visibleItemsCount
+
+    //val visibleItemsCount = 3
+    /*
+    LaunchedEffect(selectedNumber) {
+        coroutineScope.launch {
+            val initialIndex = numbers.size * 50 + selectedNumber
+            lazyListState.scrollToItem(initialIndex)
+        }
+    }*/
+    LaunchedEffect(selectedIndex){
+        lazyListState.animateScrollToItem(selectedIndex)
+    }
+
+    LazyColumn(
+        state = lazyListState,
+        modifier = modifier
+            .fillMaxHeight() ,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        userScrollEnabled = false
+    ) {
+
+        itemsIndexed(dummyAddedList) { index, str ->
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(itemHeight),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = str, fontSize = 12.sp)
+            }
+        }
+    }
+
+
+    /*
+
+    LaunchedEffect(Unit) {
+        snapshotFlow { lazyListState.isScrollInProgress }
+            .distinctUntilChanged()
+            .filter { isScrolling -> !isScrolling }
+            .collect {
+                // 스크롤이 멈춘 순간에 실행할 작업
+                println("Scrolling stopped")
+            }
+    }
+
+
+
+    val density = LocalDensity.current
+    var wasScrolling by remember { mutableStateOf(false) }
+
+
+
+
+
+    LaunchedEffect(lazyListState.isScrollInProgress) {
+        if (wasScrolling && !lazyListState.isScrollInProgress) {
             val centerIndex = (lazyListState.firstVisibleItemIndex + lazyListState.firstVisibleItemScrollOffset / with(density) { itemHeight.toPx() }).roundToInt()
-            val actualIndex = centerIndex % numbers.size
-            onNumberChange(numbers[(actualIndex + 1) % numbers.size])
+            onIndexChange(centerIndex-(visibleItemsCount/2))
             coroutineScope.launch {
                 lazyListState.animateScrollToItem(centerIndex)
             }
             Log.d("aaaa", "!lazyListState.isScrollInProgress called")
         }
         wasScrolling = lazyListState.isScrollInProgress
-    }
+    }*/
 }

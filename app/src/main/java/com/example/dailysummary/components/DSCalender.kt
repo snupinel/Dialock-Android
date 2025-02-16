@@ -1,36 +1,29 @@
 package com.example.dailysummary.components
 
-import android.content.Intent
-import android.provider.Settings
-import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.KeyboardArrowLeft
 import androidx.compose.material.icons.outlined.KeyboardArrowRight
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,13 +45,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
-import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.dailysummary.viewModel.MainPageViewModel
 import java.time.LocalDate
-import java.time.Month
-import java.time.Year
+
+val weekDayList= listOf(
+    Pair(Color.Red,"S"),
+    Pair(null,"M"),
+    Pair(null,"T"),
+    Pair(null,"W"),
+    Pair(null,"T"),
+    Pair(null,"F"),
+    Pair(Color.Blue,"S"),
+)
 
 @Composable
 fun DSCalender(
@@ -99,27 +99,22 @@ fun DSCalender(
                 )
                 AdjustMonthButton(isPrev = false,Modifier.weight(1f)) {viewModel.nextMonth()}
             }
-            Row {
-                val weekList= listOf(
-                    Pair(Color.Red,"S"),
-                    Pair(null,"M"),
-                    Pair(null,"T"),
-                    Pair(null,"W"),
-                    Pair(null,"T"),
-                    Pair(null,"F"),
-                    Pair(Color.Blue,"S"),
-                )
-                repeat(7){
-                    CalenderDate(
-                        modifier = Modifier.weight(1f),
-                        color = weekList[it].first,
-                        text = weekList[it].second
-                    )
-                }
-            }
             LazyVerticalGrid(
                 columns = GridCells.Fixed(7),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(0.dp)
             ){
+
+                repeat(7){
+                    item {
+                        CalenderDate(
+                            modifier = Modifier.weight(1f),
+                            color = weekDayList[it].first,
+                            text = weekDayList[it].second
+                        )
+                    }
+                }
                 itemsIndexed(calenderEntries){index, calenderEntry->
                     CalenderBox(
                         isBlank = calenderEntry.isBlank,
@@ -218,7 +213,6 @@ fun CalenderBox(
 
     Box(modifier = modifier
         .aspectRatio(1f)
-        .padding(4.dp)
         .clip(shape = RoundedCornerShape(12.dp))
         .then(
             if (isBlank) Modifier.background(color = Color.Transparent)

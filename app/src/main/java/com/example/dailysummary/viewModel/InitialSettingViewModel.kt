@@ -1,21 +1,16 @@
 package com.example.dailysummary.viewModel
 
 import android.util.Log
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.dailysummary.data.PrefRepository
 import com.example.dailysummary.dto.AdviceOrForcing
 import com.example.dailysummary.dto.AlarmTime
-import com.example.dailysummary.dto.DEFAULT_ALARMTIME
+import com.example.dailysummary.dto.SAMPLE_ALARM_TIME
 import com.example.dailysummary.dto.Setting
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import java.lang.StringBuilder
 import javax.inject.Inject
 
 @HiltViewModel
@@ -46,7 +41,7 @@ class InitialSettingViewModel @Inject constructor(
         _currentMyTimeTab.value=tab
     }
 
-    private val _myTime = MutableStateFlow(List(7){ DEFAULT_ALARMTIME })
+    private val _myTime = MutableStateFlow(List(7){ SAMPLE_ALARM_TIME })
     val myTime:StateFlow<List<AlarmTime>> = _myTime.asStateFlow()
 
     fun setMyTime(hour:Int?=null,minute:Int?=null,tab:Int?=null){
@@ -57,6 +52,7 @@ class InitialSettingViewModel @Inject constructor(
                 hour ?: this[index].hour,
                 minute ?: this[index].minute,
                 this[index].isNextDay,
+                this[index].isGrouped,
             )
         }
         Log.d("setMyTime",myTime.value.joinToString(separator = ",") { "(${it.hour},${it.minute})" })
@@ -75,7 +71,8 @@ class InitialSettingViewModel @Inject constructor(
             this[index]= AlarmTime(
                 hour = this[index].hour,
                 minute = this[index].minute,
-                isNextDay = value
+                isNextDay = value,
+                isGrouped =this[index].isGrouped
             )
         }
     }
@@ -85,6 +82,7 @@ class InitialSettingViewModel @Inject constructor(
             Setting(
                 adviceOrForcing = if(_adviceOrForcing.value.first)AdviceOrForcing.Advice else AdviceOrForcing.Forcing,
                 sameEveryDay = _sameEveryDay.value,
+                defaultAlarmTime = SAMPLE_ALARM_TIME,
                 alarmTimesByDay = _myTime.value,
             )
         )

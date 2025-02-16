@@ -260,9 +260,9 @@ fun Setting1(animatedValueList: List<AnimationTarget>) {
     val startPageAnimationState by viewModel.startPageAnimationState.collectAsState()
     val adviceOrForcing by viewModel.adviceOrForcing.collectAsState()
 
+    /*
     SettingOption(
         animatedValue = animatedValueList[4],
-        title = "권유 or 강요",
         adviceOrForcing = adviceOrForcing,
         onOptionSelected = { clickedIsLeft ->
             viewModel.clickAdviceOrForcing(clickedIsLeft)
@@ -270,7 +270,7 @@ fun Setting1(animatedValueList: List<AnimationTarget>) {
         isEnabled = startPageAnimationState >= 5,
         startPageAnimationState = startPageAnimationState,
         onNextState = { viewModel.setStartPageAnimationState(6) }
-    )
+    )*/
 }
 
 
