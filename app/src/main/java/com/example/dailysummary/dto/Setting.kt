@@ -19,7 +19,6 @@ data class AlarmTime(
 data class GroupedAlarmEntry(
     val alarmTime: AlarmTime,
     val dayList: List<Int>,
-    val isWritten:Boolean,
 )
 
 val SAMPLE_ALARM_TIME = AlarmTime(0,0, isGrouped = false)
@@ -32,6 +31,5 @@ val SAMPLE_SETTING = Setting(
 val SAMPLE_GROUPED_ALARM_ENTRY = GroupedAlarmEntry(
     alarmTime = SAMPLE_ALARM_TIME,
     dayList = emptyList(),
-    false,
 )
 

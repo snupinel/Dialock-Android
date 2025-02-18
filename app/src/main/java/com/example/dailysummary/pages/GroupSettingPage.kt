@@ -1,6 +1,7 @@
 package com.example.dailysummary.pages
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
@@ -26,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.dailysummary.components.BackButton
+import com.example.dailysummary.components.DeleteButton
 import com.example.dailysummary.components.RoundedCornerButton
 import com.example.dailysummary.components.SaveButton
 import com.example.dailysummary.components.TimePicker
@@ -41,7 +43,10 @@ fun GroupSettingPage(){
 
     val groupIndex by viewModel.groupIndex.collectAsState()
 
+    val isWritten = groupIndex!=null
+
     val groupingAlarm by viewModel.groupingAlarm.collectAsState()
+
 
     val alarmTime = groupingAlarm.alarmTime
 
@@ -57,11 +62,8 @@ fun GroupSettingPage(){
 
 
     LaunchedEffect(Unit){
-        if(groupIndex!=null){
-            viewModel.initializeGroupingAlarm(groupIndex!!)
-            viewModel.setIsWritten(true)
-        }
-        else viewModel.setIsWritten(false)
+        Log.d("GroupSettingPage", "LaunchedEffect called")
+        viewModel.initializeGroupingAlarm()
 
 
     }
@@ -74,14 +76,26 @@ fun GroupSettingPage(){
 
     Scaffold(
         topBar = {
-            GroupSettingToolBar{
-                viewModel.setAlarmSettingPageState(AlarmSettingPageState.Main)
-            }
+            GroupSettingToolBar(
+                isWritten = isWritten,
+                onBack = {viewModel.changePage(AlarmSettingPageState.Main)},
+                onDelete = {
+                    viewModel.deleteGroup()
+                    viewModel.changePage(AlarmSettingPageState.Main)
+                }
+            )
         },
         bottomBar = {
             SaveButton(modifier = Modifier.padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())) {
-                viewModel.saveGroup()
-                viewModel.setAlarmSettingPageState(AlarmSettingPageState.Main)
+                if(isWritten){
+                    viewModel.updateGroup()
+                    viewModel.changePage(AlarmSettingPageState.Main)
+                }
+                else{
+                    viewModel.saveGroup()
+                    viewModel.changePage(AlarmSettingPageState.Main)
+                }
+
             }
         }
     ){ paddingValues ->
@@ -94,9 +108,16 @@ fun GroupSettingPage(){
 
             Row(Modifier.fillMaxWidth()) {
 
-                weekDayList.forEachIndexed { index, day ->
-                    val isNotGrouped = !viewModel.isGrouped(index)
-                    val isSelected = daySelects[index]
+                weekDayList.forEachIndexed { dayIndex, day ->
+                    val isNotGrouped = !viewModel.isGrouped(dayIndex)
+
+                    val enabled = if(isWritten) {
+                        isNotGrouped || viewModel.isDayContainedInGroup(dayIndex)
+                    }else {
+                        isNotGrouped
+                    }
+
+                    val isSelected = daySelects[dayIndex]
                     RoundedCornerButton(
                         modifier = Modifier
                             .weight(1f)
@@ -108,10 +129,10 @@ fun GroupSettingPage(){
                                 )
                             ),
                         color = if(isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
-                        enabled = isNotGrouped,
+                        enabled = enabled,
                         onClick = {
-                            if (isSelected) viewModel.removeDayInGroup(index)
-                            else viewModel.appendDayInGroup(index)
+                            if (isSelected) viewModel.removeDayInGroup(dayIndex)
+                            else viewModel.appendDayInGroup(dayIndex)
                         }
                     ) {
                         Text(text = day.second, color = day.first?:MaterialTheme.colorScheme.onPrimary)
@@ -137,7 +158,9 @@ fun GroupSettingPage(){
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupSettingToolBar(
+    isWritten:Boolean,
     onBack:()->Unit,
+    onDelete:()->Unit
 ){
     TopAppBar(
         title = { /*TODO*/ },
@@ -146,6 +169,11 @@ fun GroupSettingToolBar(
                 onBack()
             }
 
+        },
+        actions = {
+            if(isWritten) DeleteButton {
+                onDelete()
+            }
         }
     )
 }

@@ -39,6 +39,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -85,6 +86,8 @@ fun AlarmSettingPage(navController: NavController){
 
         viewModel.settingInitialize()
 
+        viewModel.setShouldRefresh(true)
+
     }
 
 
@@ -108,9 +111,13 @@ fun AlarmSettingPage(navController: NavController){
 fun AlarmSettingMainPage(navController: NavController){
 
     val viewModel = hiltViewModel<SettingPageViewModel>()
+    val shouldRefresh by viewModel.shouldRefresh.collectAsState()
 
-    LaunchedEffect(Unit){
-        viewModel.refreshGroupedAlarmList()
+    LaunchedEffect(shouldRefresh){
+        if(shouldRefresh){
+            viewModel.refreshGroupedAlarmList()
+            viewModel.setShouldRefresh(false)
+        }
     }
 
     Scaffold(
@@ -147,13 +154,12 @@ fun AlarmSettingMainPage(navController: NavController){
                     DefaultTimePicker()
 
                     GroupedAlarms {
-                        viewModel.setGroupIndex(it)
-                        viewModel.setAlarmSettingPageState(AlarmSettingPageState.group)
+                        viewModel.changePage(AlarmSettingPageState.group,it)
                     }
 
                     Spacer(Modifier.height(8.dp))
                     AddGroupButton {
-                        viewModel.setAlarmSettingPageState(AlarmSettingPageState.group)
+                        viewModel.changePage(AlarmSettingPageState.group)
                     }
 
                 }

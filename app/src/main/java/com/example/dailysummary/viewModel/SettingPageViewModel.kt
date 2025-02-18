@@ -1,6 +1,7 @@
 package com.example.dailysummary.viewModel
 
 import android.os.Build
+import android.text.BoringLayout
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
@@ -29,11 +30,34 @@ class SettingPageViewModel @Inject constructor(
     private val alarmScheduler: AlarmScheduler,
 ): ViewModel(){
 
+
     private val _alarmSettingPageState = MutableStateFlow(AlarmSettingPageState.Main)
     val alarmSettingPageState: StateFlow<AlarmSettingPageState> = _alarmSettingPageState.asStateFlow()
 
     fun setAlarmSettingPageState(it:AlarmSettingPageState){
         _alarmSettingPageState.value=it
+    }
+
+    private val _shouldRefresh = MutableStateFlow(true)
+    val shouldRefresh: StateFlow<Boolean> = _shouldRefresh.asStateFlow()
+
+    fun setShouldRefresh(value:Boolean){
+        _shouldRefresh.value=value
+    }
+
+    fun changePage(value:AlarmSettingPageState,groupIndex:Int?=null){
+        Log.d("changePage","changePage called")
+        when(value){
+            AlarmSettingPageState.Main->{
+                setShouldRefresh(true)
+                setAlarmSettingPageState(AlarmSettingPageState.Main)
+            }
+            AlarmSettingPageState.group->{
+                setGroupIndex(groupIndex)
+                setAlarmSettingPageState(AlarmSettingPageState.group)
+            }
+
+        }
     }
 
     private val _groupIndex = MutableStateFlow<Int?>(null)
@@ -126,12 +150,13 @@ class SettingPageViewModel @Inject constructor(
     val groupedAlarmList: StateFlow<List<GroupedAlarmEntry>> = _groupedAlarmList.asStateFlow()
 
     fun refreshGroupedAlarmList(){
+        Log.d("aaaa",setting.value.alarmTimesByDay.toString())
         _groupedAlarmList.value=setting.value.alarmTimesByDay
-            .filter { it.isGrouped }
-            .mapIndexed { index, alarmTime -> alarmTime to index } // 인덱스와 함께 매핑
+            .mapIndexed { index, alarmTime -> alarmTime to index }
+            .filter { it.first.isGrouped }// 인덱스와 함께 매핑
             .groupBy({ it.first }, { it.second }) // alarmTime 기준으로 그룹화
-            .map { (alarmTime, dayList) -> GroupedAlarmEntry(alarmTime, dayList, true) } // GroupedAlarmEntry 생성
-        //Log.d("aaaa",setting.value.alarmTimesByDay.toString())
+            .map { (alarmTime, dayList) -> GroupedAlarmEntry(alarmTime, dayList) } // GroupedAlarmEntry 생성
+        Log.d("aaaa",_groupedAlarmList.value.toString())
     }
 
 
@@ -144,10 +169,6 @@ class SettingPageViewModel @Inject constructor(
         setSameEveryDay(setting.sameEveryDay)
         setDefaultAlarmTime(setting.defaultAlarmTime)
         setAlarmTimeByDay(setting.alarmTimesByDay)
-
-        refreshGroupedAlarmList()
-
-
 
     }
 
@@ -186,12 +207,17 @@ class SettingPageViewModel @Inject constructor(
     private val _groupingAlarm = MutableStateFlow(SAMPLE_GROUPED_ALARM_ENTRY)
     val groupingAlarm:StateFlow<GroupedAlarmEntry> = _groupingAlarm.asStateFlow()
 
-    fun initializeGroupingAlarm(index:Int){
-        _groupingAlarm.value=groupedAlarmList.value[index]
+    fun initializeGroupingAlarm(){
+        if(groupIndex.value==null){
+            _groupingAlarm.value = SAMPLE_GROUPED_ALARM_ENTRY
+        }
+        else _groupingAlarm.value=groupedAlarmList.value[groupIndex.value!!]
+
     }
 
     fun setGroupingAlarm(value:GroupedAlarmEntry){
         _groupingAlarm.value=value
+        Log.d("setGroupingAlarm",value.toString())
     }
 
     fun setGroupingAlarmTime(value:AlarmTime){
@@ -215,9 +241,7 @@ class SettingPageViewModel @Inject constructor(
 
     }
 
-    fun setIsWritten(value:Boolean){
-        setGroupingAlarm(groupingAlarm.value.copy(isWritten = value))
-    }
+
 
     fun setDayList(value:List<Int>){
         setGroupingAlarm(groupingAlarm.value.copy(dayList = value))
@@ -238,23 +262,41 @@ class SettingPageViewModel @Inject constructor(
         )
     }
 
-    fun saveGroup(){
+    //현재 edit 중인 group에 포함되어 있는가?
+    fun isDayContainedInGroup(dayIndex:Int):Boolean{
+        if(groupIndex.value==null) return false
+        return groupedAlarmList.value[groupIndex.value!!].dayList.contains(dayIndex)
+    }
+
+    fun saveGroup(
+        value:GroupedAlarmEntry = groupingAlarm.value
+    ){
         val newTimes = setting.value.alarmTimesByDay.toMutableList().apply {
-            groupingAlarm.value.dayList.forEach { day->
-                this[day]=groupingAlarm.value.alarmTime.copy(isGrouped = true)
+            value.dayList.forEach { day->
+                this[day]=value.alarmTime.copy(isGrouped = true)
             }
         }
         Log.d("saveGroup",newTimes.toString())
         setAlarmTimeByDay(newTimes)
     }
 
-    /*
-    private val _daySelects = MutableStateFlow(emptyList<Boolean>())
-    val daySelects:StateFlow<List<Boolean>> = _daySelects.asStateFlow()
+    fun deleteGroup(
+        gIndex:Int? = groupIndex.value
+    ){
+        if(gIndex==null) return
 
-    fun setDaySelects(day:Int,value:Boolean){
-        _daySelects.value=daySelects.value.toMutableList().apply {
-            this[day]=value
+        val newTimes = setting.value.alarmTimesByDay.toMutableList().apply {
+            groupedAlarmList.value[gIndex].dayList.forEach { day->
+                this[day]= AlarmTime(0,0, isGrouped = false)
+            }
         }
-    }*/
+        Log.d("deleteGroup",newTimes.toString())
+        setAlarmTimeByDay(newTimes)
+    }
+
+    fun updateGroup(){
+        if(groupIndex.value==null) return
+        deleteGroup()
+        saveGroup()
+    }
 }
