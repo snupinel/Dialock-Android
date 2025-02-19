@@ -46,6 +46,7 @@ class MainActivity : ComponentActivity() {
                     WindowCompat.setDecorFitsSystemWindows(it, false) // ✅ 시스템 UI가 콘텐츠를 덮지 않도록 설정
                     it.statusBarColor = Color.Transparent.toArgb()
                     //it.navigationBarColor = Color.Transparent.toArgb()// ✅ 상태바 배경을 투명하게 설정
+                    Log.d("ac","activate WindowCompat 그뭐시기")
                 }
 
                 //startService(Intent(this, MyService::class.java))

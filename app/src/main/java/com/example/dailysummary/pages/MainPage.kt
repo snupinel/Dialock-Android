@@ -72,8 +72,6 @@ fun MainPage(navController: NavController){
     val viewModel = hiltViewModel<MainPageViewModel>()
 
 
-    val context = LocalContext.current
-    val window = (context as? Activity)?.window
 
     LaunchedEffect(shouldRefresh){
         viewModel.setShowPopup(false)
