@@ -4,6 +4,9 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.view.WindowInsets
+import android.view.WindowInsetsController
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -37,14 +40,24 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModels()
-    @RequiresApi(Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             DailySummaryTheme{
+
                 window?.let {
                     WindowCompat.setDecorFitsSystemWindows(it, false) // ✅ 시스템 UI가 콘텐츠를 덮지 않도록 설정
-                    it.statusBarColor = Color.Transparent.toArgb()
+                    it.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
+                        val statusBarInsets = windowInsets.getInsets(WindowInsets.Type.statusBars())
+                        view.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+                        //view.setPadding(0,statusBarInsets.top,0,0)
+                        windowInsets
+
+                    }
+
+                        //window.decorView.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+                    //it.statusBarColor = Color.Transparent.toArgb()
                     //it.navigationBarColor = Color.Transparent.toArgb()// ✅ 상태바 배경을 투명하게 설정
                     Log.d("ac","activate WindowCompat 그뭐시기")
                 }

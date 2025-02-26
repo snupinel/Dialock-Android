@@ -2,8 +2,10 @@ package com.example.dailysummary.pages
 
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
 import android.provider.Settings
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -45,6 +47,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.dailysummary.components.AnimatedActionButton
 import com.example.dailysummary.components.DSCalender
+import com.example.dailysummary.components.MenuButton
 import com.example.dailysummary.components.SettingOption
 import com.example.dailysummary.components.TabNavigationBar
 import com.example.dailysummary.components.TimeSetting
@@ -63,6 +66,7 @@ val tabBarItems = listOf(homeTab,socialTab,myTab)
 //@Inject lateinit var alarmScheduler: AlarmScheduler
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MainPage(navController: NavController){
 
@@ -74,8 +78,8 @@ fun MainPage(navController: NavController){
 
 
     LaunchedEffect(shouldRefresh){
-        viewModel.setShowPopup(false)
-        viewModel.calenderRefresh()
+        //viewModel.setShowPopup(false)
+        //viewModel.calenderRefresh()
         //viewModel.setCalenderEntries()
 
         backStackEntry?.savedStateHandle?.set("shouldRefresh", false)
@@ -86,9 +90,7 @@ fun MainPage(navController: NavController){
     Scaffold(
         modifier = Modifier.height(100.dp),
         bottomBar = {
-            Column {
-                TabNavigationBar(tabBarItems)
-            }
+            TabNavigationBar(tabBarItems)
                     },
         topBar = {MainPageToolbar()},
         floatingActionButton = {
@@ -146,11 +148,10 @@ fun MainPageToolbar() {
     //val interpolatedColor = lerp(Color.White, Color.Black, alpha)
     TopAppBar(
 
-        title = { Text(text = "아무튼 탑앱바")},
+        title = { },
         navigationIcon = {
-            Row {
-                //BackButton(navController = navController)
-                //HomeButton(navController = navController)
+            MenuButton {
+
             }
         },
         actions = {

@@ -4,10 +4,19 @@ import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import com.example.dailysummary.data.CalenderPagingSource
 import com.example.dailysummary.data.PrefRepository
 import com.example.dailysummary.data.SummaryRepository
+import com.example.dailysummary.data.YearMonth
+import com.example.dailysummary.di.CalenderPagingSourceFactory
 import com.example.dailysummary.dto.Summary
 import com.example.dailysummary.model.CalenderEntry
+import com.example.dailysummary.model.CalenderOnePage
 import com.example.dailysummary.overlay.AlarmScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
@@ -29,6 +38,7 @@ class MainPageViewModel @Inject constructor(
     private val prefRepository: PrefRepository,
     private val alarmScheduler: AlarmScheduler,
     private val summaryRepository: SummaryRepository,
+    private val calenderPagingSourceFactory: CalenderPagingSourceFactory
     ):ViewModel(){
 
     private val _selectedTab = MutableStateFlow(Tab.Home)
@@ -38,6 +48,36 @@ class MainPageViewModel @Inject constructor(
         _selectedTab.value = Tab.valueOf(tab)
     }
 
+    val pager = Pager(
+        config = PagingConfig(
+            pageSize = 1, // 한 달 단위로 가져오므로 1개씩 가져옴
+            enablePlaceholders = false
+        ),
+        pagingSourceFactory = { calenderPagingSourceFactory.create() }
+    ).flow.cachedIn(viewModelScope)
+
+    /*
+    fun getCalenderPager(start: YearMonth = currentYMPage.value):Flow<PagingData<CalenderOnePage>>{
+        return Pager(
+            config = PagingConfig(
+                pageSize = 1, // 한 달 단위로 가져오므로 1개씩 가져옴
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = { calenderPagingSourceFactory.create(start) }
+        ).flow.cachedIn(viewModelScope)
+    }*/
+
+    val now = LocalDate.now()
+
+    private val _currentYMPage = MutableStateFlow(YearMonth(now.year,now.monthValue))
+    val currentYMPage = _currentYMPage.asStateFlow()
+
+    fun setCurrentYMPage(value:YearMonth){
+        _currentYMPage.value=value
+    }
+
+    /*
+
     @SuppressLint("NewApi")
     val currentDate = LocalDate.now() // 현재 날짜 가져오기
     @SuppressLint("NewApi")
@@ -45,9 +85,12 @@ class MainPageViewModel @Inject constructor(
     @SuppressLint("NewApi")
     val currentMonth = currentDate.monthValue // 현재 월 (숫자로)
 
+
+
     private val _selectedYearAndMonth = MutableStateFlow(Pair(currentYear,currentMonth))
     val selectedYearAndMonth = _selectedYearAndMonth.asStateFlow()
-
+*/
+    /*
     fun setSelectedYearAndMonth(year:Int,month: Int){
         _selectedYearAndMonth.value= Pair(year,month)
         calenderRefresh()
@@ -65,16 +108,18 @@ class MainPageViewModel @Inject constructor(
         else setSelectedYearAndMonth(selectedYearAndMonth.value.first,selectedYearAndMonth.value.second+1)
     }
 
+    */
 
+    //private val _currentMonthSummaries = MutableStateFlow(listOf<Summary>())
 
-    private val _currentMonthSummaries = MutableStateFlow(listOf<Summary>())
+    //val currentMonthSummaries = _currentMonthSummaries.asStateFlow()
 
-    val currentMonthSummaries = _currentMonthSummaries.asStateFlow()
-
+    /*
     fun setCurrentMonthSummaries(list:List<Summary>){
         _currentMonthSummaries.value=list
         Log.d("currentsum","list:$list")
-    }
+    }*/
+    /*
 
     private val _calenderEntries = MutableStateFlow(listOf<CalenderEntry>())
 
@@ -100,52 +145,23 @@ class MainPageViewModel @Inject constructor(
 
         _calenderEntries.value=list
     }
+    */
+    /*
+    fun getSummaries(year: Int,month: Int):List<Summary>{
+        val yearMonth = "%04d-%02d".format(year, month)
+        return runBlocking {
+            getSummariesByMonth(yearMonth).first()
+        }
+    }*/
 
+
+
+    /*
     fun readSummary(index:Int):Summary{
         return currentMonthSummaries.value[index]
-    }
+    }*/
 
 
 
-
-
-    fun getSummariesByMonth(yearMonth: String): Flow<List<Summary>> {
-        return summaryRepository.getSummariesByMonth(yearMonth)
-    }
-
-
-    fun calenderRefresh(){
-        val yearMonth = "%04d-%02d".format(
-            selectedYearAndMonth.value.first,
-            selectedYearAndMonth.value.second
-        )
-        setCurrentMonthSummaries(
-            runBlocking {
-                getSummariesByMonth(yearMonth).first()
-            }
-        )
-        setCalenderEntries()
-    }
-
-    private val _showPopup = MutableStateFlow(false)
-    val showPopup:StateFlow<Boolean> = _showPopup.asStateFlow()
-
-    fun setShowPopup(isShow:Boolean){
-        _showPopup.value=isShow
-    }
-
-    private val _popupPosition = MutableStateFlow(IntOffset(0, 0))
-    val popupPosition:StateFlow<IntOffset> = _popupPosition.asStateFlow()
-
-    fun setPopupPosition(it:IntOffset){
-        _popupPosition.value=it
-    }
-
-    private val _clickedBoxIndex = MutableStateFlow(0)
-    val clickedBoxIndex:StateFlow<Int> = _clickedBoxIndex.asStateFlow()
-
-    fun setClickedBoxIndex(index:Int){
-        _clickedBoxIndex.value=index
-    }
 
 }
