@@ -184,6 +184,7 @@ fun SummaryPage(
 
         ){
             viewModel.insertSummary()
+            backStackEntry?.savedStateHandle?.set("shouldRefresh", true)
             navController.popBackStack()
         } },
         topBar = {

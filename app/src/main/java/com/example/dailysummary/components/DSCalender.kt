@@ -62,12 +62,14 @@ import androidx.compose.ui.unit.round
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.example.dailysummary.data.YearMonth
 import com.example.dailysummary.model.CalenderOnePage
 import com.example.dailysummary.viewModel.MainPageViewModel
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.distinctUntilChanged
 import java.time.LocalDate
 
@@ -89,6 +91,14 @@ fun DSCalender(
 ) {
     Log.d("recompose", "DSCalender recomposition")
 
+    val backStackEntry = navController.currentBackStackEntryAsState().value
+    val shouldRefresh = backStackEntry?.savedStateHandle?.get<Boolean>("shouldRefresh")?:false
+
+
+
+
+
+
     val viewModel = hiltViewModel<MainPageViewModel>()
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
 
@@ -101,6 +111,30 @@ fun DSCalender(
 
     val currentYMPage by viewModel.currentYMPage.collectAsState()
     val isCurrentYear = currentYMPage.year == LocalDate.now().year
+
+    LaunchedEffect(shouldRefresh){
+        //viewModel.setShowPopup(false)
+        //viewModel.calenderRefresh()
+        //viewModel.setCalenderEntries()
+        if(shouldRefresh){
+            val targetPage = pagerState.currentPage
+            lazyPagingItems.refresh()
+            /*
+            snapshotFlow { lazyPagingItems.loadState.refresh }
+                .distinctUntilChanged()
+                .collect { state ->
+                    if (state is LoadState.NotLoading) {
+                        // 🪄 새로고침 완료되었으므로 원래 페이지로 복귀
+                        pagerState.scrollToPage(targetPage)
+                        cancel() // snapshotFlow collect 빠져나오기
+                    }
+                }
+            */
+            backStackEntry?.savedStateHandle?.set("shouldRefresh", false)
+        }
+    }
+
+
 
     if(hasData){
         LaunchedEffect(pagerState) {
