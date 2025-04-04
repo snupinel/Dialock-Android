@@ -51,7 +51,8 @@ class MainPageViewModel @Inject constructor(
     val pager = Pager(
         config = PagingConfig(
             pageSize = 1, // 한 달 단위로 가져오므로 1개씩 가져옴
-            enablePlaceholders = false
+            enablePlaceholders = false,
+            initialLoadSize = 3,
         ),
         pagingSourceFactory = { calenderPagingSourceFactory.create() }
     ).flow.cachedIn(viewModelScope)
@@ -73,7 +74,7 @@ class MainPageViewModel @Inject constructor(
     val currentYMPage = _currentYMPage.asStateFlow()
 
     fun setCurrentYMPage(value:YearMonth){
-        _currentYMPage.value=value
+        if (currentYMPage.value != value) _currentYMPage.value = value
     }
 
     /*

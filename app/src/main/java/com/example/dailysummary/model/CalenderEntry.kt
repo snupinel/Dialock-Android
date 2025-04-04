@@ -1,11 +1,14 @@
 package com.example.dailysummary.model
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.Immutable
 import com.example.dailysummary.data.YearMonth
 import com.example.dailysummary.dto.Summary
 import java.time.LocalDate
 
+@Immutable
 data class CalenderEntry(
     val isBlank:Boolean,
     val isWritten:Boolean,
@@ -13,6 +16,7 @@ data class CalenderEntry(
     val summaryIndex: Int,
 )
 
+@Immutable
 data class CalenderOnePage(
     val year:Int,
     val month: Int,
@@ -21,6 +25,7 @@ data class CalenderOnePage(
 )
 @RequiresApi(Build.VERSION_CODES.O)
 fun summaryRefinement(year:Int, month:Int, summaries:List<Summary>):CalenderOnePage{
+    Log.d("summaryRefinement", "activate")
     return CalenderOnePage(
         year = year,
         month = month,
