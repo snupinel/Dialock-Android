@@ -67,7 +67,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
-import com.example.dailysummary.data.YearMonth
+import com.example.dailysummary.dto.PageYearMonth
 import com.example.dailysummary.model.CalenderOnePage
 import com.example.dailysummary.viewModel.MainPageViewModel
 import kotlinx.coroutines.cancel
@@ -95,15 +95,15 @@ fun DSCalender(
     val backStackEntry = navController.currentBackStackEntryAsState().value
     val shouldRefresh = backStackEntry?.savedStateHandle?.get<Boolean>("shouldRefresh")?:false //글을 작성하거나 수정했을 때, 새로고침이 필요함을 전달
     val viewModel = hiltViewModel<MainPageViewModel>()
-    val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
-    val hasData = lazyPagingItems.itemCount > 0
+    //val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
+    //val hasData = lazyPagingItems.itemCount > 0
     val currentYMPage by viewModel.currentYMPage.collectAsState()
 
     val pagerState = rememberPagerState(
         initialPage = currentYMPage.toPageNum(),
         pageCount = { 1200 }
     )
-
+    val cache = viewModel.pageCache
     val isCurrentYear = currentYMPage.year == LocalDate.now().year
 
     LaunchedEffect(shouldRefresh){
@@ -112,7 +112,7 @@ fun DSCalender(
         //viewModel.setCalenderEntries()
         if(shouldRefresh){
             val targetPage = pagerState.currentPage
-            lazyPagingItems.refresh()
+            //lazyPagingItems.refresh()
             /*
             snapshotFlow { lazyPagingItems.loadState.refresh }
                 .distinctUntilChanged()
@@ -128,25 +128,9 @@ fun DSCalender(
         }
     }
 
-
-
-    if(hasData){
-        LaunchedEffect(pagerState) {
-            snapshotFlow { pagerState.currentPage }
-                .distinctUntilChanged()
-                .collect { page ->
-                    try {
-                        val item = lazyPagingItems[page]
-                        if (item != null) {
-                            viewModel.setCurrentYMPage(item.yearMonth)
-                        }
-                    } catch (_:Exception){}
-                }
-        }
+    LaunchedEffect(pagerState.currentPage){
+        viewModel.setCurrentYMPage(PageYearMonth(pagerState.currentPage))
     }
-
-
-
 
     val customFlingBehavior = PagerDefaults.flingBehavior(
         state = pagerState,
@@ -173,53 +157,61 @@ fun DSCalender(
             }
         }
 
-        if(lazyPagingItems.loadState.refresh is LoadState.Loading){
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier
+                .height(300.dp),
+            verticalAlignment = Alignment.Top,
+            beyondViewportPageCount = 2,
+            pageSpacing = 8.dp,
+            flingBehavior = customFlingBehavior
+        ) { page ->
+            val pageData = cache[page]
+
+            // 없으면 로딩 요청
+            LaunchedEffect(page) {
+                viewModel.loadPageIfAbsent(page)
             }
-        }
-        else{
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier
-                    .height(300.dp),
-                verticalAlignment = Alignment.Top,
-                beyondViewportPageCount = 2,
-                pageSpacing = 8.dp,
-                flingBehavior = customFlingBehavior
-            ) { page ->
-                val calenderOnePage = try{
-                    lazyPagingItems[page]
-                } catch (_:Exception){
-
-                    null
+            
+            if (pageData != null) {
+                CalenderDayGrid(
+                    calenderOnePage = pageData,
+                    onNav = { year, month, day ->
+                        navController.navigate("SummaryPage/$year/$month/$day")
+                    },
+                )
+            } else {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
                 }
+            }
+            /*
+            val calenderOnePage = try{
+                lazyPagingItems[page]
+            } catch (_:Exception){
+
+                null
+            }
 
 
-                if(calenderOnePage == null){
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
+            if(calenderOnePage == null){
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
                 }
-                else{
-                    val rememberedPage: (@Composable () -> Unit)? = remember(calenderOnePage) {
-                        calenderOnePage?.let {
-                            {
-                                CalenderDayGrid(
-                                    calenderOnePage = it,
-                                    onNav = { year, month, day ->
-                                        navController.navigate("SummaryPage/$year/$month/$day")
-                                    },
-                                )
-                            }
+            }
+            else{
+                val rememberedPage: (@Composable () -> Unit)? = remember(calenderOnePage) {
+                    calenderOnePage?.let {
+                        {
+
                         }
                     }
-
-                    rememberedPage?.invoke() // 여기서 호출
                 }
 
+                rememberedPage?.invoke() // 여기서 호출
+            }*/
 
-            }
+
         }
 
 
