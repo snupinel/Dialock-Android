@@ -64,6 +64,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.example.dailysummary.data.YearMonth
@@ -92,24 +93,17 @@ fun DSCalender(
     Log.d("recompose", "DSCalender recomposition")
 
     val backStackEntry = navController.currentBackStackEntryAsState().value
-    val shouldRefresh = backStackEntry?.savedStateHandle?.get<Boolean>("shouldRefresh")?:false
-
-
-
-
-
-
+    val shouldRefresh = backStackEntry?.savedStateHandle?.get<Boolean>("shouldRefresh")?:false //글을 작성하거나 수정했을 때, 새로고침이 필요함을 전달
     val viewModel = hiltViewModel<MainPageViewModel>()
     val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
+    val hasData = lazyPagingItems.itemCount > 0
+    val currentYMPage by viewModel.currentYMPage.collectAsState()
 
     val pagerState = rememberPagerState(
-
-        pageCount = { lazyPagingItems.itemCount }
+        initialPage = currentYMPage.toPageNum(),
+        pageCount = { 1200 }
     )
 
-    val hasData = lazyPagingItems.itemCount > 0
-
-    val currentYMPage by viewModel.currentYMPage.collectAsState()
     val isCurrentYear = currentYMPage.year == LocalDate.now().year
 
     LaunchedEffect(shouldRefresh){
@@ -141,10 +135,12 @@ fun DSCalender(
             snapshotFlow { pagerState.currentPage }
                 .distinctUntilChanged()
                 .collect { page ->
-                    val item = lazyPagingItems[page]
-                    if (item != null) {
-                        viewModel.setCurrentYMPage(item.yearMonth)
-                    }
+                    try {
+                        val item = lazyPagingItems[page]
+                        if (item != null) {
+                            viewModel.setCurrentYMPage(item.yearMonth)
+                        }
+                    } catch (_:Exception){}
                 }
         }
     }
@@ -188,16 +184,22 @@ fun DSCalender(
                 modifier = Modifier
                     .height(300.dp),
                 verticalAlignment = Alignment.Top,
-                key = lazyPagingItems.itemKey { it.yearMonth.toPageNum() },
                 beyondViewportPageCount = 2,
                 pageSpacing = 8.dp,
                 flingBehavior = customFlingBehavior
             ) { page ->
-                val calenderOnePage = lazyPagingItems[page]
+                val calenderOnePage = try{
+                    lazyPagingItems[page]
+                } catch (_:Exception){
+
+                    null
+                }
 
 
                 if(calenderOnePage == null){
-
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
                 }
                 else{
                     val rememberedPage: (@Composable () -> Unit)? = remember(calenderOnePage) {
@@ -343,7 +345,7 @@ fun CalenderDayGrid(
                 ){
                     if(calenderEntry.isWritten){
                         //Toast.makeText(context,viewModel.readSummary(it.summaryIndex).content,Toast.LENGTH_SHORT).show()
-
+                        onNav(year,month,calenderEntry.day)
                     }
                     else{
                         val targetDate = LocalDate.of(year,month,calenderEntry.day)
