@@ -97,14 +97,16 @@ fun DSCalender(
     val viewModel = hiltViewModel<MainPageViewModel>()
     //val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
     //val hasData = lazyPagingItems.itemCount > 0
-    val currentYMPage by viewModel.currentYMPage.collectAsState()
 
     val pagerState = rememberPagerState(
-        initialPage = currentYMPage.toPageNum(),
+        initialPage = PageYearMonth().toPageNum(),
         pageCount = { 1200 }
     )
+
+
+
     val cache = viewModel.pageCache
-    val isCurrentYear = currentYMPage.year == LocalDate.now().year
+
 
     LaunchedEffect(shouldRefresh){
         //viewModel.setShowPopup(false)
@@ -127,90 +129,66 @@ fun DSCalender(
             backStackEntry?.savedStateHandle?.set("shouldRefresh", false)
         }
     }
-
-    LaunchedEffect(pagerState.currentPage){
-        viewModel.setCurrentYMPage(PageYearMonth(pagerState.currentPage))
+    val currentPageYM = remember(pagerState.currentPage) {
+        PageYearMonth(pagerState.currentPage)
     }
+    val isCurrentYear = currentPageYM.year == LocalDate.now().year
 
     val customFlingBehavior = PagerDefaults.flingBehavior(
         state = pagerState,
         pagerSnapDistance = PagerSnapDistance.atMost(1),
         decayAnimationSpec = splineBasedDecay(LocalDensity.current),
-        snapAnimationSpec = tween(
-            durationMillis = 350, // 부드러운 이동 시간 (ms)
-            easing = FastOutSlowInEasing // 느리게 시작하고 부드럽게 끝나는 이징
+        snapAnimationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
         ),
         snapPositionalThreshold = 0.5f // 50% 이상 넘기면 다음 페이지로 이동
     )
 
 
     Column(modifier = modifier) {
+
         CalenderMonth(
             modifier = Modifier.align(Alignment.Start),
             isCurrentYear = isCurrentYear,
-            year = currentYMPage.year,
-            month = currentYMPage.month
+            year = currentPageYM.year,
+            month = currentPageYM.month
         )
         Row {
-            weekDayList.forEach { day ->
-                CalenderDate(modifier = Modifier.weight(1f), day.first, day.second)
+            weekDayList.forEach { d ->
+                CalenderDate(modifier = Modifier.weight(1f), d.first, d.second)
             }
         }
 
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier
-                .height(300.dp),
+            modifier = Modifier.height(300.dp),
             verticalAlignment = Alignment.Top,
-            beyondViewportPageCount = 2,
+            beyondViewportPageCount = 4,
             pageSpacing = 8.dp,
             flingBehavior = customFlingBehavior
         ) { page ->
             val pageData = cache[page]
 
             // 없으면 로딩 요청
-            LaunchedEffect(page) {
-                viewModel.loadPageIfAbsent(page)
-            }
-            
-            if (pageData != null) {
-                CalenderDayGrid(
-                    calenderOnePage = pageData,
-                    onNav = { year, month, day ->
-                        navController.navigate("SummaryPage/$year/$month/$day")
-                    },
-                )
-            } else {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+            LaunchedEffect(pageData) {
+                if (pageData == null) {
+                    viewModel.loadPageIfAbsent(page)
                 }
             }
-            /*
-            val calenderOnePage = try{
-                lazyPagingItems[page]
-            } catch (_:Exception){
-
-                null
-            }
 
 
-            if(calenderOnePage == null){
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            }
-            else{
-                val rememberedPage: (@Composable () -> Unit)? = remember(calenderOnePage) {
-                    calenderOnePage?.let {
-                        {
-
+            val pageContent:@Composable ()->Unit = remember(pageData) {
+                {
+                    CalenderDayGrid(
+                        calenderOnePage = pageData ?: CalenderOnePage.dummy(page),
+                        onNav = { y, m, d ->
+                            navController.navigate("SummaryPage/$y/$m/$d")
                         }
-                    }
+                    )
                 }
-
-                rememberedPage?.invoke() // 여기서 호출
-            }*/
-
+            }
+            pageContent()
 
         }
 

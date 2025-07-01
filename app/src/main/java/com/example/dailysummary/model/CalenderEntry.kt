@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Immutable
 import com.example.dailysummary.data.YearMonth
+import com.example.dailysummary.dto.PageYearMonth
 import com.example.dailysummary.dto.Summary
 import java.time.LocalDate
 
@@ -22,7 +23,15 @@ data class CalenderOnePage(
     val month: Int,
     val calenderEntries:List<CalenderEntry>,
     val yearMonth: YearMonth = YearMonth(year, month)
-)
+){
+    companion object {
+        @RequiresApi(Build.VERSION_CODES.O)
+        fun dummy(page: Int): CalenderOnePage {
+            val ym = PageYearMonth(page)
+            return summaryRefinement(ym.year,ym.month, emptyList())
+        }
+    }
+}
 @RequiresApi(Build.VERSION_CODES.O)
 fun summaryRefinement(year:Int, month:Int, summaries:List<Summary>):CalenderOnePage{
     Log.d("summaryRefinement", "activate")
