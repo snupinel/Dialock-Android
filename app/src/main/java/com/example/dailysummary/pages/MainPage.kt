@@ -107,7 +107,6 @@ fun MainPage(navController: NavController){
             Modifier
                 .fillMaxSize()
                 .padding(paddingValues = paddingValues)
-                .padding(horizontal = 12.dp)
         ) {
             when (selectedTab){
                 Tab.Home -> {

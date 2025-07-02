@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -149,12 +150,12 @@ fun DSCalender(
     Column(modifier = modifier) {
 
         CalenderMonth(
-            modifier = Modifier.align(Alignment.Start),
+            modifier = Modifier.align(Alignment.Start).padding(horizontal = 12.dp),
             isCurrentYear = isCurrentYear,
             year = currentPageYM.year,
             month = currentPageYM.month
         )
-        Row {
+        Row(modifier = Modifier.padding(horizontal = 12.dp)) {
             weekDayList.forEach { d ->
                 CalenderDate(modifier = Modifier.weight(1f), d.first, d.second)
             }
@@ -165,7 +166,7 @@ fun DSCalender(
             modifier = Modifier.height(300.dp),
             verticalAlignment = Alignment.Top,
             beyondViewportPageCount = 4,
-            pageSpacing = 8.dp,
+            pageSpacing = 40.dp,
             flingBehavior = customFlingBehavior
         ) { page ->
             val pageData = cache[page]
@@ -296,7 +297,7 @@ fun CalenderDayGrid(
     val month = calenderOnePage.month
 
     LazyVerticalGrid(
-        modifier = Modifier.height(300.dp),
+        modifier = Modifier.height(300.dp).padding(horizontal = 12.dp),
         columns = GridCells.Fixed(7),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
