@@ -58,17 +58,15 @@ class AlarmScheduler @Inject constructor(
                     add(Calendar.DATE, 1)
                 }
 
-                if (after(futureLimit)) {
-                    add(Calendar.DATE, -7)
-                }
-
                 // ✅ 설정 시간이 현재보다 이전이면 다음 주로 이동
                 if (before(now)) {
                     add(Calendar.DATE, 7)
                 }
 
                 // ✅ 설정 시간이 현재 + 7일 이후라면 7일 빼기
-
+                if (after(futureLimit)) {
+                    add(Calendar.DATE, -7)
+                }
             }
 
 

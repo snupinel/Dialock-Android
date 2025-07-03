@@ -87,6 +87,7 @@ fun AlarmSettingPage(navController: NavController){
         viewModel.settingInitialize()
 
         viewModel.setShouldRefresh(true)
+        viewModel.toggleChangeToggle()
 
     }
 

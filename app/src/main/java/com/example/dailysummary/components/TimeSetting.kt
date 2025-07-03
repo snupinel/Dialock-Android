@@ -367,6 +367,7 @@ fun NumberScroller(
     LaunchedEffect(changeToggle){
         val initialIndex = numbers.size * 50 + selectedNumber -(visibleItemsCount/2)
         lazyListState.scrollToItem(initialIndex)
+        Log.d("NumberScroller",selectedNumber.toString())
     }
 
     LazyColumn(
