@@ -33,6 +33,9 @@ import com.example.dailysummary.pages.MainPage
 import com.example.dailysummary.pages.StartPage
 import com.example.dailysummary.pages.SummaryPage
 import com.example.dailysummary.pages.TimeSettingPage
+import com.example.dailysummary.pages.initialPages.FeatureIntroPage
+import com.example.dailysummary.pages.initialPages.GreetingPage
+import com.example.dailysummary.pages.initialPages.InitialSettingPage
 import com.example.dailysummary.ui.theme.DailySummaryTheme
 import com.example.dailysummary.viewModel.InitialSettingViewModel
 import com.example.dailysummary.viewModel.MainViewModel
@@ -74,8 +77,8 @@ class MainActivity : ComponentActivity() {
                     Log.d("aaaa","completed")
                     MyApp(startDestination = "MainPage")
                 }else{
-                    //MyApp()
-                    MyApp(startDestination = "MainPage")
+                    MyApp()
+                    //MyApp(startDestination = "MainPage")
                 }
             }
         }
@@ -87,7 +90,7 @@ class MainActivity : ComponentActivity() {
 private fun MyApp(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = "StartPage"
+    startDestination: String = "GreetingPage"
 ) {
 
     Surface(
@@ -130,7 +133,15 @@ private fun MyApp(
                 }
 
             }
-
+            composable("GreetingPage") {
+                GreetingPage(navController = navController)
+            }
+            composable("FeatureIntroPage") {
+                FeatureIntroPage(navController = navController)
+            }
+            composable("InitialSettingPage") {
+                InitialSettingPage(navController = navController)
+            }
         }
     }
 

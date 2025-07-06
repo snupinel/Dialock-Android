@@ -172,19 +172,7 @@ fun SettingSameEveryDay(){
     }
 }
 
-@Composable
-fun SettingInstruction(){
-    Column (
-        Modifier
-            .fillMaxWidth()
-            .height(60.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center){
-        Text("일기를 쓸 시간을 설정해 주세요", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-        Text("(잠자기 30분 전 정도가 좋아요!)")
-    }
 
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -221,77 +209,12 @@ fun AlarmSettingToolBar(
 }
 
 
-
-/*
-@Composable
-fun SettingTime() {
-    val viewModel = hiltViewModel<SettingPageViewModel>()
-
-    val myTime by viewModel.myTime.collectAsState()
-    val sameEveryDay by viewModel.sameEveryDay.collectAsState()
-    val currentMyTimeTab by viewModel.currentMyTimeTab.collectAsState()
-    val isNextDay = viewModel.myTime.collectAsState().value[currentMyTimeTab].isNextDay
-
-    val changeToggle by viewModel.changeToggle.collectAsState()
-
-
-    //Log.d("aaaab",myTime.toString())
-    //Log.d("aaaab",currentMyTimeTab.toString())
-    Log.d("SettingTime","SettingTime recompositioned:\n" +
-            "$myTime")
-    TimeSetting(
-        title = "알림을 받을 시간을 설정해 주세요.\n잠자기 30분 정도가 좋아요.",
-        selectedHour = myTime[currentMyTimeTab].hour,
-        selectedMinute = myTime[currentMyTimeTab].minute,
-        onHourChange = { viewModel.setMyTime(hour = it) },
-        onMinuteChange = { viewModel.setMyTime(minute = it) },
-        sameEveryDay = sameEveryDay,
-        onToggleSameEveryDay = { viewModel.setSameEveryDay(isToggle = true) },
-        currentMyTimeTab = currentMyTimeTab,
-        onDayTabClick = { viewModel.setCurrentMyTimeTab(it) },
-        isNextDay = isNextDay,
-        onToggleIsNextDay = {viewModel.setIsNextDay(!isNextDay)},
-        changeToggle = changeToggle
-    )
-}
-
-
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-fun SettingPreviewButton() {
-    val viewModel = hiltViewModel<SettingPageViewModel>()
-    val context = LocalContext.current
-
-    AnimatedActionButton(
-        text = "미리보기",
-        onClick = {
-            viewModel.previewSetting(context)
-        },
-        backgroundColor = MaterialTheme.colorScheme.primary,
-        textColor = Color.White,
-    )
-}*/
-
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SettingSaveButton(enabled:Boolean,onclick:()->Unit) {
 
     val context = LocalContext.current
-
-    //val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
     val (permissionRequested, setPermissionRequested) = remember { mutableStateOf(false) }
-
-
-    /*
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (alarmManager.canScheduleExactAlarms()) {
-
-        } else {
-
-        }
-    }*/
 
     LaunchedEffect(permissionRequested){
         if(permissionRequested){
@@ -320,33 +243,6 @@ fun SettingSaveButton(enabled:Boolean,onclick:()->Unit) {
     ){
         Text("설정 저장", color = MaterialTheme.colorScheme.onPrimary)
     }
-
-
-    /*
-
-    AnimatedActionButton(
-        text = "설정 완료",
-        onClick = {
-            viewModel.saveSetting()
-            //viewModel.setRefSetting(viewModel.extractCurrentSetting())
-            Toast.makeText(context, "설정 완료", Toast.LENGTH_SHORT).show()
-
-            /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) { // Android 12+
-                scheduleOverlay(context)
-                setPermissionRequested(true)
-            } else {
-                // Pre-Android 12, directly schedule the alarm
-
-            }*/
-            //scheduleOverlay(context,p)
-            //setPermissionRequested(true)
-            viewModel.scheduleOverlay()
-        },
-        backgroundColor = MaterialTheme.colorScheme.primary,
-        textColor = Color.White,
-    )
-    */
-
 }
 
 @Composable

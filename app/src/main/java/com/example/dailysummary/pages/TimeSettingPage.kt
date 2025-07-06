@@ -35,6 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.dailysummary.components.BackButton
@@ -80,6 +81,7 @@ fun WeekdaySelectorRow(
     val allChecked = chosenDays.all { it }
 
     Column {
+        SettingInstruction()
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -207,4 +209,18 @@ fun MyTimePicker(viewModel: SettingPageViewModel){
         onMinuteChange = { viewModel.setPickerTime(minute = it) },
         changeToggle = changeToggle,
     )
+}
+
+@Composable
+fun SettingInstruction(){
+    Column (
+        Modifier
+            .fillMaxWidth()
+            .height(60.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center){
+        Text("일기를 쓸 시간을 설정해 주세요", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+        Text("(잠자기 30분 전 정도가 좋아요!)")
+    }
+
 }
