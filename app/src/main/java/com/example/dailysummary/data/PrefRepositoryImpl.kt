@@ -42,9 +42,8 @@ class PrefRepositoryImpl @Inject constructor(
         builder.append(setting.adviceOrForcing.name+" ")
         builder.append(setting.sameEveryDay.toString()+" ")
 
-        builder.append("${setting.defaultAlarmTime.hour} ${setting.defaultAlarmTime.minute} ")
         setting.alarmTimesByDay.forEach{
-            builder.append("${it.hour} ${it.minute} ${it.isGrouped} ")
+            builder.append("${it.hour} ${it.minute} ")
         }
         setPref("Setting",builder.toString())
 
@@ -59,15 +58,14 @@ class PrefRepositoryImpl @Inject constructor(
 
         val adviceOrForcing= AdviceOrForcing.valueOf(refList[0])
         val sameEveryDay=refList[1].toBoolean()
-        val defaultAlarmTime = AlarmTime(refList[2].toInt(),refList[3].toInt(), isGrouped = false)
 
-        var alarmTimes=refList.drop(4).chunked(3).map{
-                (first, second, third) -> AlarmTime(first.toInt(),second.toInt(), isGrouped = third.toBoolean())
+        var alarmTimes=refList.drop(2).chunked(2).map{
+                (first, second) -> AlarmTime(first.toInt(),second.toInt())
         }
 
         if(alarmTimes.size<7) alarmTimes= alarmTimes+List(7-alarmTimes.size){ SAMPLE_ALARM_TIME}
 
-        return Setting(adviceOrForcing, sameEveryDay, defaultAlarmTime,alarmTimes)
+        return Setting(adviceOrForcing, sameEveryDay,alarmTimes)
     }
 
 }

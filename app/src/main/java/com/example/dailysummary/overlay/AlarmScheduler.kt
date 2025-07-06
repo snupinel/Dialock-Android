@@ -38,7 +38,6 @@ class AlarmScheduler @Inject constructor(
         //setting.alarmTimes
         //val timeParts = timeString.split(":")
         //if (timeParts.size != 2) return // 잘못된 시간 형식이면 종료
-        if(setting.sameEveryDay) setting = setting.copy(alarmTimesByDay = List(7){setting.defaultAlarmTime})
 
         setting.alarmTimesByDay.forEachIndexed { index, time ->
             Log.d("alarmscheduler", "${index+1} 번째 요일 의 세팅 엔트리:\n" +

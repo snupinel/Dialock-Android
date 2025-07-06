@@ -112,10 +112,18 @@ fun Overlay(
                     isUp=it
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                SaveButton(enabled = textFieldValue!=""){
-                    saveDiary(textFieldValue,isUp!!,isLikeChecked)
-                    close()
+                RoundedCornerButton(modifier = Modifier.fillMaxWidth()
+                    .height(50.dp)
+                    .padding(horizontal = 12.dp),
+                    onClick = {
+                        saveDiary(textFieldValue,isUp!!,isLikeChecked)
+                        close()
+                    },
+                    enabled = textFieldValue!=""
+                ){
+                    Text("저장", color = MaterialTheme.colorScheme.onPrimary)
                 }
+
             }
         }
     }
@@ -177,7 +185,7 @@ fun OverlayPreview(){
     DailySummaryTheme {
         Overlay(
             close = {},
-            getSetting = {  Setting(AdviceOrForcing.Advice,true,SAMPLE_ALARM_TIME,List(7){ SAMPLE_ALARM_TIME})},
+            getSetting = {  Setting(AdviceOrForcing.Advice,true,List(7){ SAMPLE_ALARM_TIME})},
             saveDiary = { content, isThumbUp, isLikeChecked ->
             }
             //setTextFieldValue =
@@ -276,23 +284,6 @@ fun MinimizeButton(
             contentDescription = "Minimize",
             tint = MaterialTheme.colorScheme.onPrimary
         )
-    }
-}
-
-@Composable
-fun SaveButton(
-    modifier: Modifier=Modifier,
-    enabled:Boolean=true,
-    onClick: () -> Unit,
-){
-    RoundedCornerButton(
-        modifier= modifier
-            .fillMaxWidth()
-            .height(50.dp),
-        onClick = onClick,
-        enabled = enabled,
-    ) {
-        Text("저장", color = MaterialTheme.colorScheme.onPrimary)
     }
 }
 

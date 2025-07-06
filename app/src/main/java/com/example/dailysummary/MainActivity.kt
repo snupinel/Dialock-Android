@@ -16,23 +16,27 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.WindowCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navigation
 import com.example.dailysummary.pages.AlarmSettingPage
-import com.example.dailysummary.pages.GroupSettingPage
 import com.example.dailysummary.pages.MainPage
 import com.example.dailysummary.pages.StartPage
 import com.example.dailysummary.pages.SummaryPage
+import com.example.dailysummary.pages.TimeSettingPage
 import com.example.dailysummary.ui.theme.DailySummaryTheme
 import com.example.dailysummary.viewModel.InitialSettingViewModel
 import com.example.dailysummary.viewModel.MainViewModel
+import com.example.dailysummary.viewModel.SettingPageViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -104,9 +108,27 @@ private fun MyApp(
                 Log.d("aaaa",year.toString())
                 SummaryPage(navController,year,month,day)
             }
-            composable("AlarmSettingPage"){
-                Log.d("nav","AlarmSettingPage called")
-                AlarmSettingPage(navController)
+
+            navigation(
+                startDestination = "AlarmSettingPage",
+                route = "alarm_graph"
+            ){
+                composable("AlarmSettingPage"){
+                    val parentEntry = remember(it) {
+                        navController.getBackStackEntry("alarm_graph")
+                    }
+                    val viewModel = hiltViewModel<SettingPageViewModel>(parentEntry)
+                    AlarmSettingPage(navController,viewModel)
+                }
+                composable("TimeSettingPage") {
+                    val parentEntry = remember(it) {
+                        navController.getBackStackEntry("alarm_graph")
+                    }
+                    val viewModel = hiltViewModel<SettingPageViewModel>(parentEntry)
+
+                    TimeSettingPage(navController, viewModel)
+                }
+
             }
 
         }

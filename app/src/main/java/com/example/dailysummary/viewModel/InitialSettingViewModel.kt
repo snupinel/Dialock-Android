@@ -30,9 +30,7 @@ class InitialSettingViewModel @Inject constructor(
     private val _adviceOrForcing = MutableStateFlow(Pair(false,false))
     val adviceOrForcing:StateFlow<Pair<Boolean,Boolean>> = _adviceOrForcing.asStateFlow()
 
-    fun clickAdviceOrForcing(clickedIsLeft:Boolean){
-        _adviceOrForcing.value=Pair(clickedIsLeft,!clickedIsLeft)
-    }
+
 
     private val _currentMyTimeTab = MutableStateFlow(0)
     val currentMyTimeTab:StateFlow<Int> = _currentMyTimeTab.asStateFlow()
@@ -52,7 +50,6 @@ class InitialSettingViewModel @Inject constructor(
                 hour ?: this[index].hour,
                 minute ?: this[index].minute,
                 this[index].isNextDay,
-                this[index].isGrouped,
             )
         }
         Log.d("setMyTime",myTime.value.joinToString(separator = ",") { "(${it.hour},${it.minute})" })
@@ -72,7 +69,6 @@ class InitialSettingViewModel @Inject constructor(
                 hour = this[index].hour,
                 minute = this[index].minute,
                 isNextDay = value,
-                isGrouped =this[index].isGrouped
             )
         }
     }
@@ -82,7 +78,6 @@ class InitialSettingViewModel @Inject constructor(
             Setting(
                 adviceOrForcing = if(_adviceOrForcing.value.first)AdviceOrForcing.Advice else AdviceOrForcing.Forcing,
                 sameEveryDay = _sameEveryDay.value,
-                defaultAlarmTime = SAMPLE_ALARM_TIME,
                 alarmTimesByDay = _myTime.value,
             )
         )

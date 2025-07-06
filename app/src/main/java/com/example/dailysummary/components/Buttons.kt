@@ -70,9 +70,10 @@ fun ConfirmButton(
 }
 @Composable
 fun RevertButton(
+    enabled:Boolean = true,
     onClick:()->Unit,
 ){
-    IconButton(onClick = onClick) {
+    IconButton(enabled = enabled, onClick = onClick) {
         Icon(imageVector = Icons.Outlined.Replay, contentDescription = "Revert")
     }
 }

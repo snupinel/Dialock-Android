@@ -112,7 +112,7 @@ import com.example.dailysummary.components.EditButton
 import com.example.dailysummary.components.ImageButton
 import com.example.dailysummary.components.ImagePager
 import com.example.dailysummary.components.RevertButton
-import com.example.dailysummary.components.SaveButton
+import com.example.dailysummary.components.RoundedCornerButton
 import com.example.dailysummary.ui.theme.DailySummaryTheme
 import com.example.dailysummary.viewModel.SummaryPageViewModel
 import kotlinx.coroutines.android.awaitFrame
@@ -253,9 +253,16 @@ fun SummaryPageBottomBar(
 
     }
     else{
-        SaveButton(Modifier.padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())) {
-            onSave()
+        RoundedCornerButton(
+            modifier = Modifier.padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
+                .fillMaxWidth()
+                .height(50.dp)
+                .padding(horizontal = 12.dp),
+            onClick = onSave,
+        ){
+            Text("작성 완료",color = MaterialTheme.colorScheme.onPrimary)
         }
+
     }
 }
 
