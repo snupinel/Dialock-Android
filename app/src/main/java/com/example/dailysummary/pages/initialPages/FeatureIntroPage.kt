@@ -55,7 +55,7 @@ fun FeatureIntroPage(navController: NavController){
                     if (pagerState.currentPage < features.lastIndex) {
                         scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
                     } else {
-                        navController.navigate("InitialSettingPage")
+                        navController.navigate("PermissionRequestPage")
                     }
                 },
             ){

@@ -36,6 +36,7 @@ import com.example.dailysummary.pages.TimeSettingPage
 import com.example.dailysummary.pages.initialPages.FeatureIntroPage
 import com.example.dailysummary.pages.initialPages.GreetingPage
 import com.example.dailysummary.pages.initialPages.InitialSettingPage
+import com.example.dailysummary.pages.initialPages.PermissionRequestPage
 import com.example.dailysummary.ui.theme.DailySummaryTheme
 import com.example.dailysummary.viewModel.InitialSettingViewModel
 import com.example.dailysummary.viewModel.MainViewModel
@@ -141,6 +142,9 @@ private fun MyApp(
             }
             composable("InitialSettingPage") {
                 InitialSettingPage(navController = navController)
+            }
+            composable("PermissionRequestPage"){
+                PermissionRequestPage(navController)
             }
         }
     }
