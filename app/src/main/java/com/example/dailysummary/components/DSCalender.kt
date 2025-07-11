@@ -9,6 +9,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.splineBasedDecay
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
@@ -29,6 +31,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerSnapDistance
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.KeyboardArrowLeft
@@ -69,6 +72,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.example.dailysummary.dto.PageYearMonth
+import com.example.dailysummary.model.CalenderEntry
 import com.example.dailysummary.model.CalenderOnePage
 import com.example.dailysummary.viewModel.MainPageViewModel
 import kotlinx.coroutines.cancel
@@ -146,16 +150,20 @@ fun DSCalender(
         snapPositionalThreshold = 0.5f // 50% 이상 넘기면 다음 페이지로 이동
     )
 
+    val clickedDay by viewModel.clickedDay.collectAsState()
+
 
     Column(modifier = modifier) {
 
         CalenderMonth(
-            modifier = Modifier.align(Alignment.Start).padding(horizontal = 12.dp),
+            modifier = Modifier
+                .align(Alignment.Start)
+                .padding(horizontal = 12.dp),
             isCurrentYear = isCurrentYear,
             year = currentPageYM.year,
             month = currentPageYM.month
         )
-        Row(modifier = Modifier.padding(horizontal = 12.dp)) {
+        Row(modifier = Modifier.padding(horizontal = 8.dp)) {
             weekDayList.forEach { d ->
                 CalenderDate(modifier = Modifier.weight(1f), d.first, d.second)
             }
@@ -183,8 +191,9 @@ fun DSCalender(
                 {
                     CalenderDayGrid(
                         calenderOnePage = pageData ?: CalenderOnePage.dummy(page),
-                        onNav = { y, m, d ->
-                            navController.navigate("SummaryPage/$y/$m/$d")
+                        clickedDay = clickedDay,
+                        onDayClick = {
+                            viewModel.clickDay(it)
                         }
                     )
                 }
@@ -224,7 +233,7 @@ fun CalenderDate(
     color:Color?=null,
     text:String,
 ){
-    val resolvedColor = color ?: MaterialTheme.colorScheme.primary
+    val resolvedColor = color ?: Color.Gray
     Text(text = text, modifier = modifier,color=resolvedColor, textAlign = TextAlign.Center)
 }
 
@@ -232,6 +241,9 @@ fun CalenderDate(
 fun CalenderBox(
     modifier: Modifier=Modifier,
     isWritten:Boolean = false,
+    isClicked:Boolean = false,
+    isToday:Boolean = false,
+    isFuture:Boolean = false,
     day:Int=0,
     onClick: () -> Unit,
 ){
@@ -239,46 +251,41 @@ fun CalenderBox(
 
     Box(modifier = modifier
         .aspectRatio(1f)
-        .clip(shape = RoundedCornerShape(12.dp))
-        .clickable { onClick() }
-        .background(
-            color =
-            if (isWritten)
-                MaterialTheme.colorScheme.primary
-            else
-                MaterialTheme.colorScheme.primaryContainer
-        ),
+        .clip(shape = CircleShape)
+        .then(
+            if (isClicked)
+                Modifier.border(
+                    1.dp,
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.primaryContainer
+                )
+            else Modifier
+        )
+        .then(
+            if (isToday)
+                Modifier.background(color = MaterialTheme.colorScheme.primary)
+            else Modifier
+        )
+        .clickable { onClick() },
         contentAlignment = Alignment.Center
-
     ){
+        if (isWritten) {
+            Box(
+                modifier = Modifier
+                    .padding(top = 24.dp)
+                    .height(2.dp)
+                    .width(16.dp)
+                    .background(
+                        shape = RoundedCornerShape(1.dp),
+                        color = if (isToday) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
+                    )
+            )
+        }
         Text(
             text = "$day",
-            color = if(isWritten) MaterialTheme.colorScheme.onPrimary
-            else MaterialTheme.colorScheme.primary
-        )
-    }
-}
-
-@Composable
-fun AdjustMonthButton(
-    isPrev:Boolean=true,
-    modifier: Modifier = Modifier,
-    onClick : () ->Unit,
-    ){
-
-    IconButton(
-        modifier = modifier
-            .fillMaxHeight(0.5f)
-            .fillMaxWidth()
-            .clip(shape = RoundedCornerShape(8.dp))
-            .background(color = MaterialTheme.colorScheme.primary),
-        onClick = onClick) {
-        Icon(
-            imageVector =
-            if(isPrev) Icons.Outlined.KeyboardArrowLeft
-            else Icons.Outlined.KeyboardArrowRight,
-            contentDescription = if(isPrev) "Prev" else "Next",
-            tint = MaterialTheme.colorScheme.onPrimary
+            color = if(isFuture) Color.Gray
+            else if(isToday) MaterialTheme.colorScheme.onPrimary
+            else MaterialTheme.colorScheme.onSurface
         )
     }
 }
@@ -287,8 +294,8 @@ fun AdjustMonthButton(
 @Composable
 fun CalenderDayGrid(
     calenderOnePage:CalenderOnePage,
-    showPopup:Boolean = false,
-    onNav:(Int,Int,Int)->Unit,
+    clickedDay:Int?=null,
+    onDayClick: (d:Int) -> Unit,
 ){
     Log.d("recompose", "CalenderDayGrid recomposed with page:")
 
@@ -297,7 +304,9 @@ fun CalenderDayGrid(
     val month = calenderOnePage.month
 
     LazyVerticalGrid(
-        modifier = Modifier.height(300.dp).padding(horizontal = 12.dp),
+        modifier = Modifier
+            .height(300.dp)
+            .padding(horizontal = 12.dp),
         columns = GridCells.Fixed(7),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -312,21 +321,18 @@ fun CalenderDayGrid(
             } else{
                 CalenderBox(
                     isWritten = calenderEntry.isWritten,
+                    isClicked = calenderEntry.day==clickedDay,
+                    isToday = calenderEntry.isToday,
+                    isFuture = calenderEntry.isFuture,
                     day = calenderEntry.day,
                 ){
-                    if(calenderEntry.isWritten){
-                        //Toast.makeText(context,viewModel.readSummary(it.summaryIndex).content,Toast.LENGTH_SHORT).show()
-                        onNav(year,month,calenderEntry.day)
+                    val targetDate = LocalDate.of(year,month,calenderEntry.day)
+
+                    if(targetDate.isAfter(LocalDate.now())){
+
                     }
-                    else{
-                        val targetDate = LocalDate.of(year,month,calenderEntry.day)
-
-                        if(targetDate.isAfter(LocalDate.now())){
-
-                        }
-                        else {
-                            onNav(year,month,calenderEntry.day)
-                        }
+                    else {
+                        onDayClick(calenderEntry.day)
                     }
 
                 }

@@ -17,18 +17,25 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    //primary = Purple80,
-    //secondary = PurpleGrey80,
-    //tertiary = Pink80
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
+    primary = Color(0xFF4FA4FF),         // 밝은 파랑 (주요 강조 색)
+    onPrimary = Color.White,             // primary 위에 텍스트 등
+    primaryContainer = Color(0xFFD4EBFF),
+
+    secondary = Color(0xFF3370B6),       // 보조 파랑
     onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+
+    background = Color(0xFF101217),      // 전체 배경 - 거의 검은색에 가까운 짙은 회색
+    onBackground = Color(0xFFE0E0E0),    // 배경 위 텍스트 - 연회색
+
+    surface = Color(0xFF1C1F24),         // 카드나 다이얼로그 등 surface
+    onSurface = Color(0xFFE8EAF0),       // surface 위 텍스트
+
+    surfaceVariant = Color(0xFF2B2F36),  // 추가적인 surface variant (예: 팝업 배경)
+    onSurfaceVariant = Color(0xFFB0B8C1),
+
+    outline = Color(0xFF4FA4FF),         // 테두리 - 연한 파랑
+    error = Color(0xFFFF6B6B),           // 에러 색상
+    onError = Color.Black
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -39,11 +46,11 @@ private val LightColorScheme = lightColorScheme(
     onPrimaryContainer = Color(0xFF002D6C),
 
     // 배경
-    background = Color(0xFFFDFDFD),         // 거의 흰색
+    background = Color.White,
     onBackground = Color(0xFF1C1B1F),
 
     // 카드/서페이스 영역
-    surface = Color(0xFFFFFFFF),
+    surface = Color.White,
     onSurface = Color(0xFF1C1B1F),
 
     // 보조 색상 (선택적 사용)

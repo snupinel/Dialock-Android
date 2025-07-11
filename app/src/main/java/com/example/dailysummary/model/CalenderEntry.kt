@@ -12,9 +12,11 @@ import java.time.LocalDate
 @Immutable
 data class CalenderEntry(
     val isBlank:Boolean,
-    val isWritten:Boolean,
-    val day:Int,
-    val summaryIndex: Int,
+    val isWritten:Boolean = false,
+    var isToday:Boolean = false,
+    val isFuture:Boolean = false,
+    val day:Int = 0,
+    val summaryIndex: Int = 0,
 )
 
 @Immutable
@@ -35,6 +37,7 @@ data class CalenderOnePage(
 @RequiresApi(Build.VERSION_CODES.O)
 fun summaryRefinement(year:Int, month:Int, summaries:List<Summary>):CalenderOnePage{
     Log.d("summaryRefinement", "activate")
+    val today = LocalDate.now()
     return CalenderOnePage(
         year = year,
         month = month,
@@ -42,18 +45,23 @@ fun summaryRefinement(year:Int, month:Int, summaries:List<Summary>):CalenderOneP
             val list = mutableListOf<CalenderEntry>()
             val frontBlankCount=LocalDate.of(year,month,1).dayOfWeek.value%7
             repeat(frontBlankCount){
-                list.add(CalenderEntry(isBlank = true,isWritten = false, day = 0 , summaryIndex = 0))
+                list.add(CalenderEntry(isBlank = true))
             }
             val daysInMonth = LocalDate.of(year,month,1).lengthOfMonth()
             repeat(daysInMonth){
-                list.add(CalenderEntry(isBlank = false,isWritten = false, day = it+1 , summaryIndex = 0))
+                list.add(CalenderEntry(isBlank = false, day = it+1, isFuture = today.isBefore(LocalDate.of(year,month,it+1)) ))
             }
             summaries.forEachIndexed{ index, summary ->
                 list[frontBlankCount-1+summary.date.dayOfMonth] = CalenderEntry(isBlank = false,isWritten = true, day = summary.date.dayOfMonth , summaryIndex = index)
             }
+            if(today.year == year && today.monthValue ==month){
+                list[frontBlankCount-1+today.dayOfMonth].apply {
+                    this.isToday = true
+                }
+            }
             val backBlankCount = (7 - (frontBlankCount + daysInMonth) % 7) % 7
             repeat(backBlankCount){
-                list.add(CalenderEntry(isBlank = true,isWritten = false, day = 0 , summaryIndex = 0))
+                list.add(CalenderEntry(isBlank = true))
             }
             list
         }

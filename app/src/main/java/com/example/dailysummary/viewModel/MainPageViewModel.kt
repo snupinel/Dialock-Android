@@ -50,6 +50,14 @@ class MainPageViewModel @Inject constructor(
         _selectedTab.value = Tab.valueOf(tab)
     }
 
+    private val _clickedDay:MutableStateFlow<Int?> = MutableStateFlow(null)
+    val clickedDay = _clickedDay.asStateFlow()
+
+    fun clickDay(day:Int){
+        if(day == clickedDay.value) _clickedDay.value = null
+        else  _clickedDay.value = day
+    }
+
     val now = LocalDate.now()
 
     private val _currentYMPage = MutableStateFlow(PageYearMonth(now.year,now.monthValue))
