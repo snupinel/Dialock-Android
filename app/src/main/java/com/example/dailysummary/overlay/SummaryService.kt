@@ -1,5 +1,8 @@
 package com.example.dailysummary.overlay
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.content.res.Resources
@@ -11,6 +14,7 @@ import android.view.Gravity
 import android.view.WindowManager
 import androidx.annotation.RequiresApi
 import androidx.compose.ui.platform.ComposeView
+import androidx.core.app.NotificationCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
@@ -67,8 +71,14 @@ class SummaryService  : Service() {
         // 전달받은 매개변수 처리
         //Log.d("MyService", "Value1: $value1, Value2: $value2")
 
-        return START_NOT_STICKY
+        createNotificationChannel()
+        startForeground(1, buildNotification())
+
+
+        return START_STICKY
     }
+
+
 
     override fun onCreate() {
         super.onCreate()
@@ -76,6 +86,27 @@ class SummaryService  : Service() {
         Log.d("summaryservice","SummaryService activated")
         showOverlay()
         alarmScheduler.scheduleOverlay()
+    }
+
+    private fun buildNotification(): Notification {
+        return NotificationCompat.Builder(this, "summary_channel")
+            .setContentTitle("Daily Summary")
+            .setContentText("알람 준비 중...")
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .build()
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                "summary_channel",
+                "Summary Alarm Channel",
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
+            val manager = getSystemService(NotificationManager::class.java)
+            manager.createNotificationChannel(channel)
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

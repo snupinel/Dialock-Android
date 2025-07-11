@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
+
     <application
         android:name=".DSApplication"
         android:usesCleartextTraffic="true"
@@ -18,7 +19,11 @@
         android:theme="@style/Theme.DailySummary"
         tools:targetApi="31">
 
-        <service android:name=".overlay.SummaryService" />
+        <service
+            android:name=".overlay.SummaryService"
+            android:exported="true"
+            android:foregroundServiceType="shortService"
+            />
 
         <activity
             android:name=".MainActivity"
@@ -34,11 +39,12 @@
 
         <receiver android:name=".overlay.AlarmResetReceiver"
             android:enabled="true"
-            android:exported="false"
+            android:exported="true"
             android:directBootAware="true">
             <intent-filter>
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="com.example.dailysummary.ACTION_ALARM_TRIGGER"/>
             </intent-filter>
         </receiver>
 

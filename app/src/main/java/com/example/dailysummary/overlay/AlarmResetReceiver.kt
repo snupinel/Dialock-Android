@@ -8,16 +8,40 @@ import android.content.Intent
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import com.example.dailysummary.data.PrefRepository
+import com.example.dailysummary.data.SummaryRepository
 import javax.inject.Inject
 
-class AlarmResetReceiver @Inject constructor(
-    private val alarmScheduler: AlarmScheduler,
-) : BroadcastReceiver() {
+class AlarmResetReceiver : BroadcastReceiver() {
+
+    @Inject
+    lateinit var alarmScheduler: AlarmScheduler
+
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action == Intent.ACTION_MY_PACKAGE_REPLACED || intent.action == Intent.ACTION_BOOT_COMPLETED) {
-            Log.d("AlarmResetReceiver", "앱 업데이트 또는 부팅 후 알람 재설정 시작")
-            alarmScheduler.scheduleOverlay()  // ✅ AlarmScheduler의 기존 설정을 사용하여 알람 재설정
+        when (intent.action) {
+            Intent.ACTION_BOOT_COMPLETED,
+            Intent.ACTION_MY_PACKAGE_REPLACED -> {
+                Log.d("AlarmResetReceiver", "앱 업데이트 또는 부팅 후 알람 재설정 시작")
+                alarmScheduler.scheduleOverlay()
+            }
+
+            "com.example.dailysummary.ACTION_ALARM_TRIGGER" -> {
+                Log.d("AlarmResetReceiver", "알람 트리거 도착")
+
+                val serviceIntent = Intent(context, SummaryService::class.java).apply {
+                    putExtra("year", intent.getIntExtra("year", 0))
+                    putExtra("month", intent.getIntExtra("month", 0))
+                    putExtra("day", intent.getIntExtra("day", 0))
+                    putExtra("isNextDay", intent.getBooleanExtra("isNextDay", false))
+                }
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    context.startForegroundService(serviceIntent)
+                } else {
+                    context.startService(serviceIntent)
+                }
+            }
         }
     }
 }
