@@ -192,8 +192,8 @@ fun DSCalender(
                     CalenderDayGrid(
                         calenderOnePage = pageData ?: CalenderOnePage.dummy(page),
                         clickedDay = clickedDay,
-                        onDayClick = {
-                            viewModel.clickDay(it)
+                        onDayClick = {d->
+                            viewModel.clickDay(LocalDate.of(currentPageYM.year, currentPageYM.month, d))
                         }
                     )
                 }
@@ -294,7 +294,7 @@ fun CalenderBox(
 @Composable
 fun CalenderDayGrid(
     calenderOnePage:CalenderOnePage,
-    clickedDay:Int?=null,
+    clickedDay:LocalDate?=null,
     onDayClick: (d:Int) -> Unit,
 ){
     Log.d("recompose", "CalenderDayGrid recomposed with page:")
@@ -321,7 +321,7 @@ fun CalenderDayGrid(
             } else{
                 CalenderBox(
                     isWritten = calenderEntry.isWritten,
-                    isClicked = calenderEntry.day==clickedDay,
+                    isClicked = clickedDay!=null && clickedDay.isEqual(LocalDate.of(year,month,calenderEntry.day)),
                     isToday = calenderEntry.isToday,
                     isFuture = calenderEntry.isFuture,
                     day = calenderEntry.day,
