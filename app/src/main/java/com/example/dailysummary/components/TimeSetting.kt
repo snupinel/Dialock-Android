@@ -49,6 +49,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -195,7 +196,7 @@ fun TimePicker(
     changeToggle: Boolean=true,
     height:Dp
 ) {
-    val strings = listOf("당일 오후","다음 날 오전")
+    val strings = listOf("당일","다음 날")
     val hours = (0..23).toList()
     val minutes = (0..59).toList()
 
@@ -222,7 +223,7 @@ fun TimePicker(
         Row(modifier = Modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically) {
-            StringScrolled(
+            StringScroller(
                 modifier= Modifier.weight(1f).fillMaxHeight(),
                 strings = strings,
                 selectedIndex = selectedStringIndex,
@@ -398,7 +399,8 @@ fun NumberScroller(
 
             // alpha, scale 계산 (가까울수록 1에 가까움)
             val alpha = 1f - norm
-            val scale = 1f - norm * 0.3f  // 최소 스케일 0.7
+            val scale = 1f - norm * 0.5f  // 최소 스케일 0.7
+            val cNorm = (distance / (maxDistance/(visibleItemsCount/2+1))).coerceIn(0f, 1f)
 
             Box(
                 modifier = Modifier
@@ -411,10 +413,17 @@ fun NumberScroller(
                     },
                 contentAlignment = Alignment.Center
             ) {
+                val interpolatedColor = lerp(
+                    MaterialTheme.colorScheme.onPrimary,
+                    MaterialTheme.colorScheme.onBackground,
+                    cNorm
+                )
+
                 Text(
                     text = String.format("%02d", number),
                     fontSize = 40.sp,
-                    fontWeight = FontWeight.Light
+                    fontWeight = FontWeight.Light,
+                    color = interpolatedColor
                 )
             }
         }
@@ -446,7 +455,7 @@ fun NumberScroller(
     }
 }
 @Composable
-fun StringScrolled(
+fun StringScroller(
     strings: List<String>,
     selectedIndex: Int,
     modifier: Modifier = Modifier,
@@ -491,42 +500,8 @@ fun StringScrolled(
                     .height(itemHeight),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = str, fontSize = 12.sp)
+                Text(text = str, fontSize = 16.sp, color = MaterialTheme.colorScheme.onPrimary)
             }
         }
     }
-
-
-    /*
-
-    LaunchedEffect(Unit) {
-        snapshotFlow { lazyListState.isScrollInProgress }
-            .distinctUntilChanged()
-            .filter { isScrolling -> !isScrolling }
-            .collect {
-                // 스크롤이 멈춘 순간에 실행할 작업
-                println("Scrolling stopped")
-            }
-    }
-
-
-
-    val density = LocalDensity.current
-    var wasScrolling by remember { mutableStateOf(false) }
-
-
-
-
-
-    LaunchedEffect(lazyListState.isScrollInProgress) {
-        if (wasScrolling && !lazyListState.isScrollInProgress) {
-            val centerIndex = (lazyListState.firstVisibleItemIndex + lazyListState.firstVisibleItemScrollOffset / with(density) { itemHeight.toPx() }).roundToInt()
-            onIndexChange(centerIndex-(visibleItemsCount/2))
-            coroutineScope.launch {
-                lazyListState.animateScrollToItem(centerIndex)
-            }
-            Log.d("aaaa", "!lazyListState.isScrollInProgress called")
-        }
-        wasScrolling = lazyListState.isScrollInProgress
-    }*/
 }

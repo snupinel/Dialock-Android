@@ -104,7 +104,7 @@ fun WeekdaySelectorRow(
                     colors = CheckboxDefaults.colors(checkedColor = Color(0xFF3D8BFF))
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("매일", color = Color.White)
+                Text("매일", color = MaterialTheme.colorScheme.onBackground)
             }
         }
 
