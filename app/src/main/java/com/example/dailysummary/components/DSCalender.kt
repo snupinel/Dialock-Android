@@ -213,9 +213,9 @@ fun DSCalender(
         }
         if(clickedDay!=null){
             DiaryPreviewCard(
-                Modifier,
-                clickedDay!!,clickedEntry!!.title){
-
+                date = clickedDay!!,
+                title = clickedEntry!!.title){
+                navController.navigate("SummaryPage/${clickedDay!!.year}/${clickedDay!!.monthValue}/${clickedDay!!.dayOfMonth}")
             }
         }
 
@@ -363,21 +363,28 @@ fun CalenderDayGrid(
 fun DiaryPreviewCard(
     modifier: Modifier = Modifier,
     date: LocalDate,
-    title: String,
+    title: String?,
+    isWritten:Boolean = title!=null,
     onClickDetail: () -> Unit,
 
 ) {
     Card(
+        shape = RoundedCornerShape(20.dp),
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        shape = RoundedCornerShape(20.dp),
+            .padding(horizontal = 16.dp, vertical = 16.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .clickable {
+                onClickDetail()
+            }
+            .padding(16.dp)
+        ){
             Text(
                 text = date.format(DateTimeFormatter.ofPattern("yyyy.MM.dd (E)", Locale.KOREA)),
                 style = MaterialTheme.typography.labelMedium,
@@ -385,16 +392,24 @@ fun DiaryPreviewCard(
             )
 
             Spacer(modifier = Modifier.height(6.dp))
-
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-
+            if(isWritten) {
+                Text(
+                    text = title!!,
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            else{
+                Text(
+                    text = "이 날의 이야기는 아직 비어 있어요. 기억 나는 대로 한 줄이라도 적어 볼까요?",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = Color.Gray
+                )
+            }
             Spacer(modifier = Modifier.height(8.dp))
+            /*
 
             TextButton(
                 onClick = onClickDetail,
@@ -406,7 +421,7 @@ fun DiaryPreviewCard(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary
                 )
-            }
+            }*/
         }
     }
 }

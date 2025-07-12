@@ -17,7 +17,7 @@ data class CalenderEntry(
     val isFuture:Boolean = false,
     val day:Int = 0,
     val summaryIndex: Int = 0,
-    val title:String = ""
+    val title:String? = null
 )
 
 @Immutable
