@@ -13,10 +13,11 @@ import java.time.LocalDate
 data class CalenderEntry(
     val isBlank:Boolean,
     val isWritten:Boolean = false,
-    var isToday:Boolean = false,
+    val isToday:Boolean = false,
     val isFuture:Boolean = false,
     val day:Int = 0,
     val summaryIndex: Int = 0,
+    val title:String = ""
 )
 
 @Immutable
@@ -52,12 +53,10 @@ fun summaryRefinement(year:Int, month:Int, summaries:List<Summary>):CalenderOneP
                 list.add(CalenderEntry(isBlank = false, day = it+1, isFuture = today.isBefore(LocalDate.of(year,month,it+1)) ))
             }
             summaries.forEachIndexed{ index, summary ->
-                list[frontBlankCount-1+summary.date.dayOfMonth] = CalenderEntry(isBlank = false,isWritten = true, day = summary.date.dayOfMonth , summaryIndex = index)
+                list[frontBlankCount-1+summary.date.dayOfMonth] = CalenderEntry(isBlank = false,isWritten = true, day = summary.date.dayOfMonth , summaryIndex = index,title = summary.title)
             }
             if(today.year == year && today.monthValue ==month){
-                list[frontBlankCount-1+today.dayOfMonth].apply {
-                    this.isToday = true
-                }
+                list[frontBlankCount-1+today.dayOfMonth]=list[frontBlankCount-1+today.dayOfMonth].copy(isToday = true)
             }
             val backBlankCount = (7 - (frontBlankCount + daysInMonth) % 7) % 7
             repeat(backBlankCount){

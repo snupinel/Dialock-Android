@@ -53,20 +53,22 @@ class MainPageViewModel @Inject constructor(
     private val _clickedDay:MutableStateFlow<LocalDate?> = MutableStateFlow(null)
     val clickedDay = _clickedDay.asStateFlow()
 
-    fun clickDay(date:LocalDate){
-        if(clickedDay.value!=null && date.isEqual(clickedDay.value)) _clickedDay.value = null
-        else  _clickedDay.value = date
+    private val _clickedEntry:MutableStateFlow<CalenderEntry?> = MutableStateFlow(null)
+    val clickedEntry = _clickedEntry.asStateFlow()
+
+    fun clickDay(date:LocalDate, entry:CalenderEntry){
+        if(clickedDay.value!=null && date.isEqual(clickedDay.value)) {
+            _clickedDay.value = null
+            _clickedEntry.value = null
+        }
+        else {
+            _clickedDay.value = date
+            _clickedEntry.value = entry
+        }
         Log.d("aaaa",clickedDay.value.toString() )
     }
 
     val now = LocalDate.now()
-
-    private val _currentYMPage = MutableStateFlow(PageYearMonth(now.year,now.monthValue))
-    val currentYMPage = _currentYMPage.asStateFlow()
-
-    fun setCurrentYMPage(value:PageYearMonth){
-        if (currentYMPage.value != value) _currentYMPage.value = value
-    }
 
     private val _pageCache = mutableStateMapOf<Int, CalenderOnePage>()
     val pageCache: SnapshotStateMap<Int, CalenderOnePage> = _pageCache

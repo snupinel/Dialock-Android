@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,11 +37,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.KeyboardArrowLeft
 import androidx.compose.material.icons.outlined.KeyboardArrowRight
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -59,6 +63,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -78,6 +83,8 @@ import com.example.dailysummary.viewModel.MainPageViewModel
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.distinctUntilChanged
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 val weekDayList= listOf(
     Pair(Color.Red,"S"),
@@ -151,7 +158,7 @@ fun DSCalender(
     )
 
     val clickedDay by viewModel.clickedDay.collectAsState()
-
+    val clickedEntry by viewModel.clickedEntry.collectAsState()
 
     Column(modifier = modifier) {
 
@@ -192,14 +199,24 @@ fun DSCalender(
                     CalenderDayGrid(
                         calenderOnePage = pageData ?: CalenderOnePage.dummy(page),
                         clickedDay = clickedDay,
-                        onDayClick = {d->
-                            viewModel.clickDay(LocalDate.of(currentPageYM.year, currentPageYM.month, d))
+                        onDayClick = {d,c->
+                            viewModel.clickDay(
+                                LocalDate.of(currentPageYM.year, currentPageYM.month, d),
+                                c
+                            )
                         }
                     )
                 }
             }
             pageContent()
 
+        }
+        if(clickedDay!=null){
+            DiaryPreviewCard(
+                Modifier,
+                clickedDay!!,clickedEntry!!.title){
+
+            }
         }
 
 
@@ -295,7 +312,7 @@ fun CalenderBox(
 fun CalenderDayGrid(
     calenderOnePage:CalenderOnePage,
     clickedDay:LocalDate?=null,
-    onDayClick: (d:Int) -> Unit,
+    onDayClick: (d:Int,c:CalenderEntry) -> Unit,
 ){
     Log.d("recompose", "CalenderDayGrid recomposed with page:")
 
@@ -332,12 +349,64 @@ fun CalenderDayGrid(
 
                     }
                     else {
-                        onDayClick(calenderEntry.day)
+                        onDayClick(calenderEntry.day,calenderEntry)
                     }
 
                 }
             }
 
+        }
+    }
+}
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun DiaryPreviewCard(
+    modifier: Modifier = Modifier,
+    date: LocalDate,
+    title: String,
+    onClickDetail: () -> Unit,
+
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = date.format(DateTimeFormatter.ofPattern("yyyy.MM.dd (E)", Locale.KOREA)),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            TextButton(
+                onClick = onClickDetail,
+
+                contentPadding = PaddingValues(0.dp)
+            ) {
+                Text(
+                    text = "자세히 보기",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
         }
     }
 }
