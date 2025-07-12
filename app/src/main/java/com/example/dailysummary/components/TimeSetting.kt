@@ -48,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -59,6 +60,7 @@ import com.example.dailysummary.dto.AnimationTarget
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
 
@@ -193,7 +195,7 @@ fun TimePicker(
     changeToggle: Boolean=true,
     height:Dp
 ) {
-    val strings = listOf("그날 오후","다음 날 오전")
+    val strings = listOf("당일 오후","다음 날 오전")
     val hours = (0..23).toList()
     val minutes = (0..59).toList()
 
@@ -208,8 +210,7 @@ fun TimePicker(
 
     Box(modifier = modifier
         .clip(RoundedCornerShape(8.dp))
-        .height(height)
-        .background(MaterialTheme.colorScheme.primaryContainer),
+        .height(height),
         contentAlignment = Alignment.Center,
         ){
         Box(Modifier
@@ -335,7 +336,6 @@ fun IsNextDayToggle(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun NumberScroller(
     numbers: List<Int>,
@@ -382,20 +382,44 @@ fun NumberScroller(
                     change.consume()
                 }
             },
-
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         itemsIndexed(List(numbers.size * 100) { it % numbers.size }) { index, number ->
+            val itemInfo = lazyListState.layoutInfo.visibleItemsInfo
+                .firstOrNull { it.index == index }
+
+            val centerOffset = (lazyListState.layoutInfo.viewportEndOffset + lazyListState.layoutInfo.viewportStartOffset) / 2
+            val itemCenter = itemInfo?.let { it.offset + it.size / 2 } ?: 0
+            val distance = abs(itemCenter - centerOffset).toFloat()
+
+            // 최대 거리 기준값 설정 (화면에서 멀어지는 기준)
+            val maxDistance = with(LocalDensity.current) { itemHeight.toPx() } * (visibleItemsCount / 2f)
+            val norm = (distance / maxDistance).coerceIn(0f, 1f)
+
+            // alpha, scale 계산 (가까울수록 1에 가까움)
+            val alpha = 1f - norm
+            val scale = 1f - norm * 0.3f  // 최소 스케일 0.7
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(itemHeight),
+                    .height(itemHeight)
+                    .graphicsLayer {
+                        this.alpha = alpha
+                        this.scaleX = scale
+                        this.scaleY = scale
+                    },
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = String.format("%02d", number), fontSize = 16.sp)
+                Text(
+                    text = String.format("%02d", number),
+                    fontSize = 40.sp,
+                    fontWeight = FontWeight.Light
+                )
             }
         }
     }
+
     val density = LocalDensity.current
     LaunchedEffect(Unit) {
         snapshotFlow { lazyListState.isScrollInProgress }

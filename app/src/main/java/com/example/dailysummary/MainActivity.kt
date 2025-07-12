@@ -16,6 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -53,21 +54,18 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             DailySummaryTheme{
+                SideEffect {
+                    window?.let {
+                        WindowCompat.setDecorFitsSystemWindows(it, false) // ✅ 시스템 UI가 콘텐츠를 덮지 않도록 설정
+                        it.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
+                            val statusBarInsets = windowInsets.getInsets(WindowInsets.Type.statusBars())
+                            view.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+                            //view.setPadding(0,statusBarInsets.top,0,0)
+                            windowInsets
 
-                window?.let {
-                    WindowCompat.setDecorFitsSystemWindows(it, false) // ✅ 시스템 UI가 콘텐츠를 덮지 않도록 설정
-                    it.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
-                        val statusBarInsets = windowInsets.getInsets(WindowInsets.Type.statusBars())
-                        view.setBackgroundColor(android.graphics.Color.TRANSPARENT)
-                        //view.setPadding(0,statusBarInsets.top,0,0)
-                        windowInsets
+                        }
 
                     }
-
-                        //window.decorView.setBackgroundColor(android.graphics.Color.TRANSPARENT)
-                    //it.statusBarColor = Color.Transparent.toArgb()
-                    //it.navigationBarColor = Color.Transparent.toArgb()// ✅ 상태바 배경을 투명하게 설정
-                    Log.d("ac","activate WindowCompat 그뭐시기")
                 }
 
                 //startService(Intent(this, MyService::class.java))

@@ -63,8 +63,7 @@ fun TimeSettingPage(navController: NavController,viewModel: SettingPageViewModel
     ) {paddingValues ->
 
         Column(modifier = Modifier
-            .padding(paddingValues)
-            .padding(vertical = 12.dp)){
+            .padding(paddingValues)){
             WeekdaySelectorRow(chosenDays){
                 viewModel.clickChosenDay(it)
             }
@@ -161,10 +160,10 @@ fun TimeSettingToolBar(
         },
 
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            titleContentColor = MaterialTheme.colorScheme.onPrimary,
-            navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
-            actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+            containerColor = MaterialTheme.colorScheme.background,
+            titleContentColor = MaterialTheme.colorScheme.onBackground,
+            navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
+            actionIconContentColor = MaterialTheme.colorScheme.onBackground
         )
     )
 }
@@ -201,8 +200,9 @@ fun MyTimePicker(viewModel: SettingPageViewModel){
 
     TimePicker(
         modifier = Modifier
-            .fillMaxWidth(),
-        height = 150.dp,
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        height = 300.dp,
         selectedHour = time.hour,
         selectedMinute = time.minute,
         onHourChange = {viewModel.setPickerTime(hour = it) },
@@ -215,8 +215,7 @@ fun MyTimePicker(viewModel: SettingPageViewModel){
 fun SettingInstruction(){
     Column (
         Modifier
-            .fillMaxWidth()
-            .height(60.dp),
+            .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center){
         Text("일기를 쓸 시간을 설정해 주세요", fontWeight = FontWeight.Bold, fontSize = 18.sp)
