@@ -273,7 +273,7 @@ fun CalenderBox(
         .then(
             if (isClicked)
                 Modifier.border(
-                    1.dp,
+                    3.dp,
                     shape = CircleShape,
                     color = MaterialTheme.colorScheme.primaryContainer
                 )

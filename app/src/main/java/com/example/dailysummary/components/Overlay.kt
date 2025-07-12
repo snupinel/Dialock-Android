@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.SentimentNeutral
 import androidx.compose.material.icons.outlined.ThumbDown
 import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material3.Icon
@@ -32,10 +33,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.dailysummary.dto.AdviceOrForcing
+import com.example.dailysummary.dto.DayRating
 import com.example.dailysummary.dto.SAMPLE_ALARM_TIME
 import com.example.dailysummary.dto.Setting
 import com.example.dailysummary.ui.theme.DailySummaryTheme
@@ -48,7 +51,7 @@ fun Overlay(
     getSetting: () -> Setting,
     //textFieldValue: String,
     //setTextFieldValue: (String) -> Unit,
-    saveDiary : (content:String,isThumbUp:Boolean,isLikeChecked:Boolean) -> Unit,
+    saveDiary : (content:String,isLikeChecked:Boolean,dayRating: DayRating) -> Unit,
 ) {
     //val viewModel = hiltViewModel<OverlayViewModel>()
 
@@ -60,8 +63,8 @@ fun Overlay(
         mutableStateOf("")
     }
 
-    var isUp:Boolean? by remember {
-        mutableStateOf(null)
+    var dayRating: DayRating by remember {
+        mutableStateOf(DayRating.SOSO)
     }
 
     var isLikeChecked:Boolean by remember {
@@ -105,18 +108,16 @@ fun Overlay(
                     onValueChange = {textFieldValue=it}
                 )
                 // 하단의 버튼 영역
-                Thumbs(
-                    isSummaryWritten = textFieldValue!="",
-                    isUp=isUp,
-                ){
-                    isUp=it
-                }
+                DayRatingSelector(dayRating = dayRating, setRating = {
+                    dayRating = it
+                })
                 Spacer(modifier = Modifier.weight(1f))
-                RoundedCornerButton(modifier = Modifier.fillMaxWidth()
+                RoundedCornerButton(modifier = Modifier
+                    .fillMaxWidth()
                     .height(50.dp)
                     .padding(horizontal = 12.dp),
                     onClick = {
-                        saveDiary(textFieldValue,isUp!!,isLikeChecked)
+                        saveDiary(textFieldValue,isLikeChecked,dayRating)
                         close()
                     },
                     enabled = textFieldValue!=""
@@ -194,38 +195,32 @@ fun OverlayPreview(){
 }
 
 @Composable
-fun Thumbs(
-    isSummaryWritten:Boolean,
-    isUp:Boolean?=null,
-    isSelected:Boolean=isUp!=null,
-    setThumb:(Boolean)->Unit,
+fun DayRatingSelector(
+    dayRating: DayRating,
+    setRating:(DayRating)->Unit,
 ){
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ){
-        when (isSelected){
-            true->{
-                ThumbButton(isUp = isUp!!) {
-                    setThumb(!isUp)
-                }
-            }
-            false ->{
-                ThumbButton(
-                    isSummaryWritten=isSummaryWritten,
-                    isUp = true,
-                ) {
-                    setThumb(true)
-                }
-                Spacer(modifier = Modifier.width(100.dp))
-                ThumbButton(
-                    isSummaryWritten=isSummaryWritten,
-                    isUp = false,
-                ) {
-                    setThumb(false)
-                }
-            }
+        IconButton(
+            modifier = Modifier.alpha(if(dayRating==DayRating.GOOD)1f else 0.5f),
+            onClick = { setRating(DayRating.GOOD) }) {
+            Icon(imageVector = Icons.Outlined.ThumbUp, contentDescription = "ThumbUp")
         }
+        Spacer(modifier = Modifier.width(50.dp))
+        IconButton(
+            modifier = Modifier.alpha(if(dayRating==DayRating.SOSO)1f else 0.5f),
+            onClick = { setRating(DayRating.SOSO) }) {
+            Icon(imageVector = Icons.Outlined.SentimentNeutral, contentDescription = "Neutral")
+        }
+        Spacer(modifier = Modifier.width(50.dp))
+        IconButton(
+            modifier = Modifier.alpha(if(dayRating==DayRating.BAD)1f else 0.5f),
+            onClick = { setRating(DayRating.BAD) }) {
+            Icon(imageVector = Icons.Outlined.ThumbDown, contentDescription = "ThumbUp")
+        }
+
     }
 }
 

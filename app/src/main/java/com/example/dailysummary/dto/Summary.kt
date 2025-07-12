@@ -8,6 +8,9 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.time.LocalDate
 
+enum class DayRating{
+    GOOD,SOSO,BAD
+}
 @Entity(tableName = "summary")
 data class Summary(
     @PrimaryKey(autoGenerate = true) val id: Int = 0, // Primary key 추가
@@ -15,7 +18,7 @@ data class Summary(
     @ColumnInfo(name = "date") val date: LocalDate,
     @ColumnInfo(name = "title") val title: String,
     @ColumnInfo(name = "content") val content: String,
-    @ColumnInfo(name = "is_thumb_up") val isThumbUp: Boolean,
+    @ColumnInfo(name = "day_rating") val dayRating: DayRating,
     @ColumnInfo(name = "is_like_checked") val isLikeChecked: Boolean,
     @ColumnInfo(name="image_uris") val imageUris:List<Uri>,
 )
@@ -26,7 +29,7 @@ val DEFAULT_SUMMARY = Summary(
     date = LocalDate.of(2000,1,1),
     title = "",
     content = "",
-    isThumbUp = false,
+    dayRating = DayRating.SOSO,
     isLikeChecked = false,
     imageUris = emptyList(),
 )

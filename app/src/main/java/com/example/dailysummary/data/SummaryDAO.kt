@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import com.example.dailysummary.dto.DayRating
 import com.example.dailysummary.dto.Summary
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
@@ -34,8 +35,8 @@ interface SummaryDAO {
     @Query(" UPDATE summary SET content = :content WHERE date = :date")
     suspend fun updateContentByDate(date: LocalDate, content: String): Int
 
-    @Query(" UPDATE summary SET is_thumb_up = :isThumbUp WHERE date = :date")
-    suspend fun updateThumbByDate(date: LocalDate, isThumbUp: Boolean): Int
+    @Query(" UPDATE summary SET day_rating = :dayRating WHERE date = :date")
+    suspend fun updateThumbByDate(date: LocalDate, dayRating: DayRating): Int
 
     @Query(" UPDATE summary SET is_like_checked = :isLikeChecked WHERE date = :date")
     suspend fun updateLikeByDate(date: LocalDate, isLikeChecked: Boolean): Int

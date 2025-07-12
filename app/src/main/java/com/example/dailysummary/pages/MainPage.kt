@@ -36,6 +36,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -53,6 +55,7 @@ import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.dailysummary.components.AlarmButton
 import com.example.dailysummary.components.AnimatedActionButton
 import com.example.dailysummary.components.DSCalender
 import com.example.dailysummary.components.MenuButton
@@ -103,16 +106,11 @@ fun MainPage(navController: NavController){
         bottomBar = {
             TabNavigationBar(tabBarItems)
                     },
-        topBar = {MainPageToolbar()},
-        floatingActionButton = {
-            when(selectedTab){
-                Tab.Home->{
-                    AlarmSettingFloating {navController.navigate("AlarmSettingPage")}
-                }
-                else->{}
+        topBar = {
+            MainPageToolbar {
+                navController.navigate("AlarmSettingPage")
             }
-        },
-        floatingActionButtonPosition = FabPosition.End
+                 },
         ){ paddingValues->
         Column(
             Modifier
@@ -154,7 +152,9 @@ fun AlarmSettingFloating(onClick:()->Unit){
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainPageToolbar() {
+fun MainPageToolbar(
+    onSetting:()->Unit,
+) {
     //val interpolatedColor = lerp(Color.White, Color.Black, alpha)
     TopAppBar(
 
@@ -165,17 +165,18 @@ fun MainPageToolbar() {
             }
         },
         actions = {
-            //ShareButton()
-            //MoreVertButton()
+            AlarmButton{
+                onSetting()
+            }
         },
 
-        /*
-        colors = TopAppBarDefaults.smallTopAppBarColors(
-            containerColor = Color.White.copy(alpha = alpha),
-            navigationIconContentColor = interpolatedColor,
-            titleContentColor = interpolatedColor, // Color for the title
-            actionIconContentColor = interpolatedColor // Color for action icons
-        ),*/
+
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            containerColor = Color.Transparent,
+            titleContentColor = MaterialTheme.colorScheme.onBackground,
+            navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
+            actionIconContentColor = MaterialTheme.colorScheme.onBackground
+        ),
     )
 
 }

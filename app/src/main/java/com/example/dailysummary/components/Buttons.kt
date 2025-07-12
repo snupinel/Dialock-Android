@@ -1,6 +1,7 @@
 package com.example.dailysummary.components
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Alarm
 import androidx.compose.material.icons.outlined.ArrowBackIosNew
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Delete
@@ -75,5 +76,15 @@ fun RevertButton(
 ){
     IconButton(enabled = enabled, onClick = onClick) {
         Icon(imageVector = Icons.Outlined.Replay, contentDescription = "Revert")
+    }
+}
+
+@Composable
+fun AlarmButton(
+    enabled:Boolean = true,
+    onClick:()->Unit,
+){
+    IconButton(enabled = enabled, onClick = onClick) {
+        Icon(imageVector = Icons.Outlined.Alarm, contentDescription = "Alarm")
     }
 }

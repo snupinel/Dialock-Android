@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.dailysummary.data.SummaryRepository
 import com.example.dailysummary.dto.DEFAULT_SUMMARY
+import com.example.dailysummary.dto.DayRating
 import com.example.dailysummary.dto.Summary
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -70,8 +71,8 @@ class SummaryPageViewModel @Inject constructor(
         setSummary(summary.value.copy(date = date))
     }
 
-    fun setThumb(isThumbUp:Boolean){
-        setSummary(summary.value.copy(isThumbUp = isThumbUp))
+    fun setThumb(dayRating:DayRating){
+        setSummary(summary.value.copy(dayRating = dayRating))
     }
 
     fun setLike(isLikeChecked:Boolean){

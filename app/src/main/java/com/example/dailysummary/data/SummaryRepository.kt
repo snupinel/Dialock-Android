@@ -3,6 +3,7 @@ package com.example.dailysummary.data
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import com.example.dailysummary.dto.DayRating
 import com.example.dailysummary.dto.Summary
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
@@ -43,8 +44,8 @@ class SummaryRepository @Inject constructor(
     suspend fun updateContentByDate(date: LocalDate, content: String){
         summaryDAO.updateContentByDate(date, content)
     }
-    suspend fun updateThumbByDate(date: LocalDate, isThumbUp: Boolean){
-        summaryDAO.updateThumbByDate(date, isThumbUp)
+    suspend fun updateRatingByDate(date: LocalDate, dayRating: DayRating){
+        summaryDAO.updateThumbByDate(date, dayRating)
     }
     suspend fun updateLikeByDate(date: LocalDate, isLiked: Boolean){
         summaryDAO.updateLikeByDate(date, isLiked)
