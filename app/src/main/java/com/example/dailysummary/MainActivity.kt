@@ -54,31 +54,30 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             DailySummaryTheme{
-                SideEffect {
-                    window?.let {
-                        WindowCompat.setDecorFitsSystemWindows(it, false) // ✅ 시스템 UI가 콘텐츠를 덮지 않도록 설정
-                        it.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
-                            val statusBarInsets = windowInsets.getInsets(WindowInsets.Type.statusBars())
-                            view.setBackgroundColor(android.graphics.Color.TRANSPARENT)
-                            //view.setPadding(0,statusBarInsets.top,0,0)
-                            windowInsets
-
-                        }
+                window?.let {
+                    WindowCompat.setDecorFitsSystemWindows(it, false) // ✅ 시스템 UI가 콘텐츠를 덮지 않도록 설정
+                    it.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
+                        val statusBarInsets = windowInsets.getInsets(WindowInsets.Type.statusBars())
+                        view.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+                        //view.setPadding(0,statusBarInsets.top,0,0)
+                        windowInsets
 
                     }
+
                 }
 
                 //startService(Intent(this, MyService::class.java))
                 // A surface container using the 'background' color from the theme
 
 
-                if(viewModel.isSettingCompleted()){
-                    Log.d("aaaa","completed")
+                val isCompleted = remember { viewModel.isSettingCompleted() }
+
+                if (isCompleted) {
                     MyApp(startDestination = "MainPage")
-                }else{
+                } else {
                     MyApp()
-                    //MyApp(startDestination = "MainPage")
                 }
+
             }
         }
     }

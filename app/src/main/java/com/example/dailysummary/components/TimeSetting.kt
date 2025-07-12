@@ -223,13 +223,13 @@ fun TimePicker(
         Row(modifier = Modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically) {
-            StringScroller(
+            StringScrolled(
                 modifier= Modifier.weight(1f).fillMaxHeight(),
                 strings = strings,
                 selectedIndex = selectedStringIndex,
                 visibleItemsCount= visibleItemsCount,
                 maxHeight=height)
-            Text(text = ":", fontSize = 16.sp, modifier = Modifier.padding(horizontal = 8.dp))
+            Text(text = ":", fontSize = 24.sp, modifier = Modifier.padding(horizontal = 8.dp), color = MaterialTheme.colorScheme.onPrimary)
             NumberScroller(
                 numbers = hours,
                 selectedNumber = selectedHour,
@@ -239,7 +239,7 @@ fun TimePicker(
                 visibleItemsCount=visibleItemsCount,
                 maxHeight=height
             )
-            Text(text = ":", fontSize = 16.sp, modifier = Modifier.padding(horizontal = 8.dp))
+            Text(text = ":", fontSize = 24.sp, modifier = Modifier.padding(horizontal = 8.dp),color = MaterialTheme.colorScheme.onPrimary)
             NumberScroller(
                 numbers = minutes,
                 selectedNumber = selectedMinute,
@@ -455,52 +455,61 @@ fun NumberScroller(
     }
 }
 @Composable
-fun StringScroller(
+fun StringScrolled(
     strings: List<String>,
     selectedIndex: Int,
     modifier: Modifier = Modifier,
     visibleItemsCount:Int,
     maxHeight: Dp
 ) {
-
-    val dummyList= List(visibleItemsCount/2){""}
-
-    val dummyAddedList = dummyList+strings+dummyList
+    val dummyList = List(visibleItemsCount / 2) { "" }
+    val dummyAddedList = dummyList + strings + dummyList
 
     val lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
+    val itemHeight = maxHeight / visibleItemsCount
+    val density = LocalDensity.current
 
-    val itemHeight = maxHeight/visibleItemsCount
-
-    //val visibleItemsCount = 3
-    /*
-    LaunchedEffect(selectedNumber) {
-        coroutineScope.launch {
-            val initialIndex = numbers.size * 50 + selectedNumber
-            lazyListState.scrollToItem(initialIndex)
-        }
-    }*/
-    LaunchedEffect(selectedIndex){
+    LaunchedEffect(selectedIndex) {
         lazyListState.animateScrollToItem(selectedIndex)
     }
 
     LazyColumn(
         state = lazyListState,
-        modifier = modifier
-            .fillMaxHeight() ,
+        modifier = modifier.fillMaxHeight(),
         horizontalAlignment = Alignment.CenterHorizontally,
         userScrollEnabled = false
     ) {
-
         itemsIndexed(dummyAddedList) { index, str ->
+            val itemInfo = lazyListState.layoutInfo.visibleItemsInfo
+                .firstOrNull { it.index == index }
+
+            val centerOffset = (lazyListState.layoutInfo.viewportStartOffset +
+                    lazyListState.layoutInfo.viewportEndOffset) / 2
+            val itemCenter = itemInfo?.let { it.offset + it.size / 2 } ?: 0
+
+            val distance = abs(itemCenter - centerOffset).toFloat()
+            val maxDistance = with(density) { itemHeight.toPx() } * (visibleItemsCount / 2f)
+            val norm = (distance / maxDistance).coerceIn(0f, 1f)
+
+            val color = lerp(
+                MaterialTheme.colorScheme.onPrimary,
+                MaterialTheme.colorScheme.onBackground,
+                norm
+            )
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(itemHeight),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = str, fontSize = 16.sp, color = MaterialTheme.colorScheme.onPrimary)
+                Text(
+                    text = str,
+                    fontSize = 16.sp,
+                    color = color
+                )
             }
         }
     }

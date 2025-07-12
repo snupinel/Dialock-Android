@@ -67,6 +67,7 @@ fun TimeSettingPage(navController: NavController,viewModel: SettingPageViewModel
             WeekdaySelectorRow(chosenDays){
                 viewModel.clickChosenDay(it)
             }
+            Spacer(modifier = Modifier.height(16.dp))
             MyTimePicker(viewModel)
         }
     }
@@ -201,7 +202,7 @@ fun MyTimePicker(viewModel: SettingPageViewModel){
     TimePicker(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 24.dp),
         height = 300.dp,
         selectedHour = time.hour,
         selectedMinute = time.minute,
