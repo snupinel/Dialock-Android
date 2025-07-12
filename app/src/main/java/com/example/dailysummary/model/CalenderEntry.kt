@@ -46,7 +46,7 @@ fun summaryRefinement(year:Int, month:Int, summaries:List<Summary>):CalenderOneP
             val list = mutableListOf<CalenderEntry>()
             val frontBlankCount=LocalDate.of(year,month,1).dayOfWeek.value%7
             repeat(frontBlankCount){
-                list.add(CalenderEntry(isBlank = true))
+                list.add(CalenderEntry(isBlank = true,day = LocalDate.of(year,month,1).plusDays((-frontBlankCount+it).toLong()).dayOfMonth))
             }
             val daysInMonth = LocalDate.of(year,month,1).lengthOfMonth()
             repeat(daysInMonth){
@@ -58,9 +58,9 @@ fun summaryRefinement(year:Int, month:Int, summaries:List<Summary>):CalenderOneP
             if(today.year == year && today.monthValue ==month){
                 list[frontBlankCount-1+today.dayOfMonth]=list[frontBlankCount-1+today.dayOfMonth].copy(isToday = true)
             }
-            val backBlankCount = (7 - (frontBlankCount + daysInMonth) % 7) % 7
+            val backBlankCount = 42 - frontBlankCount - daysInMonth
             repeat(backBlankCount){
-                list.add(CalenderEntry(isBlank = true))
+                list.add(CalenderEntry(isBlank = true, day = it+1))
             }
             list
         }

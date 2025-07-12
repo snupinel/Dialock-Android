@@ -55,6 +55,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -334,7 +335,14 @@ fun CalenderDayGrid(
 
         itemsIndexed(calenderOnePage.calenderEntries, key = {index, item -> "$index-${item.day}"}){ index, calenderEntry->
             if(calenderEntry.isBlank){
-
+                Box(modifier = Modifier.aspectRatio(1f).alpha(0.15f),
+                    contentAlignment = Alignment.Center
+                ){
+                    Text(
+                        text = "${calenderEntry.day}",
+                        color = Color.Gray
+                    )
+                }
             } else{
                 CalenderBox(
                     isWritten = calenderEntry.isWritten,
