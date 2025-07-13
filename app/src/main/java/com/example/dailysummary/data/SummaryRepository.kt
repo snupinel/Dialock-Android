@@ -7,10 +7,14 @@ import com.example.dailysummary.dto.DayRating
 import com.example.dailysummary.dto.Summary
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Singleton
 
+@Singleton
 class SummaryRepository @Inject constructor(
     private val summaryDAO: SummaryDAO
 ){
@@ -23,10 +27,16 @@ class SummaryRepository @Inject constructor(
     }
 
 
+    private val _shouldRefresh = MutableStateFlow(false)
+    val shouldRefresh: StateFlow<Boolean>  = _shouldRefresh.asStateFlow()
 
     suspend fun insertSummary(summary: Summary) {
         summaryDAO.insertSummary(summary)
         Log.d("room",summary.toString())
+        _shouldRefresh.value = true // ✅ 새로고침 신호
+    }
+    fun clearRefreshFlag() {
+        _shouldRefresh.value = false
     }
 
     suspend fun deleteSummary(summary: Summary) {

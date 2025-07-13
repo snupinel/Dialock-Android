@@ -102,4 +102,15 @@ class MainPageViewModel @Inject constructor(
         _clickedDay.value = null
     }
 
+    init {
+        viewModelScope.launch {
+            summaryRepository.shouldRefresh.collect { refresh ->
+                if (refresh) {
+                    calenderRefresh()
+                    summaryRepository.clearRefreshFlag()
+                }
+            }
+        }
+    }
+
 }
