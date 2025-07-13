@@ -31,7 +31,6 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
 import com.example.dailysummary.pages.AlarmSettingPage
 import com.example.dailysummary.pages.MainPage
-import com.example.dailysummary.pages.StartPage
 import com.example.dailysummary.pages.SummaryPage
 import com.example.dailysummary.pages.TimeSettingPage
 import com.example.dailysummary.pages.initialPages.FeatureIntroPage
@@ -101,9 +100,6 @@ private fun MyApp(
         color = Color.White
     ) {
         NavHost(navController = navController, startDestination = startDestination) {
-            composable("StartPage") {
-                StartPage(navController)
-            }
             composable("MainPage") {
                 MainPage(navController)
             }
