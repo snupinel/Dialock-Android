@@ -56,12 +56,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.dailysummary.components.AlarmButton
-import com.example.dailysummary.components.AnimatedActionButton
 import com.example.dailysummary.components.DSCalender
 import com.example.dailysummary.components.MenuButton
-import com.example.dailysummary.components.SettingOption
 import com.example.dailysummary.components.TabNavigationBar
-import com.example.dailysummary.components.TimeSetting
 import com.example.dailysummary.model.BottomNavItem
 import com.example.dailysummary.viewModel.MainPageViewModel
 import com.example.dailysummary.viewModel.Tab
@@ -92,11 +89,10 @@ fun MainPage(navController: NavController){
 
 
     LaunchedEffect(shouldRefresh){
-        //viewModel.setShowPopup(false)
-        //viewModel.calenderRefresh()
-        //viewModel.setCalenderEntries()
-
-        backStackEntry?.savedStateHandle?.set("shouldRefresh", false)
+        if(shouldRefresh){
+            viewModel.calenderRefresh()
+            backStackEntry?.savedStateHandle?.set("shouldRefresh", false)
+        }
     }
 
     val selectedTab by viewModel.selectedTab.collectAsState()
@@ -134,21 +130,6 @@ fun MainPage(navController: NavController){
         }
     }
 }
-
-@Composable
-fun AlarmSettingFloating(onClick:()->Unit){
-    ExtendedFloatingActionButton(
-        modifier = Modifier.size(60.dp),
-        onClick = onClick,
-        shape = CircleShape,
-        contentColor = Color.White,
-        containerColor = MaterialTheme.colorScheme.primaryContainer,
-
-    ){
-        Icon(imageVector = Icons.Filled.Alarm, contentDescription = "AlarmSetting")
-    }
-}
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

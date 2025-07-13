@@ -68,6 +68,7 @@ class MainPageViewModel @Inject constructor(
         Log.d("aaaa",clickedDay.value.toString() )
     }
 
+
     val now = LocalDate.now()
 
     private val _pageCache = mutableStateMapOf<Int, CalenderOnePage>()
@@ -92,6 +93,13 @@ class MainPageViewModel @Inject constructor(
                 loadingPages.remove(page)
             }
         }
+    }
+
+    fun calenderRefresh() {
+        _pageCache.clear()
+        loadingPages.clear()
+        _clickedEntry.value = null
+        _clickedDay.value = null
     }
 
 }

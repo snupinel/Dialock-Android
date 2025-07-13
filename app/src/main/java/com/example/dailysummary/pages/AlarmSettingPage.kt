@@ -56,16 +56,12 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.example.dailysummary.components.AnimatedActionButton
 import com.example.dailysummary.components.BackButton
 import com.example.dailysummary.components.CalenderDate
 
 import com.example.dailysummary.components.EditButton
 import com.example.dailysummary.components.RevertButton
 import com.example.dailysummary.components.RoundedCornerButton
-import com.example.dailysummary.components.SettingOption
-import com.example.dailysummary.components.TimePicker
-import com.example.dailysummary.components.TimeSetting
 import com.example.dailysummary.components.WeekdayVerticalList
 import com.example.dailysummary.components.weekDayList
 import com.example.dailysummary.dto.AdviceOrForcing
