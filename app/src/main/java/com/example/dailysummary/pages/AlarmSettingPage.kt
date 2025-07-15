@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -144,29 +145,7 @@ fun AlarmSettingPage(navController: NavController,viewModel: SettingPageViewMode
 }
 
 
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-fun AlarmSettingMainPage(navController: NavController){
 
-
-}
-
-
-@Composable
-fun SettingSameEveryDay(){
-    val viewModel= hiltViewModel<SettingPageViewModel>()
-
-    val sameEveryDay = viewModel.setting.collectAsState().value.sameEveryDay
-    Row(modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center) {
-        Text("매일 동일")
-        Checkbox(
-            checked = sameEveryDay,
-            onCheckedChange = {viewModel.setSameEveryDay(it)}
-        )
-    }
-}
 
 
 
@@ -264,9 +243,11 @@ fun WritingModeSelector(
             )
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("권유", color = if (!isForceMode) Color.Black else Color.Gray)
+                Text("권유", color = if (!isForceMode) MaterialTheme.colorScheme.onBackground else Color.Gray)
+                Spacer(modifier = Modifier.width(12.dp))
                 Switch(checked = isForceMode, onCheckedChange = onToggle)
-                Text("강요", color = if (isForceMode) Color.Black else Color.Gray)
+                Spacer(modifier = Modifier.width(12.dp))
+                Text("강요", color = if (isForceMode) MaterialTheme.colorScheme.onBackground else Color.Gray)
             }
         }
 
@@ -274,9 +255,9 @@ fun WritingModeSelector(
 
         Text(
             text = if (isForceMode)
-                "알림을 반드시 확인해야 해요. 무시할 수 없어요."
+                "일기를 작성하지 않는다면, 뒷 일은 책임 못 져요!"
             else
-                "알림은 권유용입니다. 무시해도 괜찮아요.",
+                "일기 쓸 시간이에요!",
             style = MaterialTheme.typography.bodySmall,
             color = Color.Gray
         )

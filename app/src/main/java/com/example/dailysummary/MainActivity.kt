@@ -103,9 +103,7 @@ private fun MyApp(
     ) {
         NavHost(
             navController = navController,
-            startDestination = startDestination,
-            enterTransition = { EnterTransition.None},
-            exitTransition = { ExitTransition.None}) {
+            startDestination = startDestination) {
             composable("MainPage") {
                 MainPage(navController)
             }

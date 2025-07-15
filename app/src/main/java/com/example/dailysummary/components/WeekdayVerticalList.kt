@@ -6,15 +6,18 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.dailysummary.dto.AlarmTime
 import java.time.LocalTime
@@ -48,26 +52,24 @@ fun WeekdayVerticalList(
             DayListItem(
                 modifier = Modifier.weight(1f),
                 dayName = dayNames[i],
+                dayColor = weekDayList[i].first?:MaterialTheme.colorScheme.onSurface,
                 info = info,
                 onClick = { onItemClick(i) }
             )
         }
     }
 }
+@OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DayListItem(
     modifier: Modifier,
     dayName:String,
+    dayColor:Color,
     info: AlarmTime,
     onClick: () -> Unit
 ) {
     val formattedTime = formatTimeBySystemSetting(LocalTime.of(info.hour,info.minute))
-
-    val backgroundColor = when {
-        info.isNextDay -> Color(0xFFE3F2FD) // 블루톤
-        else -> Color(0xFFE0F2F1) // 그린톤
-    }
 
     val labelText = when {
         info.isNextDay -> "다음날"
@@ -81,32 +83,37 @@ fun DayListItem(
 
     Card(
         modifier = modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
+            .fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = backgroundColor)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        onClick = onClick,
     ) {
-        Row(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            contentAlignment = Alignment.Center,
         ) {
             Text(
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Left,
                 text = dayName,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium,
-                color = Color(0xFF222222)
+                color = dayColor
             )
             Text(
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
                 text = formattedTime,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium,
-                color = Color(0xFF444444)
+                color = MaterialTheme.colorScheme.onSurface
             )
             Text(
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Right,
                 text = labelText,
                 style = MaterialTheme.typography.labelMedium,
                 color = labelColor
