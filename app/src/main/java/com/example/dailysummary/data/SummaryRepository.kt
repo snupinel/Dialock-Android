@@ -20,7 +20,7 @@ class SummaryRepository @Inject constructor(
 ){
     fun getAllSummaries(): Flow<List<Summary>> = summaryDAO.getAllSummaries()
 
-    fun getSummariesByDate(date: LocalDate): Summary? = summaryDAO.getSummaryByDate(date)
+    suspend fun getSummaryByDate(date: LocalDate): Summary? = summaryDAO.getSummaryByDate(date)
 
     fun getSummariesByMonth(yearMonth: String): Flow<List<Summary>> {
         return summaryDAO.getSummariesByMonth(yearMonth)

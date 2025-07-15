@@ -11,6 +11,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -92,14 +94,18 @@ class MainActivity : ComponentActivity() {
 private fun MyApp(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = "GreetingPage"
+    startDestination: String = "GreetingPage",
 ) {
 
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = Color.White
     ) {
-        NavHost(navController = navController, startDestination = startDestination) {
+        NavHost(
+            navController = navController,
+            startDestination = startDestination,
+            enterTransition = { EnterTransition.None},
+            exitTransition = { ExitTransition.None}) {
             composable("MainPage") {
                 MainPage(navController)
             }

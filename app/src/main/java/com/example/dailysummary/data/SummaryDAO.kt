@@ -16,7 +16,7 @@ interface SummaryDAO {
     suspend fun insertSummary(summary: Summary)
 
     @Query("SELECT * FROM summary WHERE date = :date LIMIT 1")
-    fun getSummaryByDate(date: LocalDate): Summary
+    suspend fun getSummaryByDate(date: LocalDate): Summary
 
     @Query("SELECT * FROM summary WHERE strftime('%Y-%m', date) = :yearMonth")
     fun getSummariesByMonth(yearMonth: String): Flow<List<Summary>>

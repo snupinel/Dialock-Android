@@ -86,7 +86,7 @@ class SummaryPageViewModel @Inject constructor(
 
         viewModelScope.launch{
             val gotSummary = withContext(Dispatchers.IO){
-                summaryRepository.getSummariesByDate(LocalDate.of(year,month,day))
+                summaryRepository.getSummaryByDate(LocalDate.of(year,month,day))
             }
 
             if (gotSummary == null) {

@@ -31,6 +31,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -84,8 +85,20 @@ class SummaryService  : Service() {
         super.onCreate()
         setTheme(R.style.Theme_DailySummary)
         Log.d("summaryservice","SummaryService activated")
-        showOverlay()
-        alarmScheduler.scheduleOverlay()
+        serviceScope.launch {
+            val summaries = summaryRepository.getSummaryByDate(
+                LocalDate.of(year, month, day)
+            )
+            if (summaries == null) {
+                withContext(Dispatchers.Main) {
+                    showOverlay()
+                }
+            }
+
+
+
+            alarmScheduler.scheduleOverlay()
+        }
     }
 
     private fun buildNotification(): Notification {
