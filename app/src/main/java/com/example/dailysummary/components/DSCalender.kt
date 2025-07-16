@@ -179,7 +179,6 @@ fun DSCalender(
 
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier.height(300.dp),
             verticalAlignment = Alignment.Top,
             beyondViewportPageCount = 1,
             pageSpacing = 40.dp,
