@@ -181,7 +181,7 @@ fun DSCalender(
             state = pagerState,
             modifier = Modifier.height(300.dp),
             verticalAlignment = Alignment.Top,
-            beyondViewportPageCount = 4,
+            beyondViewportPageCount = 1,
             pageSpacing = 40.dp,
             flingBehavior = customFlingBehavior
         ) { page ->

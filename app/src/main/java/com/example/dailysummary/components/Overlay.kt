@@ -19,6 +19,7 @@ import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.SentimentNeutral
 import androidx.compose.material.icons.outlined.ThumbDown
 import androidx.compose.material.icons.outlined.ThumbUp
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,11 +36,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.dailysummary.dto.AdviceOrForcing
 import com.example.dailysummary.dto.DayRating
-import com.example.dailysummary.dto.SAMPLE_ALARM_TIME
 import com.example.dailysummary.dto.Setting
 import com.example.dailysummary.ui.theme.DailySummaryTheme
 
@@ -95,7 +94,8 @@ fun Overlay(
 
                     }
                     CloseButton(isAdvice = adviceOrForcing==AdviceOrForcing.Advice) {
-                        close() }
+                        close()
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -112,7 +112,7 @@ fun Overlay(
                     dayRating = it
                 })
                 Spacer(modifier = Modifier.weight(1f))
-                RoundedCornerButton(modifier = Modifier
+                Button(modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
                     .padding(horizontal = 12.dp),
@@ -120,9 +120,11 @@ fun Overlay(
                         saveDiary(textFieldValue,isLikeChecked,dayRating)
                         close()
                     },
-                    enabled = textFieldValue!=""
+                    enabled = textFieldValue!="",
+                    shape = RoundedCornerShape(8.dp)
+
                 ){
-                    Text("저장", color = MaterialTheme.colorScheme.onPrimary)
+                    Text("저장")
                 }
 
             }
@@ -180,19 +182,7 @@ fun TextBox(
 
 
 
-@Composable
-@Preview
-fun OverlayPreview(){
-    DailySummaryTheme {
-        Overlay(
-            close = {},
-            getSetting = {  Setting(AdviceOrForcing.Advice,true,List(7){ SAMPLE_ALARM_TIME})},
-            saveDiary = { content, isThumbUp, isLikeChecked ->
-            }
-            //setTextFieldValue =
-        )
-    }
-}
+
 
 @Composable
 fun DayRatingSelector(
@@ -249,11 +239,12 @@ fun CloseButton(
     onClick:()->Unit,
 ){
     if(isAdvice)
-        RoundedCornerButton(
+        Button(
             modifier = modifier
                 .fillMaxHeight()
                 .width(60.dp),
-            onClick=onClick,
+            onClick=  onClick,
+            shape = RoundedCornerShape(8.dp)
             ) {
             Icon(
                 imageVector = Icons.Outlined.Close,
@@ -268,16 +259,16 @@ fun MinimizeButton(
     modifier: Modifier=Modifier,
     onClick:()->Unit,
 ){
-    RoundedCornerButton(
+    Button(
         modifier = modifier
             .fillMaxHeight()
             .width(60.dp),
-        onClick=onClick,
+        shape = RoundedCornerShape(8.dp),
+        onClick= onClick,
         ) {
         Icon(
             imageVector = Icons.Outlined.KeyboardArrowDown,
             contentDescription = "Minimize",
-            tint = MaterialTheme.colorScheme.onPrimary
         )
     }
 }

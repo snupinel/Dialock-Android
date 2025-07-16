@@ -1,6 +1,5 @@
 package com.example.dailysummary.pages
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +17,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,6 +30,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,22 +38,26 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.dailysummary.components.BackButton
-import com.example.dailysummary.components.RoundedCornerButton
 import com.example.dailysummary.components.TimePicker
 import com.example.dailysummary.components.weekDayList
+import com.example.dailysummary.utils.popBackStackExclusive
 import com.example.dailysummary.viewModel.SettingPageViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun TimeSettingPage(navController: NavController,viewModel: SettingPageViewModel){
     val chosenDays by viewModel.chosenDays.collectAsState()
     val applicable by viewModel.isPickerApplicable.collectAsState()
 
+    val scope = rememberCoroutineScope()
+
     Scaffold(
         topBar = {TimeSettingToolBar{
-            navController.popBackStack()
+            scope.launch {
+                navController.popBackStackExclusive()
+            }
         }},
         bottomBar = {
                     TimeApplyButton(applicable){
@@ -172,20 +178,21 @@ fun TimeSettingToolBar(
 @Composable
 fun TimeApplyButton(enabled:Boolean=true,onApply:()->Unit) {
 
-    RoundedCornerButton(
+    Button(
         modifier = Modifier
             .padding(
                 bottom = WindowInsets.navigationBars
                     .asPaddingValues()
                     .calculateBottomPadding()
             )
+            .padding(horizontal = 12.dp)
             .fillMaxWidth()
-            .height(50.dp)
-            .padding(horizontal = 12.dp),
-        onClick = onApply,
+            .height(50.dp),
+        shape = RoundedCornerShape(8.dp),
+        onClick = { onApply() },
         enabled = enabled,
         ){
-        Text(text = "완료", color = MaterialTheme.colorScheme.onPrimary)
+        Text(text = "완료")
     }
 
 

@@ -4,13 +4,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,13 +19,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.dailysummary.components.RoundedCornerButton
 
 @Composable
 fun GreetingPage(navController: NavController){
 
     Column(
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
         verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally){
         Text(
             text = "Dialock에 오신 걸 환영합니다!",
@@ -44,16 +44,17 @@ fun GreetingPage(navController: NavController){
             textAlign = TextAlign.Center
         )
 
-        RoundedCornerButton(
+        Button(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp)
                 .padding(horizontal = 12.dp),
             onClick = {
                 navController.navigate("FeatureIntroPage")
-            }
+            },
+            shape = RoundedCornerShape(8.dp)
         ){
-            Text("계속", color = MaterialTheme.colorScheme.onPrimary)
+            Text("계속")
         }
     }
 }

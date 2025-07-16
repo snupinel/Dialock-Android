@@ -19,7 +19,7 @@ interface SummaryDAO {
     suspend fun getSummaryByDate(date: LocalDate): Summary
 
     @Query("SELECT * FROM summary WHERE strftime('%Y-%m', date) = :yearMonth")
-    fun getSummariesByMonth(yearMonth: String): Flow<List<Summary>>
+    suspend fun getSummariesByMonth(yearMonth: String): List<Summary>
 
     @Query("SELECT * FROM summary")
     fun getAllSummaries(): Flow<List<Summary>>

@@ -3,7 +3,6 @@ package com.example.dailysummary.pages.initialPages
 import android.app.AlarmManager
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
@@ -26,7 +25,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,12 +35,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
-import com.example.dailysummary.components.RoundedCornerButton
 
 @Composable
 fun PermissionRequestPage(
@@ -85,7 +81,7 @@ fun PermissionRequestPage(
 
     Scaffold(
         bottomBar = {
-            RoundedCornerButton(
+            Button(
                 onClick = { navController.navigate("MainPage") },
                 modifier = Modifier
                     .padding(
@@ -93,9 +89,10 @@ fun PermissionRequestPage(
                             .asPaddingValues()
                             .calculateBottomPadding()
                     )
+                    .padding(horizontal = 12.dp)
                     .fillMaxWidth()
-                    .height(50.dp)
-                    .padding(horizontal = 12.dp),
+                    .height(50.dp),
+                    shape = RoundedCornerShape(8.dp),
                 enabled = allGranted
             ) {
                 Text("다음으로", color = MaterialTheme.colorScheme.onPrimary)

@@ -19,7 +19,11 @@ fun BackButton(
     modifier: Modifier=Modifier,
     onClick:()->Unit,
 ){
-    IconButton(modifier = modifier,onClick = onClick) {
+
+    IconButton(
+        modifier = modifier,
+        onClick = onClick
+    ) {
         Icon(imageVector = Icons.Outlined.ArrowBackIosNew, contentDescription = "Back")
     }
 }
@@ -28,7 +32,7 @@ fun ImageButton(
     modifier: Modifier=Modifier,
     onClick:()->Unit,
 ){
-    IconButton(modifier = modifier,onClick = onClick) {
+    IconButton(modifier = modifier,onClick =  { onClick() }) {
         Icon(imageVector = Icons.Outlined.Image, contentDescription = "Image")
     }
 }
@@ -38,7 +42,7 @@ fun MenuButton(
     modifier: Modifier=Modifier,
     onClick:()->Unit,
 ){
-    IconButton(modifier = modifier,onClick = onClick) {
+    IconButton(modifier = modifier,onClick =  { onClick() }) {
         Icon(imageVector = Icons.Outlined.Menu, contentDescription = "Menu")
     }
 }
@@ -47,7 +51,7 @@ fun DeleteButton(
     modifier: Modifier=Modifier,
     onClick:()->Unit,
 ){
-    IconButton(modifier = modifier,onClick = onClick) {
+    IconButton(modifier = modifier,onClick =  { onClick() }) {
         Icon(imageVector = Icons.Outlined.Delete, contentDescription = "Delete")
     }
 }
@@ -56,7 +60,7 @@ fun DeleteButton(
 fun EditButton(
     onClick:()->Unit,
 ){
-    IconButton(onClick = onClick) {
+    IconButton(onClick =  { onClick() }) {
         Icon(imageVector = Icons.Outlined.Edit, contentDescription = "Edit")
     }
 }
@@ -65,7 +69,7 @@ fun EditButton(
 fun ConfirmButton(
     onClick:()->Unit,
 ){
-    IconButton(onClick = onClick) {
+    IconButton(onClick =  { onClick() }) {
         Icon(imageVector = Icons.Outlined.Check, contentDescription = "Confirm")
     }
 }
@@ -74,7 +78,7 @@ fun RevertButton(
     enabled:Boolean = true,
     onClick:()->Unit,
 ){
-    IconButton(enabled = enabled, onClick = onClick) {
+    IconButton(enabled = enabled, onClick =  { onClick() }) {
         Icon(imageVector = Icons.Outlined.Replay, contentDescription = "Revert")
     }
 }
@@ -84,7 +88,7 @@ fun AlarmButton(
     enabled:Boolean = true,
     onClick:()->Unit,
 ){
-    IconButton(enabled = enabled, onClick = onClick) {
+    IconButton(enabled = enabled, onClick =  { onClick() }) {
         Icon(imageVector = Icons.Outlined.Alarm, contentDescription = "Alarm")
     }
 }

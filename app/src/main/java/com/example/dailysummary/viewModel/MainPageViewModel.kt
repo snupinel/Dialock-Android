@@ -38,8 +38,6 @@ enum class Tab{
 @HiltViewModel
 @SuppressLint("NewApi")
 class MainPageViewModel @Inject constructor(
-    private val prefRepository: PrefRepository,
-    private val alarmScheduler: AlarmScheduler,
     private val summaryRepository: SummaryRepository,
     ):ViewModel(){
 
@@ -85,7 +83,7 @@ class MainPageViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val ym = PageYearMonth(page)
-                val summaries = summaryRepository.getSummariesByMonth("%04d-%02d".format(ym.year, ym.month)).firstOrNull()?: emptyList()
+                val summaries = summaryRepository.getSummariesByMonth("%04d-%02d".format(ym.year, ym.month))
                 _pageCache[page] = summaryRefinement(ym.year,ym.month,summaries)
             } catch (e: Exception) {
                 Log.w("ViewModel", "Page $page load failed: ${e.message}")

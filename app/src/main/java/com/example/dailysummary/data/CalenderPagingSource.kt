@@ -55,7 +55,7 @@ class CalenderPagingSource @AssistedInject constructor(
             // CallAdapter dispatches on a worker thread.
 
 
-            val summaries = summaryRepository.getSummariesByMonth("%04d-%02d".format(pageNum.year, pageNum.month)).firstOrNull()?: emptyList()
+            val summaries = summaryRepository.getSummariesByMonth("%04d-%02d".format(pageNum.year, pageNum.month))
             Log.d("aaaa",summaries.toString())
             val calenderOnePage =summaryRefinement(pageNum.year,pageNum.month,summaries)
 

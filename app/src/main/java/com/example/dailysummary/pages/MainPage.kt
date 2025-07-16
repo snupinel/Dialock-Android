@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
+import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
@@ -90,6 +91,7 @@ fun MainPage(navController: NavController){
 
     LaunchedEffect(shouldRefresh){
         if(shouldRefresh){
+            Log.d("MainPage","Main Page Refreshed")
             viewModel.calenderRefresh()
             backStackEntry?.savedStateHandle?.set("shouldRefresh", false)
         }
@@ -98,7 +100,6 @@ fun MainPage(navController: NavController){
     val selectedTab by viewModel.selectedTab.collectAsState()
 
     Scaffold(
-        modifier = Modifier.height(100.dp),
         bottomBar = {
             TabNavigationBar(tabBarItems)
                     },

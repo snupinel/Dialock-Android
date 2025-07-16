@@ -24,7 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.dailysummary.components.RoundedCornerButton
+
 import kotlinx.coroutines.launch
 
 @Composable
@@ -41,7 +41,7 @@ fun FeatureIntroPage(navController: NavController){
 
     Scaffold(
         bottomBar = {
-            RoundedCornerButton(
+            Button(
                 modifier = Modifier
                     .padding(
                         bottom = WindowInsets.navigationBars
@@ -51,6 +51,7 @@ fun FeatureIntroPage(navController: NavController){
                     .fillMaxWidth()
                     .height(50.dp)
                     .padding(horizontal = 12.dp),
+                shape = RoundedCornerShape(8.dp),
                 onClick = {
                     if (pagerState.currentPage < features.lastIndex) {
                         scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
@@ -59,8 +60,7 @@ fun FeatureIntroPage(navController: NavController){
                     }
                 },
             ){
-                Text(if (pagerState.currentPage < features.lastIndex) "다음" else "시작하기",
-                    color = MaterialTheme.colorScheme.onPrimary)
+                Text(if (pagerState.currentPage < features.lastIndex) "다음" else "시작하기")
             }
         }
     ) { padding ->
