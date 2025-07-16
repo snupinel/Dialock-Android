@@ -1,22 +1,18 @@
 package com.example.dailysummary.components
 
 import android.util.Log
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.animation.core.animateDecay
+import androidx.compose.animation.splineBasedDecay
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.FlingBehavior
+import androidx.compose.foundation.gestures.ScrollScope
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,15 +20,12 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,7 +38,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -57,9 +49,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.dailysummary.dto.AnimationTarget
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -173,47 +163,6 @@ fun SameEveryDayToggle(
         )
     }
 }
-@Composable
-fun IsNextDayToggle(
-    isNextDay: Boolean,
-    onToggle: () -> Unit
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
-        modifier = Modifier
-            .height(40.dp)
-            .clickable(
-                indication = null,
-                interactionSource = interactionSource,
-                onClick = onToggle
-            )
-    ) {
-        Box(
-            modifier = Modifier
-                .size(20.dp)
-                .border(width = 2.dp, color = Color.DarkGray)
-                .then(
-                    if (isNextDay) Modifier.background(color = MaterialTheme.colorScheme.primary)
-                    else Modifier
-                ),
-            contentAlignment = Alignment.TopCenter
-        ) {
-            if (isNextDay) Text(text = "V")
-        }
-        Spacer(modifier = Modifier.width(5.dp))
-        Text(
-            text = "다음 날",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Normal,
-            color = if (isNextDay) Color.DarkGray else Color.LightGray,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .height(IntrinsicSize.Min)
-        )
-    }
-}
 
 @Composable
 fun NumberScroller(
@@ -223,7 +172,7 @@ fun NumberScroller(
     modifier: Modifier = Modifier,
     changeToggle:Boolean=true,
     visibleItemsCount:Int,
-    maxHeight:Dp
+    maxHeight:Dp,
 ) {
     Log.d("aaaab",selectedNumber.toString())
 
@@ -231,6 +180,7 @@ fun NumberScroller(
     //val currentMyTimeTab by viewModel.currentMyTimeTab.collectAsState()
     val lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
+    val density = LocalDensity.current
 
 
 
@@ -248,6 +198,8 @@ fun NumberScroller(
         lazyListState.scrollToItem(initialIndex)
         Log.d("NumberScroller",selectedNumber.toString())
     }
+
+
 
     LazyColumn(
         state = lazyListState,
@@ -307,27 +259,29 @@ fun NumberScroller(
         }
     }
 
-    val density = LocalDensity.current
+    var wasScrolling by remember { mutableStateOf(false) }
+
+    val itemHeightPx = with(density) { itemHeight.toPx() }
+
     LaunchedEffect(Unit) {
-        snapshotFlow { lazyListState.isScrollInProgress }
+        snapshotFlow { lazyListState.firstVisibleItemIndex to lazyListState.firstVisibleItemScrollOffset }
             .distinctUntilChanged()
-            .filter { isScrolling -> !isScrolling }
-            .collect {
-                // 스크롤이 멈춘 순간에 실행할 작업
-                println("Scrolling stopped")
+            .collect { (firstIndex, offset) ->
+                // 실시간으로 중앙 아이템 계산
+                val topIndex = (firstIndex + offset / itemHeightPx).roundToInt()
+                val actualTopIndex = topIndex % numbers.size
+                onNumberChange(numbers[(actualTopIndex + (visibleItemsCount / 2)) % numbers.size])
             }
     }
-    var wasScrolling by remember { mutableStateOf(false) }
 
     LaunchedEffect(lazyListState.isScrollInProgress) {
         if (wasScrolling && !lazyListState.isScrollInProgress) {
-            val TopIndex = (lazyListState.firstVisibleItemIndex + lazyListState.firstVisibleItemScrollOffset / with(density) { itemHeight.toPx() }).roundToInt()
-            val actualTopIndex = TopIndex % numbers.size
-            onNumberChange(numbers[(actualTopIndex + (visibleItemsCount/2)) % numbers.size])
+            val topIndex = (lazyListState.firstVisibleItemIndex +
+                    lazyListState.firstVisibleItemScrollOffset / itemHeightPx).roundToInt()
             coroutineScope.launch {
-                lazyListState.animateScrollToItem(TopIndex)
+                lazyListState.animateScrollToItem(topIndex)
             }
-            Log.d("aaaa", "!lazyListState.isScrollInProgress called")
+            Log.d("aaaa", "Snapped to $topIndex")
         }
         wasScrolling = lazyListState.isScrollInProgress
     }
@@ -392,3 +346,4 @@ fun StringScrolled(
         }
     }
 }
+

@@ -6,10 +6,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 
 @Composable
 fun SocialTab(){
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = "추가 예정!")
+        Text(text = "아 하단 탭 UI도 수정해야되는대", overflow = TextOverflow.Ellipsis)
     }
 }
