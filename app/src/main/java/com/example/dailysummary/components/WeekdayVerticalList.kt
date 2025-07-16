@@ -29,6 +29,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.dailysummary.dto.AlarmTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -107,8 +108,8 @@ fun DayListItem(
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
                 text = formattedTime,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Light,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
