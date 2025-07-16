@@ -88,14 +88,15 @@ fun WeekdaySelectorRow(
 
     Column {
         SettingInstruction()
+        Spacer(modifier = Modifier.height(8.dp))
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("매일", style = MaterialTheme.typography.titleMedium)
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(
@@ -108,14 +109,12 @@ fun WeekdaySelectorRow(
                             }
                         }
                     },
-                    colors = CheckboxDefaults.colors(checkedColor = Color(0xFF3D8BFF))
                 )
-                Spacer(modifier = Modifier.width(4.dp))
                 Text("매일", color = MaterialTheme.colorScheme.onBackground)
+                Spacer(modifier = Modifier.width(8.dp))
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
 
         Row(
             modifier = Modifier
@@ -125,12 +124,12 @@ fun WeekdaySelectorRow(
         ) {
             weekDayList.forEachIndexed { index, (color, label) ->
                 val isSelected = chosenDays.getOrNull(index) == true
-                val background = if (isSelected) Color(0xFF3D8BFF) else Color(0xFFE0E0E0)
-                val textColor = color ?: if (isSelected) Color.White else Color.Black
+                val background = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
+                val textColor = if (isSelected) MaterialTheme.colorScheme.onPrimary else color ?: MaterialTheme.colorScheme.onSurface
 
                 Box(
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(32.dp)
                         .clip(CircleShape)
                         .background(background)
                         .clickable { onDayToggle(index) },
@@ -139,7 +138,8 @@ fun WeekdaySelectorRow(
                     Text(
                         text = label,
                         color = textColor,
-                        fontWeight = FontWeight.Medium
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }

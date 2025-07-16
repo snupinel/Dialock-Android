@@ -107,7 +107,7 @@ fun TimePicker(
                 selectedIndex = selectedStringIndex,
                 visibleItemsCount= visibleItemsCount,
                 maxHeight=height)
-            Text(text = ":", fontSize = 24.sp, modifier = Modifier.padding(horizontal = 8.dp), color = MaterialTheme.colorScheme.onPrimary)
+            Text(text = ":", fontSize = 24.sp, color = MaterialTheme.colorScheme.onPrimary)
             NumberScroller(
                 numbers = hours,
                 selectedNumber = selectedHour,
@@ -117,7 +117,7 @@ fun TimePicker(
                 visibleItemsCount=visibleItemsCount,
                 maxHeight=height
             )
-            Text(text = ":", fontSize = 24.sp, modifier = Modifier.padding(horizontal = 8.dp),color = MaterialTheme.colorScheme.onPrimary)
+            Text(text = ":", fontSize = 24.sp, color = MaterialTheme.colorScheme.onPrimary)
             NumberScroller(
                 numbers = minutes,
                 selectedNumber = selectedMinute,

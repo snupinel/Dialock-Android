@@ -33,7 +33,7 @@ object GlobalClickBlocker {
 
 
 suspend fun NavController.popBackStackExclusive(
-    animationDelay: Long = 300L
+    animationDelay: Long = 50L
 ) {
     GlobalClickBlocker.runExclusive {
         this.popBackStack()
@@ -45,7 +45,7 @@ suspend fun NavController.popBackStackExclusive(
 private suspend fun NavController.waitUntilBackStackChanged(
     delayAfterPop: Long
 ) {
-    currentBackStackEntryFlow.collectLatest { entry ->
+    currentBackStackEntryFlow.collectLatest {
         // pop 후 새로운 destination이 활성화되면 unlock
         delay(delayAfterPop)
         return@collectLatest
