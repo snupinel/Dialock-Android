@@ -41,8 +41,8 @@
 
 | 버전 | 상태 | 주요 변경 사항 |
 |------|------|---------------|
-| [**v0.7.1**](https://github.com/snupinel/Dialock-Android/releases/download/v0.7.1) | 개발용 | 태블릿 호환 문제 해결 |
-| [**v0.7.0**](https://github.com/snupinel/Dialock-Android/releases/download/v0.7.0) | 개발용 | 테스트 빌드 |
+| [**v0.7.1**](https://github.com/snupinel/Dialock-Android/releases/tag/v.0.7.1) | 개발용 | 태블릿 호환 문제 해결 |
+| [**v0.7.0**](https://github.com/snupinel/Dialock-Android/releases/tag/v.0.7.0) | 개발용 | 테스트 빌드 |
 
 ---
 
