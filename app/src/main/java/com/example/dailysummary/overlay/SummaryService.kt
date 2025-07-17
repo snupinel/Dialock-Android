@@ -86,7 +86,7 @@ class SummaryService  : Service() {
         setTheme(R.style.Theme_DailySummary)
         Log.d("summaryservice","SummaryService activated")
         serviceScope.launch {
-            val summaries = summaryRepository.getSummaryByDate(
+            val summaries = summaryRepository.getSummariesByDate(
                 LocalDate.of(year, month, day)
             )
             if (summaries == null) {
@@ -188,9 +188,10 @@ class SummaryService  : Service() {
                             },
                             title = content,
                             content = "",
-                            isLikeChecked = isLikeChecked,
+                            isBookmarked = isLikeChecked,
                             dayRating = dayRating,
-                            imageUris = emptyList()
+                            imageUris = emptyList(),
+                            shouldBlockAlarm = true
                         ))
                     }
 

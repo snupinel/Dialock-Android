@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.Bookmark
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
@@ -50,7 +52,7 @@ fun Overlay(
     getSetting: () -> Setting,
     //textFieldValue: String,
     //setTextFieldValue: (String) -> Unit,
-    saveDiary : (content:String,isLikeChecked:Boolean,dayRating: DayRating) -> Unit,
+    saveDiary : (content:String,isBookmarked:Boolean,dayRating: DayRating) -> Unit,
 ) {
     //val viewModel = hiltViewModel<OverlayViewModel>()
 
@@ -66,7 +68,7 @@ fun Overlay(
         mutableStateOf(DayRating.SOSO)
     }
 
-    var isLikeChecked:Boolean by remember {
+    var isBookmarked:Boolean by remember {
         mutableStateOf(false)
     }
 
@@ -102,8 +104,8 @@ fun Overlay(
                 // 상단의 글 쓰는 박스
 
                 TextBox(
-                    isLikeChecked = isLikeChecked,
-                    toggleLike = {isLikeChecked=!isLikeChecked},
+                    isBookmarked = isBookmarked,
+                    toggleBookmark = {isBookmarked=!isBookmarked},
                     textFieldValue = textFieldValue,
                     onValueChange = {textFieldValue=it}
                 )
@@ -117,7 +119,7 @@ fun Overlay(
                     .height(50.dp)
                     .padding(horizontal = 12.dp),
                     onClick = {
-                        saveDiary(textFieldValue,isLikeChecked,dayRating)
+                        saveDiary(textFieldValue,isBookmarked,dayRating)
                         close()
                     },
                     enabled = textFieldValue!="",
@@ -133,7 +135,7 @@ fun Overlay(
 }
 
 @Composable
-fun LikeButton(
+fun BookmarkButton(
     isChecked: Boolean=true,
     onClick: () -> Unit,
 ){
@@ -141,14 +143,14 @@ fun LikeButton(
         when(isChecked){
             false->
                 Icon(
-                    imageVector = Icons.Outlined.FavoriteBorder,
-                    contentDescription = "Favorite",
+                    imageVector = Icons.Outlined.Bookmark,
+                    contentDescription = "Bookmark",
                     )
             true->
                 Icon(
-                    imageVector = Icons.Filled.Favorite,
+                    imageVector = Icons.Filled.Bookmark,
                     tint = MaterialTheme.colorScheme.primary,
-                    contentDescription = "Favorite")
+                    contentDescription = "Bookmark")
         }
 
 
@@ -157,8 +159,8 @@ fun LikeButton(
 
 @Composable
 fun TextBox(
-    isLikeChecked:Boolean=false,
-    toggleLike:()->Unit,
+    isBookmarked:Boolean=false,
+    toggleBookmark:()->Unit,
     textFieldValue:String,
     onValueChange:(String)->Unit,
 ){
@@ -171,8 +173,8 @@ fun TextBox(
                 .fillMaxWidth()
                 .padding(bottom = 16.dp),
             trailingIcon = {
-                LikeButton(isChecked = isLikeChecked) {
-                    toggleLike()
+                BookmarkButton(isChecked = isBookmarked) {
+                    toggleBookmark()
                 }
             }
         )

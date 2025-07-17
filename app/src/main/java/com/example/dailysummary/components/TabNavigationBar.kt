@@ -36,7 +36,7 @@ fun TabNavigationBar(tabBarItems: List<BottomNavItem>) {
     val selectedTabPage by viewModel.selectedTab.collectAsState()
     NavigationBar(
         modifier = Modifier.height(50.dp+ WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()),
-        containerColor = MaterialTheme.colorScheme.primaryContainer) {
+        containerColor = MaterialTheme.colorScheme.background) {
         // looping over each tab to generate the views and navigation for each item
         tabBarItems.forEach{ tabBarItem ->
             NavigationBarItem(
@@ -58,6 +58,7 @@ fun TabNavigationBar(tabBarItems: List<BottomNavItem>) {
                     }
 
                 },
+
         ) }
     }
 }

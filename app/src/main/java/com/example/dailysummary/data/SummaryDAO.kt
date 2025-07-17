@@ -15,8 +15,11 @@ interface SummaryDAO {
     @Insert
     suspend fun insertSummary(summary: Summary)
 
-    @Query("SELECT * FROM summary WHERE date = :date LIMIT 1")
-    suspend fun getSummaryByDate(date: LocalDate): Summary
+    @Query("SELECT * FROM summary WHERE id = :id")
+    suspend fun getSummaryById(id: Int): Summary
+
+    @Query("SELECT * FROM summary WHERE date = :date")
+    suspend fun getSummariesByDate(date: LocalDate): List<Summary>
 
     @Query("SELECT * FROM summary WHERE strftime('%Y-%m', date) = :yearMonth")
     suspend fun getSummariesByMonth(yearMonth: String): List<Summary>
@@ -27,20 +30,21 @@ interface SummaryDAO {
     @Delete
     suspend fun deleteSummary(summary: Summary)
 
-    @Query("DELETE FROM summary WHERE date = :date")
-    suspend fun deleteSummaryByDate(date: LocalDate): Int
+    @Query("DELETE FROM summary WHERE id = :id")
+    suspend fun deleteSummaryById(id: Int): Int
 
-    @Query(" UPDATE summary SET title = :title WHERE date = :date")
-    suspend fun updateTitleByDate(date: LocalDate, title: String): Int
-    @Query(" UPDATE summary SET content = :content WHERE date = :date")
-    suspend fun updateContentByDate(date: LocalDate, content: String): Int
+    @Query(" UPDATE summary SET title = :title WHERE id = :id")
+    suspend fun updateTitleById(id: Int, title: String): Int
 
-    @Query(" UPDATE summary SET day_rating = :dayRating WHERE date = :date")
-    suspend fun updateThumbByDate(date: LocalDate, dayRating: DayRating): Int
+    @Query(" UPDATE summary SET content = :content WHERE id = :id")
+    suspend fun updateContentById(id: Int, content: String): Int
 
-    @Query(" UPDATE summary SET is_like_checked = :isLikeChecked WHERE date = :date")
-    suspend fun updateLikeByDate(date: LocalDate, isLikeChecked: Boolean): Int
+    @Query(" UPDATE summary SET day_rating = :dayRating WHERE id = :id")
+    suspend fun updateThumbById(id: Int, dayRating: DayRating): Int
 
-    @Query(" UPDATE summary SET image_uris = :imageUris WHERE date = :date")
-    suspend fun updateImageUrisByDate(date: LocalDate, imageUris: List<Uri>): Int
+    @Query(" UPDATE summary SET is_bookmarked = :isBookmarked WHERE id = :id")
+    suspend fun updateLikeById(id: Int, isBookmarked: Boolean): Int
+
+    @Query(" UPDATE summary SET image_uris = :imageUris WHERE id = :id")
+    suspend fun updateImageUrisById(id: Int, imageUris: List<Uri>): Int
 }

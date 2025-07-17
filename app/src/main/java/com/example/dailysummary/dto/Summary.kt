@@ -19,8 +19,9 @@ data class Summary(
     @ColumnInfo(name = "title") val title: String,
     @ColumnInfo(name = "content") val content: String,
     @ColumnInfo(name = "day_rating") val dayRating: DayRating,
-    @ColumnInfo(name = "is_like_checked") val isLikeChecked: Boolean,
+    @ColumnInfo(name = "is_bookmarked") val isBookmarked: Boolean,
     @ColumnInfo(name="image_uris") val imageUris:List<Uri>,
+    @ColumnInfo(name="should_block_alarm") val shouldBlockAlarm:Boolean,
 )
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -30,6 +31,7 @@ val DEFAULT_SUMMARY = Summary(
     title = "",
     content = "",
     dayRating = DayRating.SOSO,
-    isLikeChecked = false,
+    isBookmarked = false,
     imageUris = emptyList(),
+    shouldBlockAlarm = false
 )

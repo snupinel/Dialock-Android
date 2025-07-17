@@ -1,11 +1,9 @@
 package com.example.dailysummary.data
 
-import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.example.dailysummary.dto.DayRating
 import com.example.dailysummary.dto.Summary
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,7 +18,7 @@ class SummaryRepository @Inject constructor(
 ){
     fun getAllSummaries(): Flow<List<Summary>> = summaryDAO.getAllSummaries()
 
-    suspend fun getSummaryByDate(date: LocalDate): Summary? = summaryDAO.getSummaryByDate(date)
+    suspend fun getSummariesByDate(date: LocalDate): List<Summary> = summaryDAO.getSummariesByDate(date)
 
     suspend fun getSummariesByMonth(yearMonth: String): List<Summary> {
         return summaryDAO.getSummariesByMonth(yearMonth)
@@ -43,26 +41,26 @@ class SummaryRepository @Inject constructor(
         summaryDAO.deleteSummary(summary)
     }
 
-    suspend fun deleteSummaryByDate(date: LocalDate) {
-        summaryDAO.deleteSummaryByDate(date)
+    suspend fun deleteSummaryById(id: Int) {
+        summaryDAO.deleteSummaryById(id)
     }
 
-    suspend fun updateTitleByDate(date: LocalDate, title: String){
-        summaryDAO.updateTitleByDate(date, title)
+    suspend fun updateTitleByDate(id: Int, title: String){
+        summaryDAO.updateTitleById(id, title)
     }
 
-    suspend fun updateContentByDate(date: LocalDate, content: String){
-        summaryDAO.updateContentByDate(date, content)
+    suspend fun updateContentByDate(id: Int, content: String){
+        summaryDAO.updateContentById(id, content)
     }
-    suspend fun updateRatingByDate(date: LocalDate, dayRating: DayRating){
-        summaryDAO.updateThumbByDate(date, dayRating)
+    suspend fun updateRatingByDate(id: Int, dayRating: DayRating){
+        summaryDAO.updateThumbById(id, dayRating)
     }
-    suspend fun updateLikeByDate(date: LocalDate, isLiked: Boolean){
-        summaryDAO.updateLikeByDate(date, isLiked)
+    suspend fun updateLikeByDate(id: Int, isLiked: Boolean){
+        summaryDAO.updateLikeById(id, isLiked)
     }
 
-    suspend fun updateImageUrisByDate(date: LocalDate,imageUris:List<Uri>){
-        summaryDAO.updateImageUrisByDate(date,imageUris)
+    suspend fun updateImageUrisByDate(id: Int,imageUris:List<Uri>){
+        summaryDAO.updateImageUrisById(id,imageUris)
     }
 
 }

@@ -32,7 +32,7 @@ import java.time.LocalDate
 import javax.inject.Inject
 
 enum class Tab{
-    Home,My,Social
+    Home,Calender,My
 }
 
 @HiltViewModel

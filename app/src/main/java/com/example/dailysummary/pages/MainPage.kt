@@ -1,79 +1,48 @@
 package com.example.dailysummary.pages
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Build
-import android.provider.Settings
 import android.util.Log
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Alarm
-import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.outlined.Groups
+import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FabPosition
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
-import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.dailysummary.components.AlarmButton
-import com.example.dailysummary.components.DSCalender
+import com.example.dailysummary.pages.mainPageTabs.CalenderTab
 import com.example.dailysummary.components.MenuButton
 import com.example.dailysummary.components.TabNavigationBar
 import com.example.dailysummary.model.BottomNavItem
 import com.example.dailysummary.viewModel.MainPageViewModel
 import com.example.dailysummary.viewModel.Tab
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 val homeTab = BottomNavItem(tag = "홈", title = "Home", selectedIcon = Icons.Filled.Home, unselectedIcon = Icons.Outlined.Home)
+val calenderTab = BottomNavItem(tag="캘린더", title="Calender", selectedIcon = Icons.Filled.CalendarToday, unselectedIcon = Icons.Outlined.CalendarToday)
+
 val myTab = BottomNavItem(tag="MY", title="My", selectedIcon = Icons.Filled.Person, unselectedIcon = Icons.Outlined.Person)
-val socialTab = BottomNavItem(tag="소셜", title="Social", selectedIcon = Icons.Filled.Groups, unselectedIcon = Icons.Outlined.Groups)
 
 
 // creating a list of all the tabs
-val tabBarItems = listOf(homeTab,socialTab,myTab)
+val tabBarItems = listOf(homeTab,calenderTab,myTab)
 
 //@Inject lateinit var alarmScheduler: AlarmScheduler
 
@@ -115,17 +84,18 @@ fun MainPage(navController: NavController){
                 .padding(paddingValues = paddingValues)
         ) {
             when (selectedTab){
-                Tab.Home -> {
-                    DSCalender(navController = navController)
+                Tab.Home-> {
+
+                }
+                Tab.Calender -> {
+                    CalenderTab(navController = navController)
                     //SameEveryDayToggle(sameEveryDay = false, onToggle = {viewModel.setSameEveryDay(isToggle = true)})
                 }
                 Tab.My -> {
                     //
 
                 }
-                Tab.Social-> {
-                    SocialTab()
-                }
+
             }
 
         }

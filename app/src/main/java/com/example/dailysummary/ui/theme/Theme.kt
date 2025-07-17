@@ -17,54 +17,84 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Color(0xFF4FA4FF),         // 밝은 파랑 (주요 강조 색)
-    onPrimary = Color.White,             // primary 위에 텍스트 등
-    primaryContainer = Color(0xFFD4EBFF),
+    primary = Color(0xFF4FA4FF),           // 밝은 파랑 (주요 강조 색)
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFF003A73),  // primary용 컨테이너(짙은 블루)
+    onPrimaryContainer = Color(0xFFD4EBFF),
+    inversePrimary = Color(0xFF82C2FF),    // 라이트톤 블루(반전용)
 
-    secondary = Color(0xFF3370B6),       // 보조 파랑
+    secondary = Color(0xFF3370B6),         // 보조 파랑
     onSecondary = Color.White,
+    secondaryContainer = Color(0xFF274C73),// 더 어두운 보조 파랑 컨테이너
+    onSecondaryContainer = Color(0xFFC6E0FF),
 
-    background = Color(0xFF101217),      // 전체 배경 - 거의 검은색에 가까운 짙은 회색
-    onBackground = Color(0xFFE0E0E0),    // 배경 위 텍스트 - 연회색
+    tertiary = Color(0xFF9E77FF),          // 보조 강조(퍼플 계열, 선택적)
+    onTertiary = Color.White,
+    tertiaryContainer = Color(0xFF3A2C60), // 보라 계열 어두운 컨테이너
+    onTertiaryContainer = Color(0xFFE4DAFF),
 
-    surface = Color(0xFF1C1F24),         // 카드나 다이얼로그 등 surface
-    onSurface = Color(0xFFE8EAF0),       // surface 위 텍스트
+    background = Color(0xFF101217),        // 전체 배경
+    onBackground = Color(0xFFE0E0E0),
 
-    surfaceVariant = Color(0xFF2B2F36),  // 추가적인 surface variant (예: 팝업 배경)
+    surface = Color(0xFF1C1F24),           // 카드/다이얼로그 표면
+    onSurface = Color(0xFFE8EAF0),
+    surfaceVariant = Color(0xFF2B2F36),    // 팝업/보조 surface
     onSurfaceVariant = Color(0xFFB0B8C1),
+    surfaceTint = Color(0xFF4FA4FF),       // surface 위 살짝 입혀지는 틴트(주로 primary)
 
-    outline = Color(0xFF4FA4FF),         // 테두리 - 연한 파랑
-    error = Color(0xFFFF6B6B),           // 에러 색상
-    onError = Color.Black
+    inverseSurface = Color(0xFFE0E0E0),    // 라이트한 서페이스(반전용)
+    inverseOnSurface = Color(0xFF101217),
+
+    error = Color(0xFFFF6B6B),
+    onError = Color.Black,
+    errorContainer = Color(0xFF93000A),    // 다크 컨테이너용 에러
+    onErrorContainer = Color(0xFFFFDAD6),
+
+    outline = Color(0xFF4FA4FF),           // 파랑 테두리
+    outlineVariant = Color(0xFF3B4551),    // 어두운 테두리 변형
+    scrim = Color(0x66000000)              // 반투명 블랙(모달/다이얼로그 배경)
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = Blue60,
-    onPrimary = Color.White,
-    // 밝은 강조 배경 (Container용)
-    primaryContainer = Color(0xFFD0E5FF),   // 연한 블루
-    onPrimaryContainer = Color(0xFF002D6C),
 
-    // 배경
+private val LightColorScheme = lightColorScheme(
+    primary = Blue60,                        // 기존 값
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFFD0E5FF),    // 연한 블루
+    onPrimaryContainer = Color(0xFF002D6C),
+    inversePrimary = Color(0xFF4FA4FF),      // primary의 반전용(보통 약간 어두운 블루)
+
+    secondary = Color(0xFF9AA0A6),           // 중립 회색
+    onSecondary = Color.White,
+    secondaryContainer = Color(0xFFE0E3E5),  // 밝은 회색 컨테이너
+    onSecondaryContainer = Color(0xFF2C2F33),
+
+    tertiary = Color(0xFFF7C3DA),            // 핑크 강조
+    onTertiary = Color(0xFF3F001F),
+    tertiaryContainer = Color(0xFFFFD8EB),   // 밝은 핑크 컨테이너
+    onTertiaryContainer = Color(0xFF36001A),
+
     background = Color.White,
     onBackground = Color(0xFF1C1B1F),
 
-    // 카드/서페이스 영역
     surface = Color.White,
     onSurface = Color(0xFF1C1B1F),
+    surfaceVariant = Color(0xFFE8EAED),      // 카드/배경 구분용 연한 회색
+    onSurfaceVariant = Color(0xFF45474A),
+    surfaceTint = Blue60,                    // surface에 살짝 섞이는 틴트 (primary와 동일)
 
-    // 보조 색상 (선택적 사용)
-    secondary = Color(0xFF9AA0A6),          // 중립 회색
-    onSecondary = Color.White,
+    inverseSurface = Color(0xFF313033),      // 반전 서페이스(주로 다크 배경 위 텍스트)
+    inverseOnSurface = Color(0xFFF4EFF4),
 
-    // 강조 포인트용 tertiary (optional)
-    tertiary = Color(0xFFF7C3DA),           // 핑크 강조
-    onTertiary = Color(0xFF3F001F),
-
-    // 오류 색상
     error = Color(0xFFB00020),
-    onError = Color.White
+    onError = Color.White,
+    errorContainer = Color(0xFFFCD8DF),      // 연한 에러 컨테이너
+    onErrorContainer = Color(0xFF400014),
+
+    outline = Color(0xFF73777F),             // 테두리선용
+    outlineVariant = Color(0xFFC4C6CA),      // 더 연한 테두리선
+    scrim = Color(0x66000000)                // 반투명 블랙 (모달 배경 등)
 )
+
 
 @Composable
 fun DailySummaryTheme(

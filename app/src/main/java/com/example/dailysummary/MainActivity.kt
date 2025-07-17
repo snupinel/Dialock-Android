@@ -35,7 +35,6 @@ import androidx.navigation.navigation
 import com.example.dailysummary.components.PortraitLikeWrapper
 import com.example.dailysummary.pages.AlarmSettingPage
 import com.example.dailysummary.pages.MainPage
-import com.example.dailysummary.pages.SummaryPage
 import com.example.dailysummary.pages.TimeSettingPage
 import com.example.dailysummary.pages.initialPages.FeatureIntroPage
 import com.example.dailysummary.pages.initialPages.GreetingPage
@@ -134,7 +133,7 @@ private fun MyApp(
                 val month = it.arguments!!.getString("month")!!.toInt()
                 val day = it.arguments!!.getString("day")!!.toInt()
                 Log.d("aaaa",year.toString())
-                SummaryPage(navController,year,month,day)
+                //SummaryPage(navController,year,month,day)
             }
 
             navigation(

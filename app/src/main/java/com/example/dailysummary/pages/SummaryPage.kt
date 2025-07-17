@@ -71,8 +71,7 @@ import com.example.dailysummary.components.EditButton
 import com.example.dailysummary.components.ImageButton
 import com.example.dailysummary.components.ImagePager
 import com.example.dailysummary.components.RevertButton
-import com.example.dailysummary.viewModel.SummaryPageViewModel
-
+/*
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -487,4 +486,4 @@ fun ContentPart(){
     )
 
 
-}
+}*/

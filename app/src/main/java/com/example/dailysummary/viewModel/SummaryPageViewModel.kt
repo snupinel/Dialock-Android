@@ -1,3 +1,4 @@
+
 package com.example.dailysummary.viewModel
 
 import android.net.Uri
@@ -17,10 +18,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.Dispatcher
 import java.time.LocalDate
 import javax.inject.Inject
-
+/*
 enum class EditState{
     Editing, Asking, Text
 }
@@ -76,7 +76,7 @@ class SummaryPageViewModel @Inject constructor(
     }
 
     fun setLike(isLikeChecked:Boolean){
-        setSummary(summary.value.copy(isLikeChecked = isLikeChecked))
+        setSummary(summary.value.copy(isBookmarked = isLikeChecked))
     }
 
 
@@ -86,7 +86,7 @@ class SummaryPageViewModel @Inject constructor(
 
         viewModelScope.launch{
             val gotSummary = withContext(Dispatchers.IO){
-                summaryRepository.getSummaryByDate(LocalDate.of(year,month,day))
+                summaryRepository.getSummariesByDate(LocalDate.of(year,month,day))
             }
 
             if (gotSummary == null) {
@@ -163,3 +163,4 @@ class SummaryPageViewModel @Inject constructor(
     }
 }
 
+*/
