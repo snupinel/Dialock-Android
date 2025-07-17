@@ -321,9 +321,7 @@ fun CalenderDayGrid(
     val month = calenderOnePage.month
 
     LazyVerticalGrid(
-        modifier = Modifier
-            .height(300.dp)
-            .padding(horizontal = 12.dp),
+        modifier = Modifier.padding(horizontal = 12.dp),
         columns = GridCells.Fixed(7),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),

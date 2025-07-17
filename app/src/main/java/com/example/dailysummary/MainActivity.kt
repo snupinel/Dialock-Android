@@ -1,6 +1,7 @@
 package com.example.dailysummary
 
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -31,6 +32,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
+import com.example.dailysummary.components.PortraitLikeWrapper
 import com.example.dailysummary.pages.AlarmSettingPage
 import com.example.dailysummary.pages.MainPage
 import com.example.dailysummary.pages.SummaryPage
@@ -52,11 +54,13 @@ class MainActivity : ComponentActivity() {
     private val viewModel: MainViewModel by viewModels()
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
-        Log.d("oncreate","called")
         super.onCreate(savedInstanceState)
-        Log.d("oncreate","여기는요?")
+
+        if (!isTablet()) {
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        }
+
         setContent {
-            Log.d("oncreate","여긴 어떻고")
             DailySummaryTheme{
                 SideEffect {
                     window?.let {
@@ -78,15 +82,33 @@ class MainActivity : ComponentActivity() {
 
                 val isCompleted = remember { viewModel.isSettingCompleted() }
                 Log.d("oncreate","DailySummaryTheme가...$isCompleted")
-                if (isCompleted) {
-                    MyApp(startDestination = "MainPage")
-                } else {
-                    MyApp()
+
+                if(isTablet()){
+                    PortraitLikeWrapper{
+                        if (isCompleted) {
+                            MyApp(startDestination = "MainPage")
+                        } else {
+                            MyApp()
+                        }
+                    }
+                }else{
+                    if (isCompleted) {
+                        MyApp(startDestination = "MainPage")
+                    } else {
+                        MyApp()
+                    }
                 }
+
 
             }
         }
     }
+    private fun isTablet(): Boolean {
+        val metrics = resources.displayMetrics
+        val widthDp = metrics.widthPixels / metrics.density
+        return widthDp >= 600 // 600dp 이상이면 태블릿으로 간주
+    }
+
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
