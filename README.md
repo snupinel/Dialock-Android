@@ -58,6 +58,7 @@
 
 - 버그 제보나 제안은 [Issues](https://github.com/snupinel/Dialock-Android/issues)에 남겨주세요.
 - Pull Request는 언제든 환영합니다.
+- 작업 현황 및 계획은 [이곳](https://www.notion.so/2234190faa938060a190eaf92a8c3b13?v=2234190faa93810b9721000cb8cdf180&source=copy_link)에서 확인할 수 있습니다!
 
 ---
 
