@@ -9,7 +9,7 @@
 
 최신 버전 APK를 다운로드하려면 아래 링크를 클릭하세요.
 
-👉 [📌 Download v0.7.0](https://github.com/snupinel/Dialock-Android/releases/download/v0.7.0/app-debug.apk)
+👉 [📌 Download v0.7.1](https://github.com/snupinel/Dialock-Android/releases/download/v0.7.1/app-debug.apk)
 
 ---
 
@@ -31,7 +31,7 @@
 
 ## 🛠️ 설치 방법
 
-1. [최신 APK](https://github.com/snupinel/Dialock-Android/releases/download/v0.7.0/app-debug.apk)를 다운로드합니다.
+1. 최신 APK를 다운로드합니다.
 2. **Android 설정 → 보안 → 알 수 없는 앱 허용**을 활성화합니다.
 3. 다운로드한 APK를 설치합니다.
 
