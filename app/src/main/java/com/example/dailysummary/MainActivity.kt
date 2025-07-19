@@ -19,12 +19,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.example.dailysummary.components.PortraitLikeWrapper
 import com.example.dailysummary.pages.AlarmSettingPage
+import com.example.dailysummary.pages.DiaryPage
 import com.example.dailysummary.pages.MainPage
 import com.example.dailysummary.pages.TimeSettingPage
 import com.example.dailysummary.pages.WriteDiaryPage
@@ -126,12 +129,26 @@ private fun MyApp(
                 Log.d("aaaa",year.toString())
                 //SummaryPage(navController,year,month,day)
             }*/
-            composable("WriteDiaryPage/{year}/{month}/{day}"){
-                val year = it.arguments!!.getString("year")!!.toInt()
-                val month = it.arguments!!.getString("month")!!.toInt()
-                val day = it.arguments!!.getString("day")!!.toInt()
-                WriteDiaryPage(navController,year,month,day)
+            composable(
+                route = "WriteDiaryPage/{year}/{month}/{day}?id={id}",
+                arguments = listOf(
+                    navArgument("id") {
+                        type = NavType.IntType
+                        defaultValue = -1 // ✅ id가 없으면 -1로 설정
+                    }
+                )
+            ) { backStackEntry ->
+                val year = backStackEntry.arguments!!.getString("year")!!.toInt()
+                val month = backStackEntry.arguments!!.getString("month")!!.toInt()
+                val day = backStackEntry.arguments!!.getString("day")!!.toInt()
+
+                val rawId = backStackEntry.arguments?.getInt("id") ?: -1
+                val id: Int? = if (rawId == -1) null else rawId
+
+                Log.d("WriteDiaryPage navigate", "id=$id")
+                WriteDiaryPage(navController, year, month, day, id)
             }
+
 
             navigation(
                 startDestination = "AlarmSettingPage",
@@ -153,6 +170,10 @@ private fun MyApp(
                     TimeSettingPage(navController, viewModel)
                 }
 
+            }
+            composable("DiaryPage/{id}") {
+                val id = it.arguments!!.getString("id")!!.toInt()
+                DiaryPage(navController = navController, id = id)
             }
             composable("GreetingPage") {
                 GreetingPage(navController = navController)

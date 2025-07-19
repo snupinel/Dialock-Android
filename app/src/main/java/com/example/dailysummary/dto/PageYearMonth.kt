@@ -9,8 +9,9 @@ data class PageYearMonth(
     val month:Int
 ){
     constructor(pageNum:Int) : this(pageNum/12+1970,pageNum%12+1)
-    @RequiresApi(Build.VERSION_CODES.O)
     constructor() : this(LocalDate.now().year, LocalDate.now().monthValue)
+
+    constructor(date: LocalDate) : this(date.year,date.monthValue)
 
     fun toPageNum():Int{
         return (year-1970)*12 + month -1

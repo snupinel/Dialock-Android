@@ -20,6 +20,8 @@ class SummaryRepository @Inject constructor(
 
     suspend fun getSummariesByDate(date: LocalDate): List<Summary> = summaryDAO.getSummariesByDate(date)
 
+    suspend fun getSummaryById(id: Int): Summary = summaryDAO.getSummaryById(id)
+
     suspend fun getSummariesByMonth(yearMonth: String): List<Summary> {
         return summaryDAO.getSummariesByMonth(yearMonth)
     }
@@ -39,28 +41,18 @@ class SummaryRepository @Inject constructor(
 
     suspend fun deleteSummary(summary: Summary) {
         summaryDAO.deleteSummary(summary)
+        _shouldRefresh.value = true // ✅ 새로고침 신호
     }
 
     suspend fun deleteSummaryById(id: Int) {
         summaryDAO.deleteSummaryById(id)
+        _shouldRefresh.value = true // ✅ 새로고침 신호
     }
 
-    suspend fun updateTitleByDate(id: Int, title: String){
-        summaryDAO.updateTitleById(id, title)
+    suspend fun updateSummary(summary: Summary) {
+        summaryDAO.updateSummary(summary)
+        _shouldRefresh.value = true // ✅ 새로고침 신호
     }
 
-    suspend fun updateContentByDate(id: Int, content: String){
-        summaryDAO.updateContentById(id, content)
-    }
-    suspend fun updateRatingByDate(id: Int, dayRating: DayRating){
-        summaryDAO.updateThumbById(id, dayRating)
-    }
-    suspend fun updateLikeByDate(id: Int, isLiked: Boolean){
-        summaryDAO.updateLikeById(id, isLiked)
-    }
-
-    suspend fun updateImageUrisByDate(id: Int,imageUris:List<Uri>){
-        summaryDAO.updateImageUrisById(id,imageUris)
-    }
 
 }

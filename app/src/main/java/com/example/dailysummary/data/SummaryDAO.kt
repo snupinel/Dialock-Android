@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import com.example.dailysummary.dto.DayRating
 import com.example.dailysummary.dto.Summary
 import kotlinx.coroutines.flow.Flow
@@ -32,6 +33,9 @@ interface SummaryDAO {
 
     @Query("DELETE FROM summary WHERE id = :id")
     suspend fun deleteSummaryById(id: Int): Int
+
+    @Update
+    suspend fun updateSummary(summary: Summary)
 
     @Query(" UPDATE summary SET title = :title WHERE id = :id")
     suspend fun updateTitleById(id: Int, title: String): Int

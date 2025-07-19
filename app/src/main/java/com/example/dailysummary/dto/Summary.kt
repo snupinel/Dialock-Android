@@ -24,3 +24,4 @@ data class Summary(
     @ColumnInfo(name="image_uris") val imageUris:List<Uri>,
     @ColumnInfo(name="should_block_alarm") val shouldBlockAlarm:Boolean,
 )
+

@@ -1,5 +1,7 @@
 package com.example.dailysummary.pages
 
+import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -35,15 +37,18 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -51,7 +56,12 @@ import coil.compose.AsyncImage
 import com.example.dailysummary.components.BookmarkButton
 import com.example.dailysummary.components.DayRatingSelector
 import com.example.dailysummary.dto.DayRating
+import com.example.dailysummary.utils.popBackStackExclusive
 import com.example.dailysummary.viewModel.WriteDiaryPageViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -61,6 +71,7 @@ fun WriteDiaryPage(
     year: Int,
     month: Int,
     day: Int,
+    id:Int? = null,
     viewModel: WriteDiaryPageViewModel = hiltViewModel()
 ) {
     // 🔹 상태 관리
@@ -73,6 +84,14 @@ fun WriteDiaryPage(
     val dateText = "%04d-%02d-%02d".format(year, month, day)
 
     val backStackEntry = navController.previousBackStackEntry
+
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit){
+        if(id!=null){
+            viewModel.initialize(id)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -98,9 +117,15 @@ fun WriteDiaryPage(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    viewModel.saveDiary(LocalDate.of(year,month,day))
-                    backStackEntry?.savedStateHandle?.set("shouldRefresh", true)
-                    navController.popBackStack()
+                    scope.launch {
+                        if(id==null){
+                            viewModel.saveDiary(LocalDate.of(year,month,day))
+                        }
+                        else{
+                            viewModel.updateDiary(LocalDate.of(year,month,day))
+                        }
+                        navController.popBackStackExclusive()
+                    }
                 }
             ) {
                 Icon(Icons.Outlined.Check, contentDescription = "Save")
@@ -193,16 +218,17 @@ fun WriteDiaryPage(
 }
 
 @Composable
-fun AddPhotoButton(onPhotoAdded: (Uri) -> Unit) {
+fun AddPhotoButton(onPhotosAdded: (List<Uri>) -> Unit) {
+    val context = LocalContext.current
     // ✅ 갤러리 실행 Launcher
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri ->
-            if (uri != null) {
-                onPhotoAdded(uri)
-            }
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris: List<Uri?> ->
+        val validUris = uris.filterNotNull()
+        validUris.forEach { uri ->
+            saveUriToPreferences(uri, context) // ✅ 영구 권한 부여
         }
-    )
+
+        onPhotosAdded(validUris)
+    }
 
     Box(
         modifier = Modifier
@@ -210,9 +236,7 @@ fun AddPhotoButton(onPhotoAdded: (Uri) -> Unit) {
             .clip(RoundedCornerShape(8.dp))
             .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp))
             .clickable {
-                launcher.launch(
-                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                )
+                launcher.launch(arrayOf("image/*"))
             },
         contentAlignment = Alignment.Center
     ) {
@@ -252,5 +276,16 @@ fun PhotoThumbnail(uri: Uri, onRemove: () -> Unit) {
                 tint = MaterialTheme.colorScheme.onSurface
             )
         }
+    }
+}
+
+fun saveUriToPreferences(uri: Uri, context: Context) {
+    val resolver = context.contentResolver
+    val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+
+    try {
+        resolver.takePersistableUriPermission(uri, flags) // ✅ 영구 권한 부여
+    } catch (e: SecurityException) {
+        e.printStackTrace()
     }
 }

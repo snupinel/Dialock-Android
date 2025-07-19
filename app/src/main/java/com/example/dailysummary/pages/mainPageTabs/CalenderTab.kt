@@ -92,7 +92,6 @@ fun CalenderTab(
     Log.d("recompose", "DSCalender recomposition")
 
     val backStackEntry = navController.currentBackStackEntryAsState().value
-    val shouldRefresh = backStackEntry?.savedStateHandle?.get<Boolean>("shouldRefresh")?:false //글을 작성하거나 수정했을 때, 새로고침이 필요함을 전달
     val viewModel = hiltViewModel<MainPageViewModel>()
     //val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
     //val hasData = lazyPagingItems.itemCount > 0
@@ -108,27 +107,6 @@ fun CalenderTab(
     val cache = viewModel.pageCache
 
 
-    LaunchedEffect(shouldRefresh){
-        //viewModel.setShowPopup(false)
-        //viewModel.calenderRefresh()
-        //viewModel.setCalenderEntries()
-        if(shouldRefresh){
-            val targetPage = pagerState.currentPage
-            //lazyPagingItems.refresh()
-            /*
-            snapshotFlow { lazyPagingItems.loadState.refresh }
-                .distinctUntilChanged()
-                .collect { state ->
-                    if (state is LoadState.NotLoading) {
-                        // 🪄 새로고침 완료되었으므로 원래 페이지로 복귀
-                        pagerState.scrollToPage(targetPage)
-                        cancel() // snapshotFlow collect 빠져나오기
-                    }
-                }
-            */
-            backStackEntry?.savedStateHandle?.set("shouldRefresh", false)
-        }
-    }
     val currentPageYM = remember(pagerState.currentPage) {
         PageYearMonth(pagerState.currentPage)
     }
@@ -232,7 +210,7 @@ fun CalenderTab(
                 DiaryPreviewCard(
                     summary = it
                 ){
-                    //navController.navigate("SummaryPage/${clickedDay!!.year}/${clickedDay!!.monthValue}/${clickedDay!!.dayOfMonth}")
+                    navController.navigate("DiaryPage/${it.id}")
                 }
             }
         }

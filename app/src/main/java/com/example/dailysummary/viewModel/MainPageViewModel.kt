@@ -20,6 +20,7 @@ import com.example.dailysummary.model.CalenderOnePage
 import com.example.dailysummary.model.summaryRefinement
 import com.example.dailysummary.overlay.AlarmScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,6 +29,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -69,43 +71,44 @@ class MainPageViewModel @Inject constructor(
     // 요청 중인 페이지 추적 (중복 로딩 방지)
     private val loadingPages = mutableSetOf<Int>()
 
-    fun loadPageIfAbsent(page: Int) {
+    suspend fun loadPageIfAbsent(page: Int) {
         if (_pageCache.containsKey(page) || loadingPages.contains(page)) return
 
         loadingPages.add(page)
 
-        viewModelScope.launch {
-            try {
-                val ym = PageYearMonth(page)
-                val summaries = summaryRepository.getSummariesByMonth("%04d-%02d".format(ym.year, ym.month))
-                _pageCache[page] = summaryRefinement(ym.year,ym.month,summaries)
-            } catch (e: Exception) {
-                Log.w("ViewModel", "Page $page load failed: ${e.message}")
-            } finally {
-                loadingPages.remove(page)
-            }
+        try {
+            val ym = PageYearMonth(page)
+            val summaries = summaryRepository.getSummariesByMonth("%04d-%02d".format(ym.year, ym.month))
+            _pageCache[page] = summaryRefinement(ym.year,ym.month,summaries)
+        } catch (e: Exception) {
+            Log.w("ViewModel", "Page $page load failed: ${e.message}")
+        } finally {
+            loadingPages.remove(page)
         }
     }
 
     fun calenderRefresh() {
         _pageCache.clear()
         loadingPages.clear()
-        _clickedDay.value = LocalDate.now()
 
         viewModelScope.launch {
-            val currentPage = PageYearMonth().toPageNum() // 현재 날짜 → page 계산
+            val currentPage = PageYearMonth(clickedDay.value).toPageNum() // 현재 날짜 → page 계산
             val pagesToLoad = listOf(currentPage - 1, currentPage, currentPage + 1)
 
             pagesToLoad.forEach { page ->
                 loadPageIfAbsent(page)
             }
 
-            // ✅ 2. 3장 로드 후 clickedEntry 초기화
-            val todayPage = _pageCache[currentPage]
-            todayPage?.let { page ->
-                val todayEntry = page.calenderEntries
-                    .firstOrNull { it.date.isEqual(LocalDate.now()) }
-                _clickedEntry.value = todayEntry
+            withContext(Dispatchers.Main){
+                // ✅ 2. 3장 로드 후 clickedEntry 초기화
+                val todayPage = _pageCache[currentPage]
+                todayPage?.let { page ->
+                    val todayEntry = page.calenderEntries
+                        .firstOrNull { it.date.isEqual(clickedDay.value) }
+                    _clickedEntry.value = todayEntry
+                    Log.d("calenderRefresh",todayEntry!!.toString())
+                }
+                Log.d("calenderRefresh","refreshed")
             }
         }
     }
