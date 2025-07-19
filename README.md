@@ -9,7 +9,7 @@
 
 최신 버전 APK를 다운로드하려면 아래 링크를 클릭하세요.
 
-👉 [📌 Download v0.8.0](https://github.com/snupinel/Dialock-Android/releases/download/v0.8.0/app-debug.apk)
+👉 [📌 Download v0.8.1](https://github.com/snupinel/Dialock-Android/releases/download/v0.8.1/app-debug.apk)
 
 ---
 
@@ -41,6 +41,7 @@
 
 | 버전 | 상태 | 주요 변경 사항 |
 |------|------|---------------|
+| [**v0.8.1**](https://github.com/snupinel/Dialock-Android/releases/tag/v.0.8.1) | 개발용 | 알람 미출현 버그 수정 |
 | [**v0.8.0**](https://github.com/snupinel/Dialock-Android/releases/tag/v.0.8.0) | 개발용 | 일기 보기/작성 화면 개편 |
 | [**v0.7.1**](https://github.com/snupinel/Dialock-Android/releases/tag/v.0.7.1) | 개발용 | 태블릿 호환 문제 해결 |
 | [**v0.7.0**](https://github.com/snupinel/Dialock-Android/releases/tag/v.0.7.0) | 개발용 | 테스트 빌드 |
