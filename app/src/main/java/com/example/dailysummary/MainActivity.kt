@@ -1,30 +1,21 @@
 package com.example.dailysummary
 
-import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.view.WindowInsets
-import android.view.WindowInsetsController
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -36,16 +27,15 @@ import com.example.dailysummary.components.PortraitLikeWrapper
 import com.example.dailysummary.pages.AlarmSettingPage
 import com.example.dailysummary.pages.MainPage
 import com.example.dailysummary.pages.TimeSettingPage
+import com.example.dailysummary.pages.WriteDiaryPage
 import com.example.dailysummary.pages.initialPages.FeatureIntroPage
 import com.example.dailysummary.pages.initialPages.GreetingPage
 import com.example.dailysummary.pages.initialPages.InitialSettingPage
 import com.example.dailysummary.pages.initialPages.PermissionRequestPage
 import com.example.dailysummary.ui.theme.DailySummaryTheme
-import com.example.dailysummary.viewModel.InitialSettingViewModel
 import com.example.dailysummary.viewModel.MainViewModel
 import com.example.dailysummary.viewModel.SettingPageViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -128,12 +118,19 @@ private fun MyApp(
             composable("MainPage") {
                 MainPage(navController)
             }
+            /*
             composable("SummaryPage/{year}/{month}/{day}"){
                 val year = it.arguments!!.getString("year")!!.toInt()
                 val month = it.arguments!!.getString("month")!!.toInt()
                 val day = it.arguments!!.getString("day")!!.toInt()
                 Log.d("aaaa",year.toString())
                 //SummaryPage(navController,year,month,day)
+            }*/
+            composable("WriteDiaryPage/{year}/{month}/{day}"){
+                val year = it.arguments!!.getString("year")!!.toInt()
+                val month = it.arguments!!.getString("month")!!.toInt()
+                val day = it.arguments!!.getString("day")!!.toInt()
+                WriteDiaryPage(navController,year,month,day)
             }
 
             navigation(

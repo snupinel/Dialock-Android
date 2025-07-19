@@ -1,5 +1,6 @@
 package com.example.dailysummary.pages.mainPageTabs
 
+import android.graphics.drawable.Icon
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -35,8 +36,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -80,7 +85,6 @@ val weekDayList= listOf(
     Pair(Color.Blue,"S"),
 )
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CalenderTab(
     navController: NavController,
@@ -201,23 +205,35 @@ fun CalenderTab(
         }
 
     }
-    Text(
-        text = clickedDay.format(
-            DateTimeFormatter.ofPattern(
-                "yyyy.MM.dd (E)",
-                Locale.KOREA
-            )
-        ),
-        style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.primary
-    )
+    Row {
+        Text(
+            text = clickedDay.format(
+                DateTimeFormatter.ofPattern(
+                    "yyyy.MM.dd (E)",
+                    Locale.KOREA
+                )
+            ),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+        IconButton(onClick = {
+            navController.navigate("WriteDiaryPage/${clickedDay.year}/${clickedDay.monthValue}/${clickedDay.dayOfMonth}")
+        }) {
+            Icon(imageVector = Icons.Outlined.Add, contentDescription ="Add")
+        }
+    }
 
     if(clickedEntry!=null){
-        clickedEntry!!.summaries.forEach {
-            DiaryPreviewCard(
-                summary = it
-            ){
-                //navController.navigate("SummaryPage/${clickedDay!!.year}/${clickedDay!!.monthValue}/${clickedDay!!.dayOfMonth}")
+        if(clickedEntry!!.summaries.isEmpty()){
+            Text(text = "작성된 일기가 없어요.")
+        }
+        else{
+            clickedEntry!!.summaries.forEach {
+                DiaryPreviewCard(
+                    summary = it
+                ){
+                    //navController.navigate("SummaryPage/${clickedDay!!.year}/${clickedDay!!.monthValue}/${clickedDay!!.dayOfMonth}")
+                }
             }
         }
 
@@ -274,6 +290,7 @@ fun CalenderBox(
     Box(modifier = modifier
         .aspectRatio(1f)
         .clip(shape = CircleShape)
+        .clickable { onClick() }
         .then(
             if (isClicked)
                 Modifier.border(
@@ -285,10 +302,12 @@ fun CalenderBox(
         )
         .then(
             if (isToday)
-                Modifier.background(color = MaterialTheme.colorScheme.primary)
+                Modifier
+                    .padding(3.dp)
+                    .clip(shape = CircleShape)
+                    .background(color = MaterialTheme.colorScheme.primary)
             else Modifier
-        )
-        .clickable { onClick() },
+        ),
         contentAlignment = Alignment.Center
     ){
         if (isWritten) {
