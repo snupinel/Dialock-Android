@@ -33,6 +33,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -182,7 +183,7 @@ class SummaryService  : Service() {
                 saveDiary = { content, isLikeChecked, dayRating ->
                     serviceScope.launch {
                         summaryRepository.insertSummary(Summary(
-                            writtenTime = LocalDate.now(),
+                            writtenTime = LocalDateTime.now(),
                             date = LocalDate.of(year,month,day).let{
                                 if (isNextDay) it.minusDays(1) else it
                             },

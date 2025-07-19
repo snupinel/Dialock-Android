@@ -48,21 +48,15 @@ class MainPageViewModel @Inject constructor(
         _selectedTab.value = Tab.valueOf(tab)
     }
 
-    private val _clickedDay:MutableStateFlow<LocalDate?> = MutableStateFlow(null)
+    private val _clickedDay:MutableStateFlow<LocalDate> = MutableStateFlow(LocalDate.now())
     val clickedDay = _clickedDay.asStateFlow()
 
     private val _clickedEntry:MutableStateFlow<CalenderEntry?> = MutableStateFlow(null)
     val clickedEntry = _clickedEntry.asStateFlow()
 
     fun clickDay(date:LocalDate, entry:CalenderEntry){
-        if(clickedDay.value!=null && date.isEqual(clickedDay.value)) {
-            _clickedDay.value = null
-            _clickedEntry.value = null
-        }
-        else {
-            _clickedDay.value = date
-            _clickedEntry.value = entry
-        }
+        _clickedDay.value = date
+        _clickedEntry.value = entry
         Log.d("aaaa",clickedDay.value.toString() )
     }
 
@@ -96,11 +90,29 @@ class MainPageViewModel @Inject constructor(
     fun calenderRefresh() {
         _pageCache.clear()
         loadingPages.clear()
-        _clickedEntry.value = null
-        _clickedDay.value = null
+        _clickedDay.value = LocalDate.now()
+
+        viewModelScope.launch {
+            val currentPage = PageYearMonth().toPageNum() // 현재 날짜 → page 계산
+            val pagesToLoad = listOf(currentPage - 1, currentPage, currentPage + 1)
+
+            pagesToLoad.forEach { page ->
+                loadPageIfAbsent(page)
+            }
+
+            // ✅ 2. 3장 로드 후 clickedEntry 초기화
+            val todayPage = _pageCache[currentPage]
+            todayPage?.let { page ->
+                val todayEntry = page.calenderEntries
+                    .firstOrNull { it.date.isEqual(LocalDate.now()) }
+                _clickedEntry.value = todayEntry
+            }
+        }
     }
 
+
     init {
+        calenderRefresh()
         viewModelScope.launch {
             summaryRepository.shouldRefresh.collect { refresh ->
                 if (refresh) {
@@ -110,5 +122,4 @@ class MainPageViewModel @Inject constructor(
             }
         }
     }
-
 }

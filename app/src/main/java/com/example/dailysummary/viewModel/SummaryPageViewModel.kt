@@ -8,7 +8,6 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.dailysummary.data.SummaryRepository
-import com.example.dailysummary.dto.DEFAULT_SUMMARY
 import com.example.dailysummary.dto.DayRating
 import com.example.dailysummary.dto.Summary
 import dagger.hilt.android.lifecycle.HiltViewModel

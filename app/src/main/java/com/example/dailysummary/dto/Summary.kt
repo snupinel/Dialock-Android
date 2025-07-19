@@ -7,6 +7,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 enum class DayRating{
     GOOD,SOSO,BAD
@@ -14,7 +15,7 @@ enum class DayRating{
 @Entity(tableName = "summary")
 data class Summary(
     @PrimaryKey(autoGenerate = true) val id: Int = 0, // Primary key 추가
-    @ColumnInfo(name = "written_time") val writtenTime: LocalDate,
+    @ColumnInfo(name = "written_time") val writtenTime: LocalDateTime,
     @ColumnInfo(name = "date") val date: LocalDate,
     @ColumnInfo(name = "title") val title: String,
     @ColumnInfo(name = "content") val content: String,
@@ -22,16 +23,4 @@ data class Summary(
     @ColumnInfo(name = "is_bookmarked") val isBookmarked: Boolean,
     @ColumnInfo(name="image_uris") val imageUris:List<Uri>,
     @ColumnInfo(name="should_block_alarm") val shouldBlockAlarm:Boolean,
-)
-
-@RequiresApi(Build.VERSION_CODES.O)
-val DEFAULT_SUMMARY = Summary(
-    writtenTime = LocalDate.of(2000,1,1),
-    date = LocalDate.of(2000,1,1),
-    title = "",
-    content = "",
-    dayRating = DayRating.SOSO,
-    isBookmarked = false,
-    imageUris = emptyList(),
-    shouldBlockAlarm = false
 )

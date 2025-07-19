@@ -22,15 +22,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerSnapDistance
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -39,12 +43,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -55,6 +62,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.dailysummary.dto.PageYearMonth
+import com.example.dailysummary.dto.Summary
 import com.example.dailysummary.model.CalenderEntry
 import com.example.dailysummary.model.CalenderOnePage
 import com.example.dailysummary.viewModel.MainPageViewModel
@@ -75,7 +83,6 @@ val weekDayList= listOf(
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CalenderTab(
-    modifier: Modifier = Modifier,
     navController: NavController,
 ) {
     Log.d("recompose", "DSCalender recomposition")
@@ -91,6 +98,7 @@ fun CalenderTab(
         pageCount = { 1200 }
     )
 
+    val density = LocalDensity.current
 
 
     val cache = viewModel.pageCache
@@ -136,47 +144,53 @@ fun CalenderTab(
     val clickedDay by viewModel.clickedDay.collectAsState()
     val clickedEntry by viewModel.clickedEntry.collectAsState()
 
-    Column(modifier = modifier) {
+    CalenderMonth(
+        modifier = Modifier
+            .padding(horizontal = 12.dp),
+        isCurrentYear = isCurrentYear,
+        year = currentPageYM.year,
+        month = currentPageYM.month
+    )
+    Row(modifier = Modifier.padding(horizontal = 8.dp)) {
+        weekDayList.forEach { d ->
+            CalenderDate(modifier = Modifier.weight(1f), d.first, d.second)
+        }
+    }
+    var pagerHeight by remember { mutableStateOf(1000.dp) }
+    HorizontalPager(
+        state = pagerState,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(pagerHeight),
+        verticalAlignment = Alignment.Top,
+        beyondViewportPageCount = 1,
+        pageSpacing = 40.dp,
+        flingBehavior = customFlingBehavior
+    ) { page ->
+        val pageData = cache[page]
 
-        CalenderMonth(
-            modifier = Modifier
-                .align(Alignment.Start)
-                .padding(horizontal = 12.dp),
-            isCurrentYear = isCurrentYear,
-            year = currentPageYM.year,
-            month = currentPageYM.month
-        )
-        Row(modifier = Modifier.padding(horizontal = 8.dp)) {
-            weekDayList.forEach { d ->
-                CalenderDate(modifier = Modifier.weight(1f), d.first, d.second)
+        // 없으면 로딩 요청
+        LaunchedEffect(pageData) {
+            if (pageData == null) {
+                viewModel.loadPageIfAbsent(page)
             }
         }
 
-        HorizontalPager(
-            state = pagerState,
-            verticalAlignment = Alignment.Top,
-            beyondViewportPageCount = 1,
-            pageSpacing = 40.dp,
-            flingBehavior = customFlingBehavior
-        ) { page ->
-            val pageData = cache[page]
 
-            // 없으면 로딩 요청
-            LaunchedEffect(pageData) {
-                if (pageData == null) {
-                    viewModel.loadPageIfAbsent(page)
-                }
+        Box(
+            modifier = Modifier.onGloballyPositioned { coordinates ->
+                val heightPx = coordinates.size.height
+                pagerHeight = with(density) { heightPx.toDp() }
             }
-
-
-            val pageContent:@Composable ()->Unit = remember(pageData) {
+        ) {
+            val pageContent: @Composable () -> Unit = remember(pageData) {
                 {
                     CalenderDayGrid(
                         calenderOnePage = pageData ?: CalenderOnePage.dummy(page),
                         clickedDay = clickedDay,
-                        onDayClick = {d,c->
+                        onDayClick = { d, c ->
                             viewModel.clickDay(
-                                LocalDate.of(currentPageYM.year, currentPageYM.month, d),
+                                d,
                                 c
                             )
                         }
@@ -184,19 +198,35 @@ fun CalenderTab(
                 }
             }
             pageContent()
-
         }
-        if(clickedDay!=null){
+
+    }
+    Text(
+        text = clickedDay.format(
+            DateTimeFormatter.ofPattern(
+                "yyyy.MM.dd (E)",
+                Locale.KOREA
+            )
+        ),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.primary
+    )
+
+    if(clickedEntry!=null){
+        clickedEntry!!.summaries.forEach {
             DiaryPreviewCard(
-                date = clickedDay!!,
-                title = clickedEntry!!.title){
-                navController.navigate("SummaryPage/${clickedDay!!.year}/${clickedDay!!.monthValue}/${clickedDay!!.dayOfMonth}")
+                summary = it
+            ){
+                //navController.navigate("SummaryPage/${clickedDay!!.year}/${clickedDay!!.monthValue}/${clickedDay!!.dayOfMonth}")
             }
         }
 
+    }
+    else{
 
     }
 }
+
 
 
 
@@ -282,12 +312,11 @@ fun CalenderBox(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CalenderDayGrid(
     calenderOnePage:CalenderOnePage,
     clickedDay:LocalDate?=null,
-    onDayClick: (d:Int,c:CalenderEntry) -> Unit,
+    onDayClick: (date: LocalDate,c:CalenderEntry) -> Unit,
 ){
     Log.d("recompose", "CalenderDayGrid recomposed with page:")
 
@@ -305,31 +334,33 @@ fun CalenderDayGrid(
     ){
 
 
-        itemsIndexed(calenderOnePage.calenderEntries, key = {index, item -> "$index-${item.day}"}){ index, calenderEntry->
+        itemsIndexed(calenderOnePage.calenderEntries, key = {index, item -> "$index-${item.date.dayOfMonth}"}){ index, calenderEntry->
             if(calenderEntry.isBlank){
-                Box(modifier = Modifier.aspectRatio(1f).alpha(0.15f),
+                Box(modifier = Modifier
+                    .aspectRatio(1f)
+                    .alpha(0.15f),
                     contentAlignment = Alignment.Center
                 ){
                     Text(
-                        text = "${calenderEntry.day}",
+                        text = "${calenderEntry.date.dayOfMonth}",
                         color = Color.Gray
                     )
                 }
             } else{
                 CalenderBox(
                     isWritten = calenderEntry.isWritten,
-                    isClicked = clickedDay!=null && clickedDay.isEqual(LocalDate.of(year,month,calenderEntry.day)),
+                    isClicked = clickedDay!=null && clickedDay.isEqual(LocalDate.of(year,month,calenderEntry.date.dayOfMonth)),
                     isToday = calenderEntry.isToday,
                     isFuture = calenderEntry.isFuture,
-                    day = calenderEntry.day,
+                    day = calenderEntry.date.dayOfMonth,
                 ){
-                    val targetDate = LocalDate.of(year,month,calenderEntry.day)
+                    val targetDate = LocalDate.of(year,month,calenderEntry.date.dayOfMonth)
 
                     if(targetDate.isAfter(LocalDate.now())){
 
                     }
                     else {
-                        onDayClick(calenderEntry.day,calenderEntry)
+                        onDayClick(calenderEntry.date,calenderEntry)
                     }
 
                 }
@@ -338,13 +369,10 @@ fun CalenderDayGrid(
         }
     }
 }
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DiaryPreviewCard(
     modifier: Modifier = Modifier,
-    date: LocalDate,
-    title: String?,
-    isWritten:Boolean = title!=null,
+    summary: Summary,
     onClickDetail: () -> Unit,
 
 ) {
@@ -366,42 +394,22 @@ fun DiaryPreviewCard(
             .padding(16.dp)
         ){
             Text(
-                text = date.format(DateTimeFormatter.ofPattern("yyyy.MM.dd (E)", Locale.KOREA)),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary
+                text = summary.writtenTime.toString(),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
             )
-
-            Spacer(modifier = Modifier.height(6.dp))
-            if(isWritten) {
-                Text(
-                    text = title!!,
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-            else{
-                Text(
-                    text = "이 날의 이야기는 아직 비어 있어요. 기억 나는 대로 한 줄이라도 적어 볼까요?",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = Color.Gray
-                )
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            /*
-
-            TextButton(
-                onClick = onClickDetail,
-
-                contentPadding = PaddingValues(0.dp)
-            ) {
-                Text(
-                    text = "자세히 보기",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }*/
+            Text(
+                text = summary.title,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = summary.content,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
         }
     }
 }

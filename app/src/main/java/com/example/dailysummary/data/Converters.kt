@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.room.TypeConverter
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -12,6 +13,7 @@ class Converters {
 
 
     private val formatter = DateTimeFormatter.ISO_LOCAL_DATE
+    private val ldtFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
 
     @TypeConverter
     fun fromLocalDate(value: LocalDate): String {
@@ -21,6 +23,16 @@ class Converters {
     @TypeConverter
     fun toLocalDate(value: String): LocalDate {
         return LocalDate.parse(value, formatter)
+    }
+
+    @TypeConverter
+    fun fromLocalDateTime(value: LocalDateTime): String {
+        return value.format(ldtFormatter)
+    }
+
+    @TypeConverter
+    fun toLocalDateTime(value: String): LocalDateTime {
+        return LocalDateTime.parse(value, ldtFormatter)
     }
 
     @TypeConverter
