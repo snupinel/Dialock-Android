@@ -48,6 +48,7 @@ import com.example.dailysummary.ui.theme.DailySummaryTheme
 fun Overlay(
     //viewModel: OverlayViewModel,
     close: () -> Unit,
+    isWritten:Boolean,
     //adviceOrForcing: AdviceOrForcing,
     getSetting: () -> Setting,
     //textFieldValue: String,
@@ -74,6 +75,7 @@ fun Overlay(
 
     LaunchedEffect(Unit) {
         adviceOrForcing = getSetting().adviceOrForcing
+        if(isWritten) adviceOrForcing = AdviceOrForcing.Advice
     }
 
     DailySummaryTheme(isOverlay = true) {

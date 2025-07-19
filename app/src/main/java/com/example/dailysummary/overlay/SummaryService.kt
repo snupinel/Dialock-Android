@@ -37,7 +37,6 @@ import java.time.LocalDateTime
 import javax.inject.Inject
 
 @AndroidEntryPoint
-@RequiresApi(Build.VERSION_CODES.O)
 class SummaryService  : Service() {
 
     @Inject
@@ -90,14 +89,11 @@ class SummaryService  : Service() {
             val summaries = summaryRepository.getSummariesByDate(
                 LocalDate.of(year, month, day)
             )
-            if (summaries == null) {
+            if (summaries.isEmpty() || summaries.all { !it.shouldBlockAlarm }) {
                 withContext(Dispatchers.Main) {
-                    showOverlay()
+                    showOverlay(isWritten = summaries.isNotEmpty())
                 }
             }
-
-
-
             alarmScheduler.scheduleOverlay()
         }
     }
@@ -112,26 +108,19 @@ class SummaryService  : Service() {
     }
 
     private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                "summary_channel",
-                "Summary Alarm Channel",
-                NotificationManager.IMPORTANCE_DEFAULT
-            )
-            val manager = getSystemService(NotificationManager::class.java)
-            manager.createNotificationChannel(channel)
-        }
+        val channel = NotificationChannel(
+            "summary_channel",
+            "Summary Alarm Channel",
+            NotificationManager.IMPORTANCE_DEFAULT
+        )
+        val manager = getSystemService(NotificationManager::class.java)
+        manager.createNotificationChannel(channel)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun showOverlay() {
+    private fun showOverlay(isWritten:Boolean) {
 
 
-        val layoutFlag: Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-        } else {
-            WindowManager.LayoutParams.TYPE_PHONE
-        }
+        val layoutFlag= WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
 
         val params = WindowManager.LayoutParams(
             (Resources.getSystem().displayMetrics.widthPixels * 0.8).toInt(),
@@ -179,6 +168,7 @@ class SummaryService  : Service() {
                     windowManager.removeView(composeView)
                     stopSelf()
                 },
+                isWritten = isWritten,
                 getSetting = { prefRepository.getRefSetting()!!},
                 saveDiary = { content, isLikeChecked, dayRating ->
                     serviceScope.launch {
