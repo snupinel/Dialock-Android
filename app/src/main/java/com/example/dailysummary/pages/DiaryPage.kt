@@ -50,6 +50,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -108,10 +109,11 @@ fun DiaryPage(
                             navController.navigate("WriteDiaryPage/${summary!!.date.year}/${summary!!.date.monthValue}/${summary!!.date.dayOfMonth}?id=${summary!!.id}")
                         }
                         MoreVertButton {
+                            /*
                             scope.launch {
                                 viewModel.deleteDiary(id)
                                 navController.popBackStackExclusive()
-                            }
+                            }*/
                         }
                     },
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -130,73 +132,71 @@ fun DiaryPage(
                 state = listState,
                 verticalArrangement = Arrangement.Top
             ) {
-                if (summary!!.imageUris.isNotEmpty()) {
-                    Log.d("imageUris", "isNotEmpty=${summary!!.imageUris.isNotEmpty()}, size=${summary!!.imageUris.size}, list=${summary!!.imageUris}")
-
-                    Log.d("imageUrisaa",summary!!.imageUris.toString())
-                    item { ImagePager(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(1f),
-                        images = summary!!.imageUris)
-                        Spacer(Modifier.height(20.dp)) }
-                }
-                else{
-                    item { 
-                        Spacer(modifier = Modifier.height(paddingValues.calculateTopPadding()))
-                    }
-                }
                 item {
-                    // 최초 작성 시간
-                    Text(
-                        text = "작성 시간: ${summary!!.writtenTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))}",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
-                    Spacer(Modifier.height(12.dp))
+                    if (summary!!.imageUris.isNotEmpty()) {
+                        ImagePager(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(1f),
+                            images = summary!!.imageUris)
+                            Spacer(Modifier.height(12.dp))
+                    }
+                    else{
+                        Spacer(modifier = Modifier.height(paddingValues.calculateTopPadding()))
 
-                    // 제목
-                    Text(
-                        text = summary!!.title,
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    Spacer(Modifier.height(8.dp))
-
-                    // 내용
-                    Text(
-                        text = summary!!.content,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    Spacer(Modifier.height(16.dp))
-
-                    // 하루 평가 (아이콘으로 표시)
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Icon(
-                            imageVector = when (summary!!.dayRating) {
-                                DayRating.GOOD -> Icons.Outlined.ThumbUp
-                                DayRating.SOSO -> Icons.Outlined.SentimentNeutral
-                                DayRating.BAD -> Icons.Outlined.ThumbDown
-                            },
-                            tint = when (summary!!.dayRating) {
-                                DayRating.GOOD -> MaterialTheme.colorScheme.primary
-                                DayRating.SOSO -> MaterialTheme.colorScheme.tertiary
-                                DayRating.BAD -> MaterialTheme.colorScheme.error
-                            },
-                            contentDescription = "Day Rating"
-                        )
+                    }
+                    Column(Modifier.padding(horizontal = 24.dp)){
                         Text(
-                            text = when (summary!!.dayRating) {
-                                DayRating.GOOD -> "좋은 하루였어요"
-                                DayRating.SOSO -> "그럭저럭이었어요"
-                                DayRating.BAD -> "안 좋은 하루였어요"
-                            },
-                            style = MaterialTheme.typography.bodyMedium
+                            text = "작성 시간: ${summary!!.writtenTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))}",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.secondary
                         )
+                        Spacer(Modifier.height(4.dp))
+
+                        // 제목
+                        Text(
+                            text = summary!!.title,
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        Spacer(Modifier.height(8.dp))
+
+                        // 내용
+                        Text(
+                            text = summary!!.content,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        Spacer(Modifier.height(16.dp))
+
+                        // 하루 평가 (아이콘으로 표시)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = when (summary!!.dayRating) {
+                                    DayRating.GOOD -> Icons.Outlined.ThumbUp
+                                    DayRating.SOSO -> Icons.Outlined.SentimentNeutral
+                                    DayRating.BAD -> Icons.Outlined.ThumbDown
+                                },
+                                tint = when (summary!!.dayRating) {
+                                    DayRating.GOOD -> MaterialTheme.colorScheme.primary
+                                    DayRating.SOSO -> MaterialTheme.colorScheme.tertiary
+                                    DayRating.BAD -> MaterialTheme.colorScheme.error
+                                },
+                                contentDescription = "Day Rating"
+                            )
+                            Text(
+                                text = when (summary!!.dayRating) {
+                                    DayRating.GOOD -> "좋은 하루였어요"
+                                    DayRating.SOSO -> "그럭저럭이었어요"
+                                    DayRating.BAD -> "안 좋은 하루였어요"
+                                },
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
                     }
 
 
