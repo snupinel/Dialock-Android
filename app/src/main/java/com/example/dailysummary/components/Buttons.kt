@@ -8,6 +8,7 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Replay
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -90,5 +91,15 @@ fun AlarmButton(
 ){
     IconButton(enabled = enabled, onClick =  { onClick() }) {
         Icon(imageVector = Icons.Outlined.Alarm, contentDescription = "Alarm")
+    }
+}
+
+@Composable
+fun MoreVertButton(
+    enabled:Boolean = true,
+    onClick:()->Unit,
+){
+    IconButton(enabled = enabled, onClick =  { onClick() }) {
+        Icon(imageVector = Icons.Outlined.MoreVert, contentDescription = "MoreVert")
     }
 }

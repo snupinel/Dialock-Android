@@ -25,11 +25,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ImagePager(
+    modifier: Modifier=Modifier,
     images:List<Uri>,
-    modifier: Modifier=Modifier
 ){
     val pagerState = rememberPagerState(pageCount = {
         images.size

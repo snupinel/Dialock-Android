@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Check
@@ -83,8 +84,6 @@ fun WriteDiaryPage(
 
     val dateText = "%04d-%02d-%02d".format(year, month, day)
 
-    val backStackEntry = navController.previousBackStackEntry
-
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit){
@@ -104,7 +103,7 @@ fun WriteDiaryPage(
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Outlined.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
@@ -187,8 +186,8 @@ fun WriteDiaryPage(
             ) {
                 // 사진 추가 버튼 (맨 앞)
                 item {
-                    AddPhotoButton { uri ->
-                        viewModel.setPhotoList(photoList+uri)
+                    AddPhotoButton { uris ->
+                        viewModel.setPhotoList(photoList+uris)
                     }
                 }
 

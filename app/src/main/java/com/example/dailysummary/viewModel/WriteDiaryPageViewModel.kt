@@ -1,6 +1,7 @@
 package com.example.dailysummary.viewModel
 
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.dailysummary.data.PrefRepository
@@ -85,6 +86,7 @@ class WriteDiaryPageViewModel @Inject constructor(
 
             )
         )
+        Log.d("saveDiary",photoList.value.size.toString())
     }
 
     suspend fun updateDiary(

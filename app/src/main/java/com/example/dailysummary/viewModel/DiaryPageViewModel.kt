@@ -1,5 +1,6 @@
 package com.example.dailysummary.viewModel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.dailysummary.data.SummaryRepository
@@ -23,6 +24,7 @@ class DiaryPageViewModel @Inject constructor(
         viewModelScope.launch {
             val sum = summaryRepository.getSummaryById(id)
             _summary.value = sum
+            Log.d("initialize",sum.toString())
         }
     }
 
