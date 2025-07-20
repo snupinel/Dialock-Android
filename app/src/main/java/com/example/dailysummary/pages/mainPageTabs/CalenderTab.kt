@@ -40,6 +40,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -72,6 +73,7 @@ import com.example.dailysummary.model.CalenderEntry
 import com.example.dailysummary.model.CalenderOnePage
 import com.example.dailysummary.viewModel.MainPageViewModel
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -126,102 +128,125 @@ fun CalenderTab(
     val clickedDay by viewModel.clickedDay.collectAsState()
     val clickedEntry by viewModel.clickedEntry.collectAsState()
 
-    CalenderMonth(
-        modifier = Modifier
-            .padding(horizontal = 12.dp),
-        isCurrentYear = isCurrentYear,
-        year = currentPageYM.year,
-        month = currentPageYM.month
-    )
-    Row(modifier = Modifier.padding(horizontal = 8.dp)) {
-        weekDayList.forEach { d ->
-            CalenderDate(modifier = Modifier.weight(1f), d.first, d.second)
-        }
-    }
-    var pagerHeight by remember { mutableStateOf(1000.dp) }
-    HorizontalPager(
-        state = pagerState,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(pagerHeight),
-        verticalAlignment = Alignment.Top,
-        beyondViewportPageCount = 1,
-        pageSpacing = 40.dp,
-        flingBehavior = customFlingBehavior
-    ) { page ->
-        val pageData = cache[page]
-
-        // 없으면 로딩 요청
-        LaunchedEffect(pageData) {
-            if (pageData == null) {
-                viewModel.loadPageIfAbsent(page)
-            }
-        }
-
-
-        Box(
-            modifier = Modifier.onGloballyPositioned { coordinates ->
-                val heightPx = coordinates.size.height
-                pagerHeight = with(density) { heightPx.toDp() }
-            }
-        ) {
-            val pageContent: @Composable () -> Unit = remember(pageData) {
-                {
-                    CalenderDayGrid(
-                        calenderOnePage = pageData ?: CalenderOnePage.dummy(page),
-                        clickedDay = clickedDay,
-                        onDayClick = { d, c ->
-                            viewModel.clickDay(
-                                d,
-                                c
-                            )
-                        }
-                    )
-                }
-            }
-            pageContent()
-        }
-
-    }
-    Row {
-        Text(
-            text = clickedDay.format(
-                DateTimeFormatter.ofPattern(
-                    "yyyy.MM.dd (E)",
-                    Locale.KOREA
-                )
-            ),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary
+    Column(Modifier.fillMaxSize()){
+        CalenderMonth(
+            modifier = Modifier
+                .padding(horizontal =20.dp),
+            isCurrentYear = isCurrentYear,
+            year = currentPageYM.year,
+            month = currentPageYM.month
         )
-        IconButton(onClick = {
-            navController.navigate("WriteDiaryPage/${clickedDay.year}/${clickedDay.monthValue}/${clickedDay.dayOfMonth}")
-        }) {
-            Icon(imageVector = Icons.Outlined.Add, contentDescription ="Add")
-        }
-    }
-
-    if(clickedEntry!=null){
-        if(clickedEntry!!.summaries.isEmpty()){
-            Text(text = "작성된 일기가 없어요.")
-        }
-        else{
-            clickedEntry!!.summaries.forEach {
-                DiaryPreviewCard(
-                    summary = it
-                ){
-                    navController.navigate("DiaryPage/${it.id}")
-                }
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(modifier = Modifier.padding(horizontal = 8.dp)) {
+            weekDayList.forEach { d ->
+                CalenderDate(modifier = Modifier.weight(1f), d.first, d.second)
             }
         }
+        var pagerHeight by remember { mutableStateOf(1000.dp) }
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(pagerHeight),
+            verticalAlignment = Alignment.Top,
+            beyondViewportPageCount = 1,
+            pageSpacing = 40.dp,
+            flingBehavior = customFlingBehavior
+        ) { page ->
+            val pageData = cache[page]
 
-    }
-    else{
+            // 없으면 로딩 요청
+            LaunchedEffect(pageData) {
+                if (pageData == null) {
+                    viewModel.loadPageIfAbsent(page)
+                }
+            }
 
+
+            Box(
+                modifier = Modifier.onGloballyPositioned { coordinates ->
+                    val heightPx = coordinates.size.height
+                    pagerHeight = with(density) { heightPx.toDp() }
+                }
+            ) {
+                val pageContent: @Composable () -> Unit = remember(pageData) {
+                    {
+                        CalenderDayGrid(
+                            calenderOnePage = pageData ?: CalenderOnePage.dummy(page),
+                            clickedDay = clickedDay,
+                            onDayClick = { d, c ->
+                                viewModel.clickDay(
+                                    d,
+                                    c
+                                )
+                            }
+                        )
+                    }
+                }
+                pageContent()
+            }
+
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        Divider(
+            Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .padding(horizontal = 4.dp)
+                .background(MaterialTheme.colorScheme.surface),)
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(
+                text = clickedDay.format(
+                    DateTimeFormatter.ofPattern(
+                        "yyyy.MM.dd (E)",
+                        Locale.KOREA
+                    )
+                ),
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Light,
+            )
+            IconButton(onClick = {
+                navController.navigate("WriteDiaryPage/${clickedDay.year}/${clickedDay.monthValue}/${clickedDay.dayOfMonth}")
+            }) {
+                Icon(imageVector = Icons.Outlined.Add, contentDescription ="Add")
+            }
+        }
+        Divider(
+            Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .padding(horizontal = 4.dp)
+                .background(MaterialTheme.colorScheme.surface),)
+        if(clickedEntry!=null){
+            if(clickedEntry!!.summaries.isEmpty()){
+                Box(Modifier.fillMaxSize(),contentAlignment = Alignment.Center){
+                    Text(text = "작성된 일기가 없어요.",color = Color.Gray)
+                }
+            }
+            else{
+                LazyColumn(modifier = Modifier.fillMaxSize()){
+
+                    items(clickedEntry!!.summaries){
+                        Spacer(modifier = Modifier.height(8.dp))
+                        DiaryPreviewCard(
+                            modifier = Modifier.padding(horizontal = 12.dp),
+                            summary = it
+                        ){
+                            navController.navigate("DiaryPage/${it.id}")
+                        }
+                    }
+                }
+            }
+
+        }
     }
 }
-
-
 
 
 
@@ -232,12 +257,13 @@ fun CalenderMonth(
     year:Int,
     month: Int
 ){
-    Column(
-        modifier = modifier.size(70.dp),
-        verticalArrangement = Arrangement.Bottom
-    ) {
-        if(!isCurrentYear) Text(text = year.toString())
-        Text(text = month.toString(), fontSize =36.sp, fontWeight = FontWeight.Bold)
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+    ){
+        Text(text = month.toString(), fontSize =48.sp, fontWeight = FontWeight.ExtraBold)
+        Spacer(modifier = Modifier.width(8.dp))
+        if(!isCurrentYear) Text(text = year.toString(), fontWeight = FontWeight.Light)
     }
 }
 
@@ -373,11 +399,12 @@ fun DiaryPreviewCard(
     onClickDetail: () -> Unit,
 
 ) {
+    val timeText=formatWrittenTime(summary.writtenTime, summary.date)
+
     Card(
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(12.dp),
         modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 16.dp),
+            .fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
         ),
@@ -388,25 +415,54 @@ fun DiaryPreviewCard(
             .clickable {
                 onClickDetail()
             }
-            .padding(16.dp)
+            .padding(horizontal = 12.dp, vertical = 6.dp)
         ){
             Text(
-                text = summary.writtenTime.toString(),
-                style = MaterialTheme.typography.titleMedium,
+                text = timeText,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Light,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = summary.title,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            Text(
-                text = summary.content,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+            if(summary.content!=""){
+                Text(
+                    text = summary.content,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.Light,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
+    }
+}
+fun formatWrittenTime(writtenTime: LocalDateTime, date: LocalDate): String {
+    val timePart = writtenTime.format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+    val writtenDate = writtenTime.toLocalDate()
+
+    return when {
+        // 1. 같은 날짜
+        writtenDate == date -> {
+            timePart
+        }
+        // 2. date의 다음 날
+        writtenDate == date.plusDays(1) -> {
+            "다음날 $timePart"
+        }
+        // 3. 같은 년도
+        writtenDate.year == date.year -> {
+            writtenTime.format(DateTimeFormatter.ofPattern("MM.dd HH:mm:ss"))
+        }
+        // 4. 그 외 (년도도 다름)
+        else -> {
+            writtenTime.format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss"))
         }
     }
 }
