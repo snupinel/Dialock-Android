@@ -37,10 +37,10 @@ class Converters {
 
     @TypeConverter
     fun fromUriList(uriList: List<Uri>?): String? {
-        val filtered = uriList?.filter { it != Uri.EMPTY && it.toString().isNotBlank() }
-        return if (filtered.isNullOrEmpty()) null else filtered.joinToString(",")
+        return uriList
+            ?.filter { it != Uri.EMPTY && it.toString().isNotBlank() } // ✅ 의미 있는 Uri만 저장
+            ?.joinToString(",") { it.toString() }
     }
-
 
     @TypeConverter
     fun toUriList(data: String?): List<Uri> {
@@ -50,5 +50,6 @@ class Converters {
             ?.map { Uri.parse(it) }
             ?: emptyList()
     }
+
 
 }
