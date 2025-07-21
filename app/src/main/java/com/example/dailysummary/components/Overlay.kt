@@ -2,6 +2,7 @@ package com.example.dailysummary.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -248,7 +249,8 @@ fun CloseButton(
                 .fillMaxHeight()
                 .width(60.dp),
             onClick=  onClick,
-            shape = RoundedCornerShape(8.dp)
+            shape = RoundedCornerShape(8.dp),
+            contentPadding = PaddingValues(0.dp)
             ) {
             Icon(
                 imageVector = Icons.Outlined.Close,
@@ -269,6 +271,7 @@ fun MinimizeButton(
             .width(60.dp),
         shape = RoundedCornerShape(8.dp),
         onClick= onClick,
+        contentPadding = PaddingValues(0.dp)
         ) {
         Icon(
             imageVector = Icons.Outlined.KeyboardArrowDown,

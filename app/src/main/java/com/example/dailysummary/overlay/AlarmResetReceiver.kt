@@ -36,11 +36,7 @@ class AlarmResetReceiver : BroadcastReceiver() {
                     putExtra("isNextDay", intent.getBooleanExtra("isNextDay", false))
                 }
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    context.startForegroundService(serviceIntent)
-                } else {
-                    context.startService(serviceIntent)
-                }
+                context.startForegroundService(serviceIntent)
             }
         }
     }
