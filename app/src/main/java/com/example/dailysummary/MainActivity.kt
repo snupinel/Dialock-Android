@@ -11,6 +11,7 @@ import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -129,7 +130,10 @@ private fun MyApp(
                 // ✅ navigate() 시: 새 화면이 아래에서 위로 올라옴
                 slideInVertically(
                     initialOffsetY = { fullHeight -> fullHeight }, // 화면 아래에서 시작
-                    animationSpec = tween(300)
+                    animationSpec = tween(
+                        durationMillis = 350,
+                        easing = FastOutSlowInEasing // ✅ 자연스러운 가속/감속
+                    )
                 )
             },
             exitTransition = {
@@ -143,7 +147,10 @@ private fun MyApp(
                 // ✅ 뒤로가기(pop): 현재 화면이 아래로 내려가며 사라짐
                 slideOutVertically(
                     targetOffsetY = { fullHeight -> fullHeight },
-                    animationSpec = tween(300)
+                    animationSpec = tween(
+                        durationMillis = 350,
+                        easing = FastOutSlowInEasing
+                    )
                 )
             }
             ) {

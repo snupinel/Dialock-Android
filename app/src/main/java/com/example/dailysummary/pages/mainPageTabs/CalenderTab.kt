@@ -150,7 +150,7 @@ fun CalenderTab(
                 .fillMaxWidth()
                 .height(pagerHeight),
             verticalAlignment = Alignment.Top,
-            beyondViewportPageCount = 1,
+            beyondViewportPageCount = 0,
             pageSpacing = 40.dp,
             flingBehavior = customFlingBehavior
         ) { page ->
