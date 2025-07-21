@@ -125,7 +125,6 @@ class SettingPageViewModel @Inject constructor(
         context.startService(Intent(context, SummaryService::class.java))
     }*/
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun scheduleOverlay() {
         alarmScheduler.scheduleOverlay()
     }

@@ -82,7 +82,9 @@ fun PermissionRequestPage(
     Scaffold(
         bottomBar = {
             Button(
-                onClick = { navController.navigate("MainPage") },
+                onClick = {
+                    navController.navigate("InitialTimeSettingPage")
+                          },
                 modifier = Modifier
                     .padding(
                         bottom = WindowInsets.navigationBars
