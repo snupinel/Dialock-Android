@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
@@ -93,7 +94,6 @@ fun CalenderTab(
 ) {
     Log.d("recompose", "DSCalender recomposition")
 
-    val backStackEntry = navController.currentBackStackEntryAsState().value
     val viewModel = hiltViewModel<MainPageViewModel>()
     //val lazyPagingItems = viewModel.pager.collectAsLazyPagingItems()
     //val hasData = lazyPagingItems.itemCount > 0
@@ -143,6 +143,7 @@ fun CalenderTab(
             }
         }
         var pagerHeight by remember { mutableStateOf(1000.dp) }
+
         HorizontalPager(
             state = pagerState,
             modifier = Modifier
@@ -153,6 +154,7 @@ fun CalenderTab(
             pageSpacing = 40.dp,
             flingBehavior = customFlingBehavior
         ) { page ->
+
             val pageData = cache[page]
 
             // 없으면 로딩 요청
@@ -337,61 +339,67 @@ fun CalenderBox(
 
 @Composable
 fun CalenderDayGrid(
-    calenderOnePage:CalenderOnePage,
-    clickedDay:LocalDate?=null,
-    onDayClick: (date: LocalDate,c:CalenderEntry) -> Unit,
-){
+    calenderOnePage: CalenderOnePage,
+    clickedDay: LocalDate? = null,
+    onDayClick: (date: LocalDate, c: CalenderEntry) -> Unit,
+) {
     Log.d("recompose", "CalenderDayGrid recomposed with page:")
-
 
     val year = calenderOnePage.year
     val month = calenderOnePage.month
+    val entries = calenderOnePage.calenderEntries
 
-    LazyVerticalGrid(
+    // ✅ 7일씩 끊어서 6줄(Row)로 나누기
+    Column(
         modifier = Modifier.padding(horizontal = 12.dp),
-        columns = GridCells.Fixed(7),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(0.dp),
-        userScrollEnabled = false,
-    ){
-
-
-        itemsIndexed(calenderOnePage.calenderEntries, key = {index, item -> "$index-${item.date.dayOfMonth}"}){ index, calenderEntry->
-            if(calenderEntry.isBlank){
-                Box(modifier = Modifier
-                    .aspectRatio(1f)
-                    .alpha(0.15f),
-                    contentAlignment = Alignment.Center
-                ){
-                    Text(
-                        text = "${calenderEntry.date.dayOfMonth}",
-                        color = Color.Gray
-                    )
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        entries.chunked(7).forEach { weekEntries ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                weekEntries.forEach { entry ->
+                    if (entry.isBlank) {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .aspectRatio(1f)
+                                .alpha(0.15f),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "${entry.date.dayOfMonth}",
+                                color = Color.Gray
+                            )
+                        }
+                    } else {
+                        CalenderBox(
+                            modifier = Modifier.weight(1f),
+                            isWritten = entry.isWritten,
+                            isClicked = clickedDay != null &&
+                                    clickedDay.isEqual(LocalDate.of(year, month, entry.date.dayOfMonth)),
+                            isToday = entry.isToday,
+                            isFuture = entry.isFuture,
+                            day = entry.date.dayOfMonth
+                        ) {
+                            val targetDate = LocalDate.of(year, month, entry.date.dayOfMonth)
+                            if (!targetDate.isAfter(LocalDate.now())) {
+                                onDayClick(entry.date, entry)
+                            }
+                        }
+                    }
                 }
-            } else{
-                CalenderBox(
-                    isWritten = calenderEntry.isWritten,
-                    isClicked = clickedDay!=null && clickedDay.isEqual(LocalDate.of(year,month,calenderEntry.date.dayOfMonth)),
-                    isToday = calenderEntry.isToday,
-                    isFuture = calenderEntry.isFuture,
-                    day = calenderEntry.date.dayOfMonth,
-                ){
-                    val targetDate = LocalDate.of(year,month,calenderEntry.date.dayOfMonth)
 
-                    if(targetDate.isAfter(LocalDate.now())){
-
-                    }
-                    else {
-                        onDayClick(calenderEntry.date,calenderEntry)
-                    }
-
+                // ✅ 마지막 줄이 7칸 미만일 경우 빈 공간 채우기
+                repeat(7 - weekEntries.size) {
+                    Spacer(modifier = Modifier.weight(1f).aspectRatio(1f))
                 }
             }
-
         }
     }
 }
+
 @Composable
 fun DiaryPreviewCard(
     modifier: Modifier = Modifier,

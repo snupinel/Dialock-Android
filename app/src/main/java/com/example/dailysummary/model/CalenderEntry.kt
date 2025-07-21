@@ -1,10 +1,8 @@
 package com.example.dailysummary.model
 
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Immutable
-import com.example.dailysummary.data.YearMonth
+import com.example.dailysummary.dto.YearMonth
 import com.example.dailysummary.dto.PageYearMonth
 import com.example.dailysummary.dto.Summary
 import java.time.LocalDate
@@ -51,6 +49,7 @@ data class CalenderOnePage(
     }
 }
 fun summaryRefinement(year: Int, month: Int, summaries: List<Summary>): CalenderOnePage {
+    Log.d("summaryRefinement","called")
     val firstDayOfMonth = LocalDate.of(year, month, 1)
     val daysInMonth = firstDayOfMonth.lengthOfMonth()
 

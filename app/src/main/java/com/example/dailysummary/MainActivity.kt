@@ -9,6 +9,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -103,7 +111,6 @@ class MainActivity : ComponentActivity() {
 
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun MyApp(
     modifier: Modifier = Modifier,
@@ -117,7 +124,29 @@ private fun MyApp(
     ) {
         NavHost(
             navController = navController,
-            startDestination = startDestination) {
+            startDestination = startDestination,
+            enterTransition = {
+                // ✅ navigate() 시: 새 화면이 아래에서 위로 올라옴
+                slideInVertically(
+                    initialOffsetY = { fullHeight -> fullHeight }, // 화면 아래에서 시작
+                    animationSpec = tween(300)
+                )
+            },
+            exitTransition = {
+                             ExitTransition.None
+            },
+            popEnterTransition = {
+                // ✅ 뒤로가기(pop): 이전 화면 그대로 나타남
+                EnterTransition.None
+            },
+            popExitTransition = {
+                // ✅ 뒤로가기(pop): 현재 화면이 아래로 내려가며 사라짐
+                slideOutVertically(
+                    targetOffsetY = { fullHeight -> fullHeight },
+                    animationSpec = tween(300)
+                )
+            }
+            ) {
             composable("MainPage") {
                 MainPage(navController)
             }

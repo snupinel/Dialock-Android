@@ -17,7 +17,6 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
 
-    @RequiresApi(Build.VERSION_CODES.O)
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase {
@@ -28,7 +27,6 @@ object DatabaseModule {
         ).fallbackToDestructiveMigration().build()
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     @Provides
     fun provideSummaryDao(database: AppDatabase): SummaryDAO {
         return database.summaryDAO()

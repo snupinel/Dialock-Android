@@ -93,14 +93,8 @@ class MainPageViewModel @Inject constructor(
 
         viewModelScope.launch {
             val currentPage = PageYearMonth(clickedDay.value).toPageNum() // 현재 날짜 → page 계산
-            val pagesToLoad = listOf(currentPage - 1, currentPage, currentPage + 1)
-
-            pagesToLoad.forEach { page ->
-                loadPageIfAbsent(page)
-            }
-
+            loadPageIfAbsent(currentPage)
             withContext(Dispatchers.Main){
-                // ✅ 2. 3장 로드 후 clickedEntry 초기화
                 val todayPage = _pageCache[currentPage]
                 todayPage?.let { page ->
                     val todayEntry = page.calenderEntries
