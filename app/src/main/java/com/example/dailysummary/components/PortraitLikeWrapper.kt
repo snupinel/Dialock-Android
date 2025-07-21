@@ -18,23 +18,18 @@ import androidx.compose.ui.unit.dp
 fun PortraitLikeWrapper(content: @Composable () -> Unit) {
     val configuration = LocalConfiguration.current
     val screenHeightDp = configuration.screenHeightDp.dp
-
-    // ✅ 세로 높이의 60%를 폭으로 사용 (원하는 비율로 변경 가능)
     val maxContentWidth = screenHeightDp * 0.6f
 
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black), // ✅ 양쪽 잘린 부분을 검은색(또는 앱의 배경색)으로 채움
         contentAlignment = Alignment.Center
     ) {
-        // ✅ 실제 앱 콘텐츠
         Box(
             modifier = Modifier
                 .widthIn(max = maxContentWidth)
                 .fillMaxHeight()
-                .background(
-                    color = Color.White,
-                    shape = RoundedCornerShape(0.dp)
-                )
         ) {
             content()
         }
