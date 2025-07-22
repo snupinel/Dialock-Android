@@ -31,7 +31,8 @@ import com.example.dailysummary.components.AlarmButton
 import com.example.dailysummary.pages.mainPageTabs.CalenderTab
 import com.example.dailysummary.components.MenuButton
 import com.example.dailysummary.components.TabNavigationBar
-import com.example.dailysummary.model.BottomNavItem
+import com.example.dailysummary.dto.BottomNavItem
+import com.example.dailysummary.pages.mainPageTabs.HomeTab
 import com.example.dailysummary.viewModel.MainPageViewModel
 import com.example.dailysummary.viewModel.Tab
 
@@ -85,7 +86,7 @@ fun MainPage(navController: NavController){
         ) {
             when (selectedTab){
                 Tab.Home-> {
-
+                    HomeTab(navController)
                 }
                 Tab.Calender -> {
                     CalenderTab(navController = navController)

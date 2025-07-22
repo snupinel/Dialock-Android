@@ -23,5 +23,22 @@ data class Summary(
     @ColumnInfo(name = "is_bookmarked") val isBookmarked: Boolean,
     @ColumnInfo(name="image_uris") val imageUris:List<Uri>,
     @ColumnInfo(name="should_block_alarm") val shouldBlockAlarm:Boolean,
-)
+){
+    companion object{
+        fun dummy():Summary{
+            return Summary(
+                id = 0,
+                writtenTime = LocalDateTime.now(),
+                date = LocalDate.now(),
+                title = "제목",
+                content = "내용",
+                dayRating = DayRating.SOSO,
+                isBookmarked = false,
+                imageUris = emptyList(),
+                shouldBlockAlarm = false
+            )
+        }
+    }
+}
+
 

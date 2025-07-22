@@ -1,4 +1,4 @@
-package com.example.dailysummary.model
+package com.example.dailysummary.dto
 
 import androidx.compose.ui.graphics.vector.ImageVector
 

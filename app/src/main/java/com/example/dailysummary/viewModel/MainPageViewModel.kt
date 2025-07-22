@@ -4,31 +4,22 @@ import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.snapshots.SnapshotStateMap
-import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
-import com.example.dailysummary.data.PrefRepository
 import com.example.dailysummary.data.SummaryRepository
 import com.example.dailysummary.dto.PageYearMonth
 import com.example.dailysummary.dto.Summary
-import com.example.dailysummary.model.CalenderEntry
-import com.example.dailysummary.model.CalenderOnePage
-import com.example.dailysummary.model.summaryRefinement
-import com.example.dailysummary.overlay.AlarmScheduler
+import com.example.dailysummary.dto.CalenderEntry
+import com.example.dailysummary.dto.CalenderOnePage
+import com.example.dailysummary.dto.PeriodRatingRatios
+import com.example.dailysummary.dto.RatingRatios
+import com.example.dailysummary.dto.summaryRefinement
+import com.example.dailysummary.pages.mainPageTabs.StatsPeriod
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import javax.inject.Inject
@@ -43,6 +34,35 @@ class MainPageViewModel @Inject constructor(
     private val summaryRepository: SummaryRepository,
     ):ViewModel(){
 
+
+    private val _todayDiaries:MutableStateFlow<List<Summary>> = MutableStateFlow(emptyList())
+    val todayDiaries = _todayDiaries.asStateFlow()
+
+    fun setTodayDiaries(value:List<Summary>){
+        _todayDiaries.value = value
+    }
+
+    private val _selectedPeriod = MutableStateFlow(StatsPeriod.MONTH)
+    val selectedPeriod = _selectedPeriod.asStateFlow()
+
+    fun setSelectedPeriod(value:StatsPeriod){
+        _selectedPeriod.value = value
+    }
+
+    private val _periodRatingRatios = MutableStateFlow(PeriodRatingRatios.dummy())
+    val periodRatingRatios = _periodRatingRatios.asStateFlow()
+
+    fun setPeriodRatingRatios(value:PeriodRatingRatios){
+        _periodRatingRatios.value = value
+    }
+
+    private val _recentSummaries:MutableStateFlow<List<Summary>> = MutableStateFlow(emptyList())
+    val recentSummaries = _recentSummaries.asStateFlow()
+
+    fun setRecentSummaries(value:List<Summary>){
+        _recentSummaries.value = value
+    }
+
     private val _selectedTab = MutableStateFlow(Tab.Home)
     val selectedTab = _selectedTab.asStateFlow()
 
@@ -56,7 +76,7 @@ class MainPageViewModel @Inject constructor(
     private val _clickedEntry:MutableStateFlow<CalenderEntry?> = MutableStateFlow(null)
     val clickedEntry = _clickedEntry.asStateFlow()
 
-    fun clickDay(date:LocalDate, entry:CalenderEntry){
+    fun clickDay(date:LocalDate, entry: CalenderEntry){
         _clickedDay.value = date
         _clickedEntry.value = entry
         Log.d("aaaa",clickedDay.value.toString() )
@@ -86,6 +106,19 @@ class MainPageViewModel @Inject constructor(
             loadingPages.remove(page)
         }
     }
+    fun homeRefresh(){
+        viewModelScope.launch {
+            setTodayDiaries(summaryRepository.getSummariesByDate(LocalDate.now()))
+            setPeriodRatingRatios(
+                PeriodRatingRatios(
+                    RatingRatios(7,summaryRepository.getSummariesLastWeek()),
+                    RatingRatios(30,summaryRepository.getSummariesLastMonth()),
+                    RatingRatios(365,summaryRepository.getSummariesLastYear()),
+                )
+            )
+            setRecentSummaries(summaryRepository.getRecentSummariesExcludingToday(10))
+        }
+    }
 
     fun calenderRefresh() {
         _pageCache.clear()
@@ -109,6 +142,7 @@ class MainPageViewModel @Inject constructor(
 
 
     init {
+        homeRefresh()
         calenderRefresh()
         viewModelScope.launch {
             summaryRepository.shouldRefresh.collect { refresh ->

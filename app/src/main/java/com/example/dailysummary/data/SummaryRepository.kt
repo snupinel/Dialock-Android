@@ -54,5 +54,19 @@ class SummaryRepository @Inject constructor(
         _shouldRefresh.value = true // ✅ 새로고침 신호
     }
 
+    suspend fun getSummariesLastYear(): List<Summary>{
+        return summaryDAO.getSummariesLastYear()
+    }
+    suspend fun getSummariesLastMonth(): List<Summary>{
+        return summaryDAO.getSummariesLastMonth()
+    }
+
+    suspend fun getSummariesLastWeek(): List<Summary>{
+        return summaryDAO.getSummariesLastWeek()
+    }
+
+    suspend fun getRecentSummariesExcludingToday(n:Int): List<Summary>{
+        return summaryDAO.getRecentSummariesExcludingToday(n)
+    }
 
 }

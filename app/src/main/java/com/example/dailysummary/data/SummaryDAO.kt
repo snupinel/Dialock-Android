@@ -51,4 +51,36 @@ interface SummaryDAO {
 
     @Query(" UPDATE summary SET image_uris = :imageUris WHERE id = :id")
     suspend fun updateImageUrisById(id: Int, imageUris: List<Uri>): Int
+
+    /** ✅ 오늘 제외 지난 1년 */
+    @Query("""
+        SELECT * FROM summary 
+        WHERE date >= date('now', '-365 days') 
+          AND date < date('now')
+    """)
+    suspend fun getSummariesLastYear(): List<Summary>
+
+    /** ✅ 오늘 제외 지난 1달 */
+    @Query("""
+        SELECT * FROM summary 
+        WHERE date >= date('now', '-30 days') 
+          AND date < date('now')
+    """)
+    suspend fun getSummariesLastMonth(): List<Summary>
+
+    /** ✅ 오늘 제외 지난 1주 */
+    @Query("""
+        SELECT * FROM summary 
+        WHERE date >= date('now', '-7 days') 
+          AND date < date('now')
+    """)
+    suspend fun getSummariesLastWeek(): List<Summary>
+
+    @Query("""
+        SELECT * FROM summary 
+        WHERE date < date('now')
+        ORDER BY date DESC, written_time DESC
+        LIMIT :n
+    """)
+    suspend fun getRecentSummariesExcludingToday(n: Int): List<Summary>
 }

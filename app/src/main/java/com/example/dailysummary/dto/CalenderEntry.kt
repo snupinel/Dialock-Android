@@ -1,10 +1,7 @@
-package com.example.dailysummary.model
+package com.example.dailysummary.dto
 
 import android.util.Log
 import androidx.compose.runtime.Immutable
-import com.example.dailysummary.dto.YearMonth
-import com.example.dailysummary.dto.PageYearMonth
-import com.example.dailysummary.dto.Summary
 import java.time.LocalDate
 
 @Immutable
@@ -18,7 +15,7 @@ data class CalenderEntry (
     val isFuture:Boolean = date.isAfter(LocalDate.now()),
 ){
     companion object{
-        fun dummy():CalenderEntry{
+        fun dummy(): CalenderEntry {
             return CalenderEntry(
                 date = LocalDate.now(),
                 summaries = emptyList(),

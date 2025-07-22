@@ -1,9 +1,6 @@
 package com.example.dailysummary.pages.mainPageTabs
 
-import android.graphics.drawable.Icon
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.splineBasedDecay
@@ -21,22 +18,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerSnapDistance
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.Card
@@ -67,15 +57,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.dailysummary.dto.PageYearMonth
 import com.example.dailysummary.dto.Summary
-import com.example.dailysummary.model.CalenderEntry
-import com.example.dailysummary.model.CalenderOnePage
+import com.example.dailysummary.dto.CalenderEntry
+import com.example.dailysummary.dto.CalenderOnePage
 import com.example.dailysummary.viewModel.MainPageViewModel
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.Locale
 
 val weekDayList= listOf(
@@ -232,12 +222,13 @@ fun CalenderTab(
                 }
             }
             else{
-                LazyColumn(modifier = Modifier.fillMaxSize()){
+                LazyColumn(modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+                ){
 
                     items(clickedEntry!!.summaries){
-                        Spacer(modifier = Modifier.height(8.dp))
                         DiaryPreviewCard(
-                            modifier = Modifier.padding(horizontal = 12.dp),
                             summary = it
                         ){
                             navController.navigate("DiaryPage/${it.id}")
@@ -404,10 +395,13 @@ fun CalenderDayGrid(
 fun DiaryPreviewCard(
     modifier: Modifier = Modifier,
     summary: Summary,
+    showDate:Boolean = false,
     onClickDetail: () -> Unit,
 
 ) {
-    val timeText=formatWrittenTime(summary.writtenTime, summary.date)
+    val timeText=
+        if (showDate) formatRelativeDateTime(summary.date)
+        else formatWrittenTime(summary.writtenTime, summary.date)
 
     Card(
         shape = RoundedCornerShape(12.dp),
@@ -472,5 +466,16 @@ fun formatWrittenTime(writtenTime: LocalDateTime, date: LocalDate): String {
         else -> {
             writtenTime.format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss"))
         }
+    }
+}
+fun formatRelativeDateTime(date: LocalDate): String {
+    val today = LocalDate.now()
+    val daysBetween = ChronoUnit.DAYS.between(date, today)
+
+
+    return when (daysBetween) {
+        0L -> "오늘"
+        1L -> "어제"                  // ✅ 어제
+        else -> "${daysBetween}일 전" // ✅ 그 외
     }
 }
