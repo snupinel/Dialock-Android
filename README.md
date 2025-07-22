@@ -41,7 +41,7 @@
 
 | 버전 | 상태 | 주요 변경 사항 |
 |------|------|---------------|
-| [**v0.9.0**](https://github.com/snupinel/Dialock-Android/releases/tag/v0.8.3) | 개발용 | 홈 탭 기능 구현 |
+| [**v0.9.0**](https://github.com/snupinel/Dialock-Android/releases/tag/v0.9.0) | 개발용 | 홈 탭 기능 구현 |
 | [**v0.8.3**](https://github.com/snupinel/Dialock-Android/releases/tag/v0.8.3) | 개발용 | 최초 시간 설정 화면 구현 및 캘린더 최적화 |
 | [**v0.8.2**](https://github.com/snupinel/Dialock-Android/releases/tag/v0.8.2) | 개발용 | 캘린더 탭의 UI 개선 |
 | [**v0.8.1**](https://github.com/snupinel/Dialock-Android/releases/tag/v0.8.1) | 개발용 | 알람 미출현 버그 수정 |
