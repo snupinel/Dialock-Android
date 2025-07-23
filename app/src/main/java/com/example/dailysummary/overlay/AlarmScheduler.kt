@@ -24,7 +24,6 @@ class AlarmScheduler @Inject constructor(
 ) {
 
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun scheduleOverlay() {
         Log.d("alarm", "scheduleOverlay activated")
 

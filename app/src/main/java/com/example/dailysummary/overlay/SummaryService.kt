@@ -63,21 +63,39 @@ class SummaryService  : Service() {
 
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        year = intent?.getIntExtra("year",0)!!
-        month = intent?.getIntExtra("month",0)!!
-        day = intent?.getIntExtra("day",0)!!
-        isNextDay=intent?.getBooleanExtra("isNextDay",false)!!
-
-
-        // 전달받은 매개변수 처리
-        //Log.d("MyService", "Value1: $value1, Value2: $value2")
+        year = intent?.getIntExtra("year", 0) ?: 0
+        month = intent?.getIntExtra("month", 0) ?: 0
+        day = intent?.getIntExtra("day", 0) ?: 0
+        isNextDay = intent?.getBooleanExtra("isNextDay", false) ?: false
 
         createNotificationChannel()
         startForeground(1, buildNotification())
 
+        // ✅ 핵심 로직을 onStartCommand에서 실행
+        serviceScope.launch {
+            val summaries = summaryRepository.getSummariesByDate(
+                LocalDate.of(year, month, day).let {
+                    if (isNextDay) it.minusDays(1) else it
+                }
+            )
+            Log.d("summaryservice", summaries.toString())
+
+            alarmScheduler.scheduleOverlay()
+            if (summaries.isEmpty() || summaries.all { !it.shouldBlockAlarm }) {
+                withContext(Dispatchers.Main) {
+                    showOverlay(isWritten = summaries.isNotEmpty())
+                }
+            }
+            else{
+                stopSelf()
+            }
+
+
+        }
 
         return START_STICKY
     }
+
 
 
 
@@ -85,17 +103,6 @@ class SummaryService  : Service() {
         super.onCreate()
         setTheme(R.style.Theme_DailySummary)
         Log.d("summaryservice","SummaryService activated")
-        serviceScope.launch {
-            val summaries = summaryRepository.getSummariesByDate(
-                LocalDate.of(year, month, day)
-            )
-            if (summaries.isEmpty() || summaries.all { !it.shouldBlockAlarm }) {
-                withContext(Dispatchers.Main) {
-                    showOverlay(isWritten = summaries.isNotEmpty())
-                }
-            }
-            alarmScheduler.scheduleOverlay()
-        }
     }
 
     private fun buildNotification(): Notification {
@@ -118,7 +125,7 @@ class SummaryService  : Service() {
     }
 
     private fun showOverlay(isWritten:Boolean) {
-
+        Log.d("summaryservice", "showOverlay activated")
 
         val layoutFlag= WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
 
@@ -182,7 +189,7 @@ class SummaryService  : Service() {
                             isBookmarked = isLikeChecked,
                             dayRating = dayRating,
                             imageUris = emptyList(),
-                            shouldBlockAlarm = true
+                            shouldBlockAlarm = false,
                         ))
                     }
 
