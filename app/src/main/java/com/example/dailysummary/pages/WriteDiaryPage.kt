@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.dailysummary.components.BackButton
 import com.example.dailysummary.components.BookmarkButton
 import com.example.dailysummary.components.DayRatingSelector
 import com.example.dailysummary.dto.DayRating
@@ -102,8 +103,10 @@ fun WriteDiaryPage(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back")
+                    BackButton {
+                        scope.launch {
+                            navController.popBackStackExclusive()
+                        }
                     }
                 },
                 actions = {

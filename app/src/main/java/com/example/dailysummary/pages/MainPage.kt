@@ -16,6 +16,7 @@ import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -24,6 +25,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -33,6 +35,7 @@ import com.example.dailysummary.components.MenuButton
 import com.example.dailysummary.components.TabNavigationBar
 import com.example.dailysummary.dto.BottomNavItem
 import com.example.dailysummary.pages.mainPageTabs.HomeTab
+import com.example.dailysummary.pages.mainPageTabs.MyTab
 import com.example.dailysummary.viewModel.MainPageViewModel
 import com.example.dailysummary.viewModel.Tab
 
@@ -48,7 +51,6 @@ val tabBarItems = listOf(homeTab,calenderTab,myTab)
 //@Inject lateinit var alarmScheduler: AlarmScheduler
 
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MainPage(navController: NavController){
 
@@ -74,7 +76,9 @@ fun MainPage(navController: NavController){
             TabNavigationBar(tabBarItems)
                     },
         topBar = {
-            MainPageToolbar {
+            MainPageToolbar(
+                title = tabBarItems[selectedTab.ordinal].tag
+            ){
                 navController.navigate("AlarmSettingPage")
             }
                  },
@@ -93,7 +97,7 @@ fun MainPage(navController: NavController){
                     //SameEveryDayToggle(sameEveryDay = false, onToggle = {viewModel.setSameEveryDay(isToggle = true)})
                 }
                 Tab.My -> {
-                    //
+                    MyTab(navController = navController)
 
                 }
 
@@ -106,21 +110,21 @@ fun MainPage(navController: NavController){
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainPageToolbar(
+    title:String,
     onSetting:()->Unit,
 ) {
     //val interpolatedColor = lerp(Color.White, Color.Black, alpha)
     TopAppBar(
 
-        title = { },
-        navigationIcon = {
+        title = { Text(title, fontWeight = FontWeight.ExtraBold)},
+        actions = {
             MenuButton {
 
             }
-        },
-        actions = {
+            /*
             AlarmButton{
                 onSetting()
-            }
+            }*/
         },
 
 

@@ -50,8 +50,7 @@ fun HomeTab(navController: NavController,
             viewModel:MainPageViewModel = hiltViewModel()) {
 
     val todayDiaries by viewModel.todayDiaries.collectAsState()
-    val periodRatingRatios by viewModel.periodRatingRatios.collectAsState()
-    val selectedPeriod by viewModel.selectedPeriod.collectAsState()
+
     val recentSummaries by viewModel.recentSummaries.collectAsState()
     val today = LocalDate.now()
     LazyColumn(
@@ -69,20 +68,13 @@ fun HomeTab(navController: NavController,
                     navController.navigate("DiaryPage/$it")
                 })
             Spacer(modifier = Modifier.height(16.dp))
-            MonthlyStatsSection(
-                periodRatingRatios,
-                onPeriodChange = {
-                                 viewModel.setSelectedPeriod(it)
-                },
-                selectedPeriod = selectedPeriod
-            )
-            Spacer(modifier = Modifier.height(16.dp))
+            /*
             RecentEntriesSection(
                 recentSummaries = recentSummaries,
                 onClickDetail = { id ->
                     navController.navigate("DiaryPage/$id")
                 }
-            )
+            )*/
         }
 
     }
@@ -138,130 +130,6 @@ fun TodaySummaryCard(
             OutlinedButton(onClick = onWrite) {
                 Text("새 일기 작성")
             }
-        }
-    }
-}
-
-@Composable
-fun MonthlyStatsSection(
-    periodRatingRatios:PeriodRatingRatios,
-    selectedPeriod: StatsPeriod,
-    onPeriodChange: (StatsPeriod) -> Unit,
-) {
-    val goodRatio = periodRatingRatios[selectedPeriod].goodRatio
-    val sosoRatio = periodRatingRatios[selectedPeriod].sosoRatio
-    val badRatio = periodRatingRatios[selectedPeriod].badRatio
-    val writtenDays =periodRatingRatios[selectedPeriod].writtenDays
-    val totalDays = periodRatingRatios[selectedPeriod].totalDays
-    Card(
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // ✅ 제목 + 기간 선택 버튼
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("통계", style = MaterialTheme.typography.titleMedium)
-
-                PeriodSelector(
-                    selectedPeriod = selectedPeriod,
-                    onPeriodChange = onPeriodChange
-                )
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // ✅ 왼쪽: 텍스트 통계
-                Column {
-                    Text(
-                        text = "${(goodRatio * 100).toInt()}% GOOD",
-                        color = Color(0xFF4CAF50), // Green
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Text(
-                        text = "${(sosoRatio * 100).toInt()}% SOSO",
-                        color = Color(0xFFFFC107), // Yellow
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Text(
-                        text = "${(badRatio * 100).toInt()}% BAD",
-                        color = Color(0xFFF44336), // Red
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = "$writtenDays / $totalDays days written",
-                        color = MaterialTheme.colorScheme.onSurface.copy(0.6f),
-                        style = MaterialTheme.typography.labelSmall
-                    )
-                }
-
-                // ✅ 오른쪽: 파이 차트
-                PieChart(
-                    data = listOf(goodRatio, sosoRatio, badRatio),
-                    colors = listOf(
-                        Color(0xFF4CAF50),
-                        Color(0xFFFFC107),
-                        Color(0xFFF44336)
-                    ),
-                    size = 80.dp
-                )
-            }
-        }
-    }
-}
-enum class StatsPeriod(val label: String) {
-    WEEK("1W"),
-    MONTH("1M"),
-    YEAR("1Y")
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PeriodSelector(
-    selectedPeriod: StatsPeriod,
-    onPeriodChange: (StatsPeriod) -> Unit
-) {
-    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        StatsPeriod.values().forEach { period ->
-            FilterChip(
-                selected = selectedPeriod == period,
-                onClick = { onPeriodChange(period) },
-                label = { Text(period.label) },
-                modifier = Modifier.heightIn(max = 32.dp)
-            )
-        }
-    }
-}
-
-
-@Composable
-fun PieChart(
-    data: List<Float>,
-    colors: List<Color>,
-    size: Dp = 100.dp
-) {
-    Canvas(modifier = Modifier.size(size)) {
-        var startAngle = -90f
-        data.forEachIndexed { index, value ->
-            val sweep = value * 360f
-            drawArc(
-                color = colors[index],
-                startAngle = startAngle,
-                sweepAngle = sweep,
-                useCenter = true
-            )
-            startAngle += sweep
         }
     }
 }

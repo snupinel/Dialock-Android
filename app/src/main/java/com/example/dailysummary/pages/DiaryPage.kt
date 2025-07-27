@@ -60,6 +60,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import coil.compose.AsyncImage
+import com.example.dailysummary.components.BackButton
 import com.example.dailysummary.components.EditButton
 import com.example.dailysummary.components.ImagePager
 import com.example.dailysummary.components.MoreVertButton
@@ -96,18 +97,17 @@ fun DiaryPage(
 
     var showDeleteDialog by remember { mutableStateOf(false) }
 
+
     if(summary!=null){
         Scaffold(
             topBar = {
                 TopAppBar(
                     title = {},
                     navigationIcon = {
-                        IconButton(onClick = {
+                        BackButton {
                             scope.launch {
                                 navController.popBackStackExclusive()
                             }
-                        }) {
-                            Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back")
                         }
                     },
                     actions = {
@@ -147,19 +147,22 @@ fun DiaryPage(
                         Spacer(modifier = Modifier.height(paddingValues.calculateTopPadding()))
 
                     }
-                    Column(Modifier.padding(horizontal = 24.dp)){
-                        Text(
-                            text = "작성 시간: ${summary!!.writtenTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))}",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
+                    Column(Modifier.padding(horizontal = 24.dp),){
+
+                        Row{
+                            Text(text = summary!!.date.format(DateTimeFormatter.ofPattern("M월 d일, yyyy")),
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Light,
+                                color = Color.Gray)
+                        }
                         Spacer(Modifier.height(4.dp))
+
 
                         // 제목
                         Text(
                             text = summary!!.title,
                             style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.ExtraBold,
                             color = MaterialTheme.colorScheme.onBackground
                         )
                         Spacer(Modifier.height(8.dp))
@@ -198,7 +201,13 @@ fun DiaryPage(
                                 },
                                 style = MaterialTheme.typography.bodyMedium
                             )
+
                         }
+                        Text(
+                            text = "작성 시간: ${summary!!.writtenTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))}",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
                     }
 
 
