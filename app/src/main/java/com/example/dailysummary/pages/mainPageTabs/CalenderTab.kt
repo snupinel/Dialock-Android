@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
@@ -29,19 +30,30 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,8 +74,11 @@ import com.example.dailysummary.dto.Summary
 import com.example.dailysummary.dto.CalenderEntry
 import com.example.dailysummary.dto.CalenderOnePage
 import com.example.dailysummary.viewModel.MainPageViewModel
+import kotlinx.coroutines.launch
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Locale
@@ -78,6 +93,7 @@ val weekDayList= listOf(
     Pair(Color.Blue,"S"),
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalenderTab(
     navController: NavController,
@@ -117,6 +133,9 @@ fun CalenderTab(
 
     val clickedDay by viewModel.clickedDay.collectAsState()
     val clickedEntry by viewModel.clickedEntry.collectAsState()
+    val scope = rememberCoroutineScope()
+    var showPicker by remember { mutableStateOf(false) }
+
 
     Column(Modifier.fillMaxSize()){
         CalenderMonth(
@@ -124,8 +143,24 @@ fun CalenderTab(
                 .padding(horizontal =20.dp),
             isCurrentYear = isCurrentYear,
             year = currentPageYM.year,
-            month = currentPageYM.month
-        )
+            month = currentPageYM.month,
+        ){
+            showPicker = true
+        }
+        if (showPicker) {
+            YearMonthPickerDialog(
+                initialYear = currentPageYM.year,
+                initialMonth = currentPageYM.month,
+                onConfirm = { y, m ->
+                    showPicker = false
+                    val newPage = PageYearMonth(y, m).toPageNum()
+                    scope.launch {
+                        pagerState.scrollToPage(newPage)
+                    }
+                },
+                onDismiss = { showPicker = false }
+            )
+        }
         Spacer(modifier = Modifier.height(8.dp))
         Row(modifier = Modifier.padding(horizontal = 8.dp)) {
             weekDayList.forEach { d ->
@@ -248,10 +283,13 @@ fun CalenderMonth(
     modifier: Modifier = Modifier,
     isCurrentYear: Boolean,
     year:Int,
-    month: Int
+    month: Int,
+    onClick: () -> Unit,
 ){
     Row(
-        modifier = modifier,
+        modifier = modifier.clickable {
+            onClick()
+        },
         verticalAlignment = Alignment.CenterVertically,
     ){
         Text(text = month.toString(), fontSize =48.sp, fontWeight = FontWeight.ExtraBold)
@@ -384,7 +422,9 @@ fun CalenderDayGrid(
 
                 // ✅ 마지막 줄이 7칸 미만일 경우 빈 공간 채우기
                 repeat(7 - weekEntries.size) {
-                    Spacer(modifier = Modifier.weight(1f).aspectRatio(1f))
+                    Spacer(modifier = Modifier
+                        .weight(1f)
+                        .aspectRatio(1f))
                 }
             }
         }
@@ -479,3 +519,108 @@ fun formatRelativeDateTime(date: LocalDate): String {
         else -> "${daysBetween}일 전" // ✅ 그 외
     }
 }
+
+@Composable
+fun YearMonthPickerDialog(
+    initialYear: Int,
+    initialMonth: Int,
+    onConfirm: (Int, Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var selectedYear by remember { mutableStateOf(initialYear) }
+    var selectedMonth by remember { mutableStateOf(initialMonth) }
+
+    // ✅ AlertDialog가 뜬 후에만 Dropdown 초기화
+    var isDialogReady by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        isDialogReady = true
+    }
+
+    AlertDialog(
+        onDismissRequest = { onDismiss() },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(selectedYear, selectedMonth) }) {
+                Text("확인")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = { onDismiss() }) {
+                Text("취소")
+            }
+        },
+        title = { Text("연/월 선택") },
+        text = {
+            if (isDialogReady) {
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    YearDropdown(selectedYear) { selectedYear = it }
+                    MonthSelector(selectedMonth) { selectedMonth = it }
+                }
+            }
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun YearDropdown(selectedYear: Int, onYearSelected: (Int) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded }
+    ) {
+        TextField(
+            value = selectedYear.toString(),
+            onValueChange = {},
+            readOnly = true,
+            modifier = Modifier.menuAnchor(),
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            }
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            val currentYear = LocalDate.now().year
+            (2000..currentYear).reversed().forEach { year ->
+                DropdownMenuItem(
+                    text = { Text(year.toString()) },
+                    onClick = {
+                        onYearSelected(year)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun MonthSelector(selectedMonth: Int, onMonthSelected: (Int) -> Unit) {
+    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        items(12) { m ->
+            val monthValue = m + 1
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(
+                        if (monthValue == selectedMonth)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.surfaceVariant
+                    )
+                    .clickable { onMonthSelected(monthValue) }
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
+            ) {
+                Text(
+                    "${monthValue}월",
+                    color = if (monthValue == selectedMonth)
+                        MaterialTheme.colorScheme.onPrimary
+                    else
+                        MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
+    }
+}
+
