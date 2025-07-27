@@ -12,6 +12,7 @@ import android.os.IBinder
 import android.util.Log
 import android.view.Gravity
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.app.NotificationCompat
@@ -165,8 +166,6 @@ class SummaryService  : Service() {
         composeView.setViewTreeLifecycleOwner(lifecycleOwner)
         composeView.setViewTreeViewModelStoreOwner(viewModelStoreOwner)
         composeView.setViewTreeSavedStateRegistryOwner(lifecycleOwner)
-
-
 
         composeView.setContent {
 

@@ -1,5 +1,6 @@
 package com.example.dailysummary.components
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -39,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.dailysummary.dto.AdviceOrForcing
 import com.example.dailysummary.dto.DayRating
@@ -78,6 +80,8 @@ fun Overlay(
         adviceOrForcing = getSetting().adviceOrForcing
         if(isWritten) adviceOrForcing = AdviceOrForcing.Advice
     }
+
+    val context = LocalContext.current
 
     DailySummaryTheme(isOverlay = true) {
         Surface(modifier = Modifier
@@ -123,6 +127,7 @@ fun Overlay(
                     .padding(horizontal = 12.dp),
                     onClick = {
                         saveDiary(textFieldValue,isBookmarked,dayRating)
+                        Toast.makeText(context,"일기를 저장했습니다",Toast.LENGTH_SHORT).show()
                         close()
                     },
                     enabled = textFieldValue!="",

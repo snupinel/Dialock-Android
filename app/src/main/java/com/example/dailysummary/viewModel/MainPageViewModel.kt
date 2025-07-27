@@ -147,6 +147,7 @@ class MainPageViewModel @Inject constructor(
         viewModelScope.launch {
             summaryRepository.shouldRefresh.collect { refresh ->
                 if (refresh) {
+                    homeRefresh()
                     calenderRefresh()
                     summaryRepository.clearRefreshFlag()
                 }
