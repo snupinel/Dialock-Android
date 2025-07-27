@@ -56,6 +56,7 @@ android {
 }
 
 dependencies {
+    implementation("androidx.room:room-paging:2.6.0")
     implementation("androidx.compose.foundation:foundation:1.4.3") // 또는 최신
 
 

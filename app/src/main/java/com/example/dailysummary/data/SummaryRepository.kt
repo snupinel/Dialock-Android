@@ -2,6 +2,9 @@ package com.example.dailysummary.data
 
 import android.net.Uri
 import android.util.Log
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import com.example.dailysummary.dto.DayRating
 import com.example.dailysummary.dto.Summary
 import kotlinx.coroutines.flow.Flow
@@ -68,5 +71,16 @@ class SummaryRepository @Inject constructor(
     suspend fun getRecentSummariesExcludingToday(n:Int): List<Summary>{
         return summaryDAO.getRecentSummariesExcludingToday(n)
     }
+
+    fun getBookmarkedSummariesPaging(): Flow<PagingData<Summary>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 20,        // 페이지당 20개 로드
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = { summaryDAO.getBookmarkedSummariesPaging() }
+        ).flow
+    }
+
 
 }

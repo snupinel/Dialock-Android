@@ -93,7 +93,6 @@ val weekDayList= listOf(
     Pair(Color.Blue,"S"),
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalenderTab(
     navController: NavController,
@@ -168,7 +167,7 @@ fun CalenderTab(
             }
         }
         var pagerHeight by remember { mutableStateOf(1000.dp) }
-
+        Spacer(modifier = Modifier.height(4.dp))
         HorizontalPager(
             state = pagerState,
             modifier = Modifier
@@ -510,13 +509,19 @@ fun formatWrittenTime(writtenTime: LocalDateTime, date: LocalDate): String {
 }
 fun formatRelativeDateTime(date: LocalDate): String {
     val today = LocalDate.now()
-    val daysBetween = ChronoUnit.DAYS.between(date, today)
 
 
-    return when (daysBetween) {
-        0L -> "오늘"
-        1L -> "어제"                  // ✅ 어제
-        else -> "${daysBetween}일 전" // ✅ 그 외
+    return when {
+        // 1. 같은 날짜
+        today == date -> {
+            "오늘"
+        }
+        today.year == date.year -> {
+            date.format(DateTimeFormatter.ofPattern("M월 d일"))
+        }
+        else -> {
+            date.format(DateTimeFormatter.ofPattern("y년 M월 d일"))
+        }
     }
 }
 

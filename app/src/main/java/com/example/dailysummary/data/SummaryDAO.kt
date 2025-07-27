@@ -1,6 +1,7 @@
 package com.example.dailysummary.data
 
 import android.net.Uri
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -83,4 +84,12 @@ interface SummaryDAO {
         LIMIT :n
     """)
     suspend fun getRecentSummariesExcludingToday(n: Int): List<Summary>
+
+    @Query("""
+    SELECT * FROM summary
+    WHERE is_bookmarked = 1
+    ORDER BY date DESC, written_time DESC
+""")
+    fun getBookmarkedSummariesPaging(): PagingSource<Int, Summary>
+
 }

@@ -33,7 +33,7 @@ object GlobalClickBlocker {
 
 
 suspend fun NavController.popBackStackExclusive(
-    animationDelay: Long = 50L
+    animationDelay: Long = 300L
 ) {
     GlobalClickBlocker.runExclusive {
         this.popBackStack()

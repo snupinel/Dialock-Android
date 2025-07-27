@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -58,6 +59,14 @@ fun MyTab(navController: NavController,viewModel:MainPageViewModel = hiltViewMod
                 selectedPeriod = selectedPeriod
             )
             Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = { navController.navigate("BookmarkedDiariesPage") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Text(text = "북마크한 일기 보기")
+            }
         }
     }
 }
@@ -65,7 +74,7 @@ fun MyTab(navController: NavController,viewModel:MainPageViewModel = hiltViewMod
 fun BigAlarmSettingButton(
     onClick: () -> Unit
 ) {
-    androidx.compose.material3.Button(
+    Button(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()

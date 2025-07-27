@@ -36,6 +36,7 @@ import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.example.dailysummary.components.PortraitLikeWrapper
 import com.example.dailysummary.pages.AlarmSettingPage
+import com.example.dailysummary.pages.BookmarkedDiariesPage
 import com.example.dailysummary.pages.DiaryPage
 import com.example.dailysummary.pages.MainPage
 import com.example.dailysummary.pages.TimeSettingPage
@@ -222,6 +223,9 @@ private fun MyApp(
             }
             composable("InitialTimeSettingPage"){
                 InitialTimeSettingPage(navController)
+            }
+            composable("BookmarkedDiariesPage") {
+                BookmarkedDiariesPage(navController)
             }
         }
     }
