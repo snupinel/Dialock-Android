@@ -72,7 +72,7 @@ class SummaryService  : Service() {
         createNotificationChannel()
         startForeground(1, buildNotification())
 
-        // ✅ 핵심 로직을 onStartCommand에서 실행
+
         serviceScope.launch {
             val summaries = summaryRepository.getSummariesByDate(
                 LocalDate.of(year, month, day).let {
@@ -94,7 +94,7 @@ class SummaryService  : Service() {
 
         }
 
-        return START_STICKY
+        return START_NOT_STICKY
     }
 
 
@@ -128,12 +128,10 @@ class SummaryService  : Service() {
     private fun showOverlay(isWritten:Boolean) {
         Log.d("summaryservice", "showOverlay activated")
 
-        val layoutFlag= WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-
         val params = WindowManager.LayoutParams(
             (Resources.getSystem().displayMetrics.widthPixels * 0.8).toInt(),
             (Resources.getSystem().displayMetrics.heightPixels * 0.6).toInt(),
-            layoutFlag,
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
                     WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
                     WindowManager.LayoutParams.FLAG_DIM_BEHIND,  // 배경 흐리게
@@ -153,19 +151,6 @@ class SummaryService  : Service() {
 
 
         val composeView = ComposeView(this)
-
-
-        // Trick The ComposeView into thinking we are tracking lifecycle
-        val viewModelStoreOwner = object : ViewModelStoreOwner {
-            override val viewModelStore: ViewModelStore
-                get() = ViewModelStore()
-        }
-        val lifecycleOwner = MyLifecycleOwner()
-        lifecycleOwner.performRestore(null)
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
-        composeView.setViewTreeLifecycleOwner(lifecycleOwner)
-        composeView.setViewTreeViewModelStoreOwner(viewModelStoreOwner)
-        composeView.setViewTreeSavedStateRegistryOwner(lifecycleOwner)
 
         composeView.setContent {
 
@@ -198,7 +183,23 @@ class SummaryService  : Service() {
             )
         }
 
-        // This is required or otherwise the UI will not recompose
+
+        // Trick The ComposeView into thinking we are tracking lifecycle
+        val viewModelStoreOwner = object : ViewModelStoreOwner {
+            override val viewModelStore: ViewModelStore
+                get() = ViewModelStore()
+        }
+        val lifecycleOwner = MyLifecycleOwner()
+        lifecycleOwner.performRestore(null)
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
+
+
+        composeView.setViewTreeLifecycleOwner(lifecycleOwner)
+        composeView.setViewTreeViewModelStoreOwner(viewModelStoreOwner)
+        composeView.setViewTreeSavedStateRegistryOwner(lifecycleOwner)
+
+
+
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_START)
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
 

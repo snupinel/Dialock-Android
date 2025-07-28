@@ -2,6 +2,7 @@ package com.example.dailysummary.components
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -40,25 +41,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.dailysummary.dto.AdviceOrForcing
 import com.example.dailysummary.dto.DayRating
 import com.example.dailysummary.dto.Setting
 import com.example.dailysummary.ui.theme.DailySummaryTheme
+import kotlinx.coroutines.delay
 
 @Composable
 fun Overlay(
-    //viewModel: OverlayViewModel,
     close: () -> Unit,
     isWritten:Boolean,
-    //adviceOrForcing: AdviceOrForcing,
     getSetting: () -> Setting,
-    //textFieldValue: String,
-    //setTextFieldValue: (String) -> Unit,
     saveDiary : (content:String,isBookmarked:Boolean,dayRating: DayRating) -> Unit,
 ) {
-    //val viewModel = hiltViewModel<OverlayViewModel>()
+
 
     var adviceOrForcing by remember {
         mutableStateOf(AdviceOrForcing.Advice)
@@ -172,11 +172,12 @@ fun TextBox(
     textFieldValue:String,
     onValueChange:(String)->Unit,
 ){
+
     Row {
         TextField(
             value = textFieldValue,
             onValueChange = onValueChange,
-            label = { Text("Write something...") },
+            label = { Text("Write something...")},
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp),
