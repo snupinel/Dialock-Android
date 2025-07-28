@@ -69,10 +69,6 @@ class SummaryService  : Service() {
         day = intent?.getIntExtra("day", 0) ?: 0
         isNextDay = intent?.getBooleanExtra("isNextDay", false) ?: false
 
-        createNotificationChannel()
-        startForeground(1, buildNotification())
-
-
         serviceScope.launch {
             val summaries = summaryRepository.getSummariesByDate(
                 LocalDate.of(year, month, day).let {

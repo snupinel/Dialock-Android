@@ -40,6 +40,13 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".overlay.MyOverlayActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.DailySummary.Transparent">
+        </activity>
+
         <receiver android:name=".overlay.AlarmResetReceiver"
             android:enabled="true"
             android:exported="true"

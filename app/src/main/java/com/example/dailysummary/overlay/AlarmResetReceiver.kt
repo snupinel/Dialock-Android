@@ -28,14 +28,15 @@ class AlarmResetReceiver : BroadcastReceiver() {
             "com.example.dailysummary.ACTION_ALARM_TRIGGER" -> {
                 Log.d("AlarmResetReceiver", "알람 트리거 도착")
 
-                val serviceIntent = Intent(context, SummaryService::class.java).apply {
+                val activityIntent = Intent(context, MyOverlayActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK  // 필수
                     putExtra("year", intent.getIntExtra("year", 0))
                     putExtra("month", intent.getIntExtra("month", 0))
                     putExtra("day", intent.getIntExtra("day", 0))
                     putExtra("isNextDay", intent.getBooleanExtra("isNextDay", false))
                 }
 
-                context.startForegroundService(serviceIntent)
+                context.startActivity(activityIntent)
             }
         }
     }
