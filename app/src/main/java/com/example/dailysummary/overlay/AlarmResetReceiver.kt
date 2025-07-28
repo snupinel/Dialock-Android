@@ -29,7 +29,7 @@ class AlarmResetReceiver : BroadcastReceiver() {
                 Log.d("AlarmResetReceiver", "알람 트리거 도착")
 
                 val activityIntent = Intent(context, MyOverlayActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK  // 필수
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK // 필수
                     putExtra("year", intent.getIntExtra("year", 0))
                     putExtra("month", intent.getIntExtra("month", 0))
                     putExtra("day", intent.getIntExtra("day", 0))
