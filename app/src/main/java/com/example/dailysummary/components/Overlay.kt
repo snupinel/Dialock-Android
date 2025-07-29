@@ -1,5 +1,6 @@
 package com.example.dailysummary.components
 
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -53,12 +55,14 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun Overlay(
+    context:Context,
     close: () -> Unit,
     isWritten:Boolean,
+    isInstant:Boolean,
     getSetting: () -> Setting,
+    onMinimize:()->Unit,
     saveDiary : (content:String,isBookmarked:Boolean,dayRating: DayRating) -> Unit,
 ) {
-
 
     var adviceOrForcing by remember {
         mutableStateOf(AdviceOrForcing.Advice)
@@ -81,8 +85,6 @@ fun Overlay(
         if(isWritten) adviceOrForcing = AdviceOrForcing.Advice
     }
 
-    val context = LocalContext.current
-
     DailySummaryTheme(isOverlay = true) {
         Surface(modifier = Modifier
             .clip(RoundedCornerShape(8.dp))) {
@@ -99,12 +101,19 @@ fun Overlay(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ){
-                    MinimizeButton {
+                    if(!isInstant){
+                        MinimizeButton{
+                            onMinimize()
+                            Toast.makeText(context,"1분 뒤에 다시 띄울게요",Toast.LENGTH_SHORT).show()
+                            close()
+                        }
+                    }else Box {}
+                    if(adviceOrForcing==AdviceOrForcing.Advice){
+                        CloseButton{
+                            close()
+                        }
+                    } else Box {}
 
-                    }
-                    CloseButton(isAdvice = adviceOrForcing==AdviceOrForcing.Advice) {
-                        close()
-                    }
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -246,25 +255,22 @@ fun ThumbButton(
 @Composable
 fun CloseButton(
     modifier: Modifier=Modifier,
-    isAdvice:Boolean=false,
     onClick:()->Unit,
 ){
-    if(isAdvice)
-        Button(
-            modifier = modifier
-                .fillMaxHeight()
-                .width(60.dp),
-            onClick=  onClick,
-            shape = RoundedCornerShape(8.dp),
-            contentPadding = PaddingValues(0.dp)
-            ) {
-            Icon(
-                imageVector = Icons.Outlined.Close,
-                contentDescription = "Close",
-                tint = MaterialTheme.colorScheme.onPrimary
-            )
-        }
-
+    Button(
+        modifier = modifier
+            .fillMaxHeight()
+            .width(60.dp),
+        onClick=  onClick,
+        shape = RoundedCornerShape(8.dp),
+        contentPadding = PaddingValues(0.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.Close,
+            contentDescription = "Close",
+            tint = MaterialTheme.colorScheme.onPrimary
+        )
+    }
 }
 @Composable
 fun MinimizeButton(
@@ -278,7 +284,7 @@ fun MinimizeButton(
         shape = RoundedCornerShape(8.dp),
         onClick= onClick,
         contentPadding = PaddingValues(0.dp)
-        ) {
+    ) {
         Icon(
             imageVector = Icons.Outlined.KeyboardArrowDown,
             contentDescription = "Minimize",

@@ -15,6 +15,7 @@ class MyOverlayActivity : ComponentActivity() {
             putExtra("month", intent.getIntExtra("month", 0))
             putExtra("day", intent.getIntExtra("day", 0))
             putExtra("isNextDay", intent.getBooleanExtra("isNextDay", false))
+            putExtra("isInstant", intent.getBooleanExtra("isInstant", false))
         }
 
         this.startService(serviceIntent)

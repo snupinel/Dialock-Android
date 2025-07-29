@@ -61,6 +61,7 @@ class SummaryService  : Service() {
     private var month =1
     private var day =1
     private var isNextDay =false
+    private var isInstant = false
 
 
 
@@ -69,6 +70,7 @@ class SummaryService  : Service() {
         month = intent?.getIntExtra("month", 0) ?: 0
         day = intent?.getIntExtra("day", 0) ?: 0
         isNextDay = intent?.getBooleanExtra("isNextDay", false) ?: false
+        isInstant = intent?.getBooleanExtra("isInstant", false) ?: false
 
         serviceScope.launch {
             val summaries = summaryRepository.getSummariesByDate(
@@ -78,10 +80,10 @@ class SummaryService  : Service() {
             )
             Log.d("summaryservice", summaries.toString())
 
-            alarmScheduler.scheduleOverlay()
+            if(!isInstant) alarmScheduler.scheduleOverlay()
             if (summaries.isEmpty() || summaries.all { !it.shouldBlockAlarm }) {
                 withContext(Dispatchers.Main) {
-                    showOverlay(isWritten = summaries.isNotEmpty())
+                    showOverlay(isWritten = summaries.isNotEmpty(),isInstant = isInstant)
                 }
             }
             else{
@@ -105,7 +107,9 @@ class SummaryService  : Service() {
 
 
 
-    private fun showOverlay(isWritten:Boolean) {
+    private fun showOverlay(
+        isWritten:Boolean,
+        isInstant:Boolean) {
         Log.d("summaryservice", "showOverlay activated")
 
         fun createParams():WindowManager.LayoutParams {
@@ -141,12 +145,17 @@ class SummaryService  : Service() {
         composeView.setContent {
 
             Overlay(
+                context = applicationContext,
                 close = {
                     listener.disable()
                     windowManager.removeView(composeView)
                     stopSelf()
                 },
+                onMinimize = {
+                             alarmScheduler.scheduleInstantOverlayAfter(1*60*1000L)
+                },
                 isWritten = isWritten,
+                isInstant = isInstant,
                 getSetting = { prefRepository.getRefSetting()!!},
                 saveDiary = { content, isLikeChecked, dayRating ->
                     serviceScope.launch {

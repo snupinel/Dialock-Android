@@ -13,6 +13,9 @@ import com.example.dailysummary.dto.AdviceOrForcing
 import com.example.dailysummary.dto.Setting
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.text.DateFormat
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.Calendar
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -54,6 +57,7 @@ class AlarmScheduler @Inject constructor(
                 putExtra("month", calendar.get(Calendar.MONTH) + 1)
                 putExtra("day", calendar.get(Calendar.DAY_OF_MONTH))
                 putExtra("isNextDay", time.isNextDay)
+                putExtra("isInstant", false)
             }
 
             val pendingIntent = PendingIntent.getBroadcast(
@@ -80,5 +84,61 @@ class AlarmScheduler @Inject constructor(
             }
         }
     }
+    fun scheduleInstantOverlay(dateTime: LocalDateTime){
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        val calendar = Calendar.getInstance().apply {
+            set(Calendar.YEAR, dateTime.year)
+            set(Calendar.MONTH, dateTime.monthValue - 1) // Calendar는 0-based month
+            set(Calendar.DAY_OF_MONTH, dateTime.dayOfMonth)
+            set(Calendar.HOUR_OF_DAY, dateTime.hour)
+            set(Calendar.MINUTE, dateTime.minute)
+            set(Calendar.SECOND, dateTime.second)
+            set(Calendar.MILLISECOND, 0)
+        }
+
+        val broadcastIntent = Intent("com.example.dailysummary.ACTION_ALARM_TRIGGER").apply {
+            setPackage(context.packageName)
+            putExtra("year", calendar.get(Calendar.YEAR))
+            putExtra("month", calendar.get(Calendar.MONTH) + 1)
+            putExtra("day", calendar.get(Calendar.DAY_OF_MONTH))
+            putExtra("isNextDay", calendar.get(Calendar.HOUR_OF_DAY)<12)
+            putExtra("isInstant", true)
+        }
+
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            7,//0~6에 포함되지 않는 채널
+            broadcastIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        alarmManager.cancel(pendingIntent)
+
+        try {
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                calendar.timeInMillis,
+                pendingIntent
+            )
+
+            val formattedDate = DateFormat.getDateTimeInstance().format(calendar.time)
+            Log.d("alarm", "비 요일 알람 설정 완료: $formattedDate")
+
+        } catch (e: SecurityException) {
+            Log.e("alarm", "정확한 알람 권한이 없어 예약 실패", e)
+        }
+    }
+    fun scheduleInstantOverlayAfter(delayMillis: Long) {
+        val futureDateTime = Instant
+            .now()
+            .plusMillis(delayMillis)
+            .atZone(ZoneId.systemDefault())
+            .toLocalDateTime()
+
+        scheduleInstantOverlay(futureDateTime)
+    }
+
+
 
 }
