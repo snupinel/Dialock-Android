@@ -9,7 +9,7 @@
 
 최신 버전 APK를 다운로드하려면 아래 링크를 클릭하세요.
 
-👉 [📌 Download v0.9.1](https://github.com/snupinel/Dialock-Android/releases/download/v0.9.1/app-debug.apk)
+👉 [📌 Download v0.9.2](https://github.com/snupinel/Dialock-Android/releases/download/v0.9.2/app-debug.apk)
 
 ---
 
@@ -41,6 +41,7 @@
 
 | 버전 | 상태 | 주요 변경 사항 |
 |------|------|---------------|
+| [**v0.9.2**](https://github.com/snupinel/Dialock-Android/releases/tag/v0.9.2) | 개발용 | 알람 잠깐 내리기 기능 추가 및 Toast 메시지 미출현 버그 수정 |
 | [**v0.9.1**](https://github.com/snupinel/Dialock-Android/releases/tag/v0.9.1) | 개발용 | 버그 수정. drawer 일부 구현, 마이 탭 일부 구현 |
 | [**v0.9.0**](https://github.com/snupinel/Dialock-Android/releases/tag/v0.9.0) | 개발용 | 홈 탭 기능 구현 |
 | [**v0.8.3**](https://github.com/snupinel/Dialock-Android/releases/tag/v0.8.3) | 개발용 | 최초 시간 설정 화면 구현 및 캘린더 최적화 |
