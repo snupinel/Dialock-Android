@@ -24,9 +24,7 @@
 
         <service
             android:name=".overlay.SummaryService"
-            android:exported="true"
-            android:foregroundServiceType="shortService"
-            />
+            android:exported="true" />
 
         <activity
             android:name=".MainActivity"
@@ -44,8 +42,20 @@
             android:name=".overlay.MyOverlayActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.DailySummary.Transparent">
+            android:theme="@style/Theme.DailySummary.Transparent"
+            android:excludeFromRecents="true"
+            android:turnScreenOn="true"
+            >
         </activity>
+
+        <activity
+            android:name=".utils.MyToastActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.DailySummary.Transparent"
+            android:excludeFromRecents="true">
+        </activity>
+
 
         <receiver android:name=".overlay.AlarmResetReceiver"
             android:enabled="true"

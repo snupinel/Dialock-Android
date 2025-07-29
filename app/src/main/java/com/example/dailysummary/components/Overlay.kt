@@ -55,7 +55,7 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun Overlay(
-    context:Context,
+    makeToast:(String)->Unit,
     close: () -> Unit,
     isWritten:Boolean,
     isInstant:Boolean,
@@ -104,7 +104,7 @@ fun Overlay(
                     if(!isInstant){
                         MinimizeButton{
                             onMinimize()
-                            Toast.makeText(context,"1분 뒤에 다시 띄울게요",Toast.LENGTH_SHORT).show()
+                            makeToast("1분 뒤에 다시 띄울게요")
                             close()
                         }
                     }else Box {}
@@ -136,7 +136,7 @@ fun Overlay(
                     .padding(horizontal = 12.dp),
                     onClick = {
                         saveDiary(textFieldValue,isBookmarked,dayRating)
-                        Toast.makeText(context,"일기를 저장했습니다",Toast.LENGTH_SHORT).show()
+                        makeToast("일기를 저장했습니다")
                         close()
                     },
                     enabled = textFieldValue!="",

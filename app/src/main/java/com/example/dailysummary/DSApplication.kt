@@ -18,12 +18,9 @@ class DSApplication :Application(){
     lateinit var alarmScheduler:AlarmScheduler
 
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate() {
         super.onCreate()
         AndroidThreeTen.init(this) // 초기화
         alarmScheduler.scheduleOverlay()
-
-
     }
 }

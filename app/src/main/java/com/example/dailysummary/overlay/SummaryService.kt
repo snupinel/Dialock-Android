@@ -28,6 +28,7 @@ import com.example.dailysummary.components.Overlay
 import com.example.dailysummary.data.PrefRepository
 import com.example.dailysummary.data.SummaryRepository
 import com.example.dailysummary.dto.Summary
+import com.example.dailysummary.utils.MyToastActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -145,7 +146,7 @@ class SummaryService  : Service() {
         composeView.setContent {
 
             Overlay(
-                context = applicationContext,
+                makeToast = { makeToast(it) },
                 close = {
                     listener.disable()
                     windowManager.removeView(composeView)
@@ -206,7 +207,14 @@ class SummaryService  : Service() {
         return null
     }
 
+    fun makeToast(text:String){
+        val activityIntent = Intent(this, MyToastActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK // 필수
+            putExtra("text", text)
+        }
 
+        startActivity(activityIntent)
+    }
 }
 
 
